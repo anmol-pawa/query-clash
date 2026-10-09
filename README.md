@@ -8,6 +8,12 @@ Queries run on **real PostgreSQL 18** compiled to WebAssembly ([PGlite](https://
 
 ![A Filter Bolt hits Intern Nulloth](docs/battle.png)
 
+## Play
+
+**https://anmol-pawa.github.io/query-clash/**
+
+**On iPhone:** open the link in Safari, tap **Share → Add to Home Screen**. It then launches full-screen from its own icon, and after the first load it works offline (the whole game, database included, is cached on the phone). On Android, use Chrome's **Install app**.
+
 ---
 
 ## What you get
@@ -107,7 +113,7 @@ Design notes:
 ## Run it
 
 ```bash
-cd sql-battle
+cd query-clash
 npm install        # also copies PGlite's runtime into public/pglite
 npm run dev        # http://localhost:3000
 ```
@@ -120,6 +126,14 @@ npm run build && npm start
 ```
 
 Requires Node 22+. Every route is pre-rendered and there's no backend, so it deploys to any Next.js host (e.g. Vercel) or runs with `npm start`.
+
+### Static / installable build
+
+```bash
+npm run build:pages    # static files in out/, served under BASE_PATH (default /query-clash)
+```
+
+This adds a web-app manifest, home-screen icons and a service worker that precaches every file, so the game works offline after the first visit. Pushing to `main` runs `.github/workflows/pages.yml`, which builds this and publishes it to the `gh-pages` branch for GitHub Pages. If Pages isn't on yet: **Settings → Pages → Deploy from a branch → `gh-pages` / root**.
 
 ## Honest limits
 

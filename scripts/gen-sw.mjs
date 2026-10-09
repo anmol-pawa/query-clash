@@ -42,19 +42,28 @@ self.addEventListener("activate", (e) => {
   );
 });
 
+// A Worker's self.location comes from the response URL. Cached responses lose
+// the request's #fragment, and Turbopack passes worker bootstrap config in the
+// fragment, so worker scripts get a fresh Response (which has no URL of its
+// own), making the browser fall back to the original request URL.
+const forWorker = (req, res) =>
+  req.destination === "worker" || req.destination === "sharedworker"
+    ? new Response(res.body, { status: res.status, statusText: res.statusText, headers: res.headers })
+    : res;
+
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
   e.respondWith(
     caches.match(req, { ignoreSearch: true }).then(
       (hit) =>
-        hit ||
+        (hit && forWorker(req, hit)) ||
         fetch(req).then((res) => {
           if (res.ok) {
             const copy = res.clone();
             caches.open(CACHE).then((c) => c.put(req, copy));
           }
-          return res;
+          return forWorker(req, res);
         }).catch(() => (req.mode === "navigate" ? caches.match("${base}/") : Response.error())),
     ),
   );

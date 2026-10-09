@@ -6,7 +6,7 @@ import path from "node:path";
  *  - default (`npm run build`): a normal Next.js app for Vercel / `next start`.
  *  - static (`npm run build:pages`): STATIC_EXPORT=1 writes plain files to out/
  *    for static hosts such as GitHub Pages. BASE_PATH sets the sub-path the
- *    site is served from (e.g. "/flash-arcade").
+ *    site is served from (e.g. "/query-clash").
  */
 const staticExport = process.env.STATIC_EXPORT === "1";
 const basePath = process.env.BASE_PATH ?? "";
