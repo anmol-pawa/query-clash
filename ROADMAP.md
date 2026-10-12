@@ -4,7 +4,7 @@ The hourly routine works top to bottom: take the first unchecked box. Split big 
 
 ## A. Creature-battler art overhaul (original, Pokémon-*style*)
 
-- [ ] A1. Pixel-sprite system: define sprites as palette + character-grid strings in code (e.g. 64×64), render them to Pixi textures with nearest-neighbour scaling, and support a 2–4 frame idle animation. Include a unit test that every sprite map is rectangular and uses only palette keys.
+- [x] A1. Pixel-sprite system: define sprites as palette + character-grid strings in code (e.g. 64×64), render them to Pixi textures with nearest-neighbour scaling, and support a 2–4 frame idle animation. Include a unit test that every sprite map is rectangular and uses only palette keys.
 - [ ] A2. Redraw the player as a creature trainer team. The player owns a starter creature (an original "data sprite" monster). Redraw the 10 bosses as original pixel monsters, keeping each one's theme (null ghost, chain golem, block golem, ice wraith, reaper, clockwork knight, forge giant, wind spirit, hydra, eye core).
 - [ ] A3. GBA-style battle layout: foe front-sprite top-right on an elliptical platform, player back-sprite bottom-left, HP boxes with name / Lv / HP bar / XP bar, and a bottom text box that types out messages ("Wild NULLOTH appeared!", "BYTEBAT used JOIN CHAIN! It's super effective!"). Keep the existing spell effects, restyled to suit pixel art.
 - [ ] A4. Types and effectiveness: give SQL concept types (Filter, Join, Aggregate, Window, Recursive, Transaction, Schema, Index…) a type chart against boss types. Show "super effective" / "not very effective" and fold the multiplier into damage. Add tests for the chart.
