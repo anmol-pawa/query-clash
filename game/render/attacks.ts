@@ -5,9 +5,8 @@
  */
 import { Container, Graphics, Text } from "pixi.js";
 import type { AttackKind } from "@/lib/dialect/concepts";
-import type { Boss } from "./characters/bosses";
+import type { BossAttackStyle } from "./characters/bosses";
 import { isHydra } from "./characters/bosses";
-import { Mage } from "./characters/mage";
 import type { Character } from "./characters/rig";
 import { FxContext, Pt, beam, glowSprite, lightning, projectile, ring, slash } from "./fx";
 import { ease } from "./tween";
@@ -17,7 +16,7 @@ type Impact = (i: number, n: number) => void;
 const lerp = (a: Pt, b: Pt, k: number): Pt => ({ x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k });
 
 export async function performAttack(c: FxContext, kind: AttackKind, caster: Character, target: Character, color: number, onImpact: Impact) {
-  if (caster instanceof Mage) await caster.castSpell();
+  await caster.castMotion();
   const from = caster.castPoint();
   const to = target.hitPoint();
   const { tw, fx } = c;
@@ -356,7 +355,7 @@ export async function performAttack(c: FxContext, kind: AttackKind, caster: Char
 }
 
 /** Boss counter-attack on the player. */
-export async function bossAttack(c: FxContext, boss: Boss, target: Character, onImpact: Impact) {
+export async function bossAttack(c: FxContext, boss: Character & { style: BossAttackStyle }, target: Character, onImpact: Impact) {
   const { tw, fx } = c;
   const color = boss.color;
   await boss.windup();

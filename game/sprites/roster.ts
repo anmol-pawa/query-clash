@@ -1,4 +1,5 @@
 import type { BossId } from "@/content/types";
+import type { BossAttackStyle } from "@/game/render/characters/bosses";
 import type { SpriteDef } from "./pixel";
 import { spriteById } from "./index";
 
@@ -34,3 +35,17 @@ export function starterSprite(side: keyof typeof STARTER): SpriteDef {
   if (!def) throw new Error(`no starter sprite "${STARTER[side]}"`);
   return def;
 }
+
+/** Each chapter boss keeps its old rig's counter-attack style and effect colour. */
+export const BOSS_STYLE: Readonly<Record<BossId, { style: BossAttackStyle; color: number }>> = {
+  nulloth: { style: "orbs", color: 0x5eead4 },
+  joinmaster: { style: "chain", color: 0xfbbf24 },
+  aggregon: { style: "blocks", color: 0xf97316 },
+  subzero: { style: "shards", color: 0xa78bfa },
+  reaper: { style: "scythe", color: 0x60a5fa },
+  transactor: { style: "gear", color: 0x34d399 },
+  schemaforge: { style: "quake", color: 0xf59e0b },
+  windwraith: { style: "wind", color: 0x38bdf8 },
+  hydra: { style: "breath", color: 0x4ade80 },
+  optimizer: { style: "laser", color: 0xe879f9 },
+};

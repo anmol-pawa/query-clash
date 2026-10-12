@@ -41,6 +41,7 @@ export class PixelSprite extends Container {
   private frame = 0;
   private acc = 0;
   private loop = true;
+  private hold = false;
   private onDone?: () => void;
 
   constructor(
@@ -68,13 +69,17 @@ export class PixelSprite extends Container {
     this.flashSprite.alpha = v;
   }
 
-  /** Switch animation. Non-looping animations resolve when they finish and return to idle. */
-  play(anim: string, loop = anim === "idle"): Promise<void> {
+  /**
+   * Switch animation. Non-looping animations resolve when they finish and
+   * return to idle, unless `hold` keeps their last frame (e.g. a faint).
+   */
+  play(anim: string, loop = anim === "idle", hold = false): Promise<void> {
     this.onDone?.();
     this.anim = this.def.anims[anim] ? anim : "idle";
     this.frame = 0;
     this.acc = 0;
     this.loop = loop;
+    this.hold = hold;
     this.apply();
     return new Promise((res) => (this.onDone = loop ? undefined : res));
   }
@@ -87,7 +92,13 @@ export class PixelSprite extends Container {
       this.acc -= 1 / fps;
       if (this.frame + 1 < frames.length) this.frame++;
       else if (this.loop) this.frame = 0;
-      else {
+      else if (this.hold) {
+        this.acc = 0;
+        const done = this.onDone;
+        this.onDone = undefined;
+        done?.();
+        break;
+      } else {
         const done = this.onDone;
         this.onDone = undefined;
         this.anim = "idle";

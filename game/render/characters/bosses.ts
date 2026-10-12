@@ -513,6 +513,6 @@ export function createBoss(id: BossId, ctx: RigContext): Boss {
   return new REGISTRY[id](ctx);
 }
 
-export function isHydra(b: Boss): b is Hydra {
+export function isHydra(b: Character): b is Hydra {
   return b instanceof Hydra;
 }

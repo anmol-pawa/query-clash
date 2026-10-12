@@ -86,6 +86,9 @@ export abstract class Character {
   }
   private flashing = 0;
 
+  /** Body motion as this character casts a spell. */
+  async castMotion(): Promise<void> {}
+
   /** Wind-up before an attack. Subclasses can extend. */
   async windup(): Promise<void> {
     const { tw } = this.ctx;

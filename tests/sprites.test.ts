@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SPRITES } from "@/game/sprites";
-import { BOSS_SPRITE, STARTER, bossSprite, starterSprite } from "@/game/sprites/roster";
+import { BOSS_SPRITE, BOSS_STYLE, STARTER, bossSprite, starterSprite } from "@/game/sprites/roster";
 import { CHAPTERS } from "@/content/chapters";
 import { bounds, frameToRGBA, mirror, overlay, shift, validateSprite, type SpriteDef } from "@/game/sprites/pixel";
 
@@ -63,6 +63,15 @@ describe("sprite lookup", () => {
     expect(STARTER).toEqual({ front: "bytebat", back: "bytebat-back" });
     expect(starterSprite("front").name).toBe("BYTEBAT");
     expect(starterSprite("back").anims.idle.length).toBeGreaterThan(1);
+  });
+  it("every boss keeps a distinct counter-attack style for the battle stage", () => {
+    const styles = CHAPTERS.map((c) => BOSS_STYLE[c.boss].style);
+    expect(new Set(styles).size).toBe(CHAPTERS.length);
+    expect(BOSS_STYLE.hydra.style).toBe("breath");
+  });
+  it("every battle sprite has the animations the stage plays", () => {
+    for (const def of [...CHAPTERS.map((c) => bossSprite(c.boss)), starterSprite("back"), starterSprite("front")])
+      for (const anim of ["idle", "attack", "hurt", "faint"]) expect(def.anims[anim], `${def.id}.${anim}`).toBeDefined();
   });
 });
 

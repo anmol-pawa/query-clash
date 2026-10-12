@@ -174,6 +174,10 @@ export class Mage extends Character {
   }
 
   /** Raise the staff, flare the rune circle, then thrust. Resolves at release. */
+  override castMotion() {
+    return this.castSpell();
+  }
+
   async castSpell(): Promise<void> {
     const { tw, fx } = this.ctx;
     this.busy = true;

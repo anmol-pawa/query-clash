@@ -10,9 +10,9 @@ import { Application, Container, Graphics, Sprite, Text } from "pixi.js";
 import type { BossId } from "@/content/types";
 import type { AttackKind } from "@/lib/dialect/concepts";
 import { bossAttack, performAttack } from "./attacks";
-import { Boss, createBoss } from "./characters/bosses";
-import { MAGE_BLUE, MAGE_ROSE, Mage } from "./characters/mage";
-import type { Character, RigContext } from "./characters/rig";
+import { BOSS_STYLE, bossSprite, starterSprite } from "@/game/sprites/roster";
+import { Creature } from "./characters/creature";
+import type { RigContext } from "./characters/rig";
 import { Camera, FxContext, popText, ring } from "./fx";
 import { Particles } from "./particles";
 import { skyTex, vignetteTex } from "./textures";
@@ -20,8 +20,10 @@ import { Tweener, ease } from "./tween";
 
 export const W = 1280;
 export const H = 720;
-const GROUND = 600;
 const HORIZON = 440;
+/** GBA layout: the foe stands top-right near the horizon, the player's creature bottom-left, seen from behind. */
+const FOE = { x: 905, y: 400, scale: 3 };
+const PLAYER = { x: 330, y: 680, scale: 5 };
 
 export type Side = "left" | "right";
 
@@ -68,8 +70,8 @@ export class BattleStage {
   private cam!: Camera;
   private fxc!: FxContext;
   private rig!: RigContext;
-  left!: Mage;
-  right!: Character;
+  left!: Creature;
+  right!: Creature;
   private t = 0;
   private destroyed = false;
   private opts: StageOptions;
@@ -153,20 +155,18 @@ export class BattleStage {
 
     this.rig = { tw: this.tw, fx: this.fx, reduced: reducedMotion, space: this.camera };
 
-    this.left = new Mage(this.rig, MAGE_BLUE);
-    this.left.root.position.set(300, GROUND);
-    this.left.homeX = 300;
+    const starterBack = starterSprite("back");
+    this.left = new Creature(this.rig, starterBack, PLAYER.scale, 0x5eead4, 1);
+    this.left.root.position.set(PLAYER.x, PLAYER.y);
+    this.left.homeX = PLAYER.x;
     if (this.opts.versus || !this.opts.boss) {
-      const m = new Mage(this.rig, MAGE_ROSE);
-      m.flip();
-      this.right = m;
+      this.right = new Creature(this.rig, starterSprite("front"), FOE.scale + 1, 0xf9a8d4, -1);
     } else {
-      const b = createBoss(this.opts.boss, this.rig);
-      b.flip();
-      this.right = b;
+      const { style, color } = BOSS_STYLE[this.opts.boss];
+      this.right = new Creature(this.rig, bossSprite(this.opts.boss), FOE.scale, color, -1, style);
     }
-    this.right.root.position.set(975, GROUND);
-    this.right.homeX = 975;
+    this.right.root.position.set(FOE.x, FOE.y);
+    this.right.homeX = FOE.x;
     this.fighters.addChild(this.left.root, this.right.root);
 
     this.fxLayer.blendMode = "add";
@@ -181,25 +181,23 @@ export class BattleStage {
     this.cam = new Camera(this.camera, this.flashRect, () => this.opts.reducedMotion);
     this.fxc = { tw: this.tw, fx: this.fx, layer: this.fxLayer, top: this.top, camera: this.cam, reduced: reducedMotion, font: this.opts.font };
 
-    // entrance
-    this.left.body.alpha = 0;
-    this.right.body.alpha = 0;
-    this.left.body.x = -160;
-    this.right.body.x = 160;
-    this.tw.to(this.left.body, { alpha: 1, x: 0 }, 0.8, ease.outCubic);
-    this.tw.to(this.right.body, { alpha: 1, x: 0 }, 0.9, ease.outCubic);
+    // entrance: both creatures slide in on their platforms from opposite edges
+    this.left.root.x = PLAYER.x - 900;
+    this.right.root.x = FOE.x + 900;
+    this.tw.to(this.left.root, { x: PLAYER.x }, 0.9, ease.outCubic);
+    this.tw.to(this.right.root, { x: FOE.x }, 0.9, ease.outCubic);
   }
 
   /**
-   * Keep the fighting band (x 110–1170, y 140–690) fully visible at any aspect
+   * Keep the fighting band (x 110–1170, y 100–700) fully visible at any aspect
    * ratio; the background is drawn much wider than 1280×720 so there is never
    * a letterbox.
    */
   private layout() {
     const { width, height } = this.app.screen;
-    const s = Math.min(height / 550, width / 1060);
+    const s = Math.min(height / 600, width / 1060);
     this.fit.scale.set(s);
-    this.fit.position.set(width / 2 - 640 * s, height / 2 - 415 * s);
+    this.fit.position.set(width / 2 - 640 * s, height / 2 - 400 * s);
     this.vignette.width = width;
     this.vignette.height = height;
     this.flashRect.width = width;
@@ -242,7 +240,7 @@ export class BattleStage {
 
   /* --------------------------------------------------------------- API */
 
-  private pair(side: Side): [Character, Character] {
+  private pair(side: Side): [Creature, Creature] {
     return side === "left" ? [this.left, this.right] : [this.right, this.left];
   }
 
@@ -266,7 +264,7 @@ export class BattleStage {
     await this.tw.wait(0.35);
   }
 
-  private impact(target: Character, color: number, damage: number, crit: boolean, i: number, n: number, finisher: boolean) {
+  private impact(target: Creature, color: number, damage: number, crit: boolean, i: number, n: number, finisher: boolean) {
     const last = i === n - 1;
     const p = target.hitPoint();
     target.hit(last ? (crit || finisher ? 1.6 : 1.1) : 0.5);
@@ -295,15 +293,15 @@ export class BattleStage {
         popText(this.fxc, { x: p.x, y: p.y - 120 }, `-${damage}`, { color: 0xf87171, size: 56 });
       }
     };
-    if (attacker instanceof Boss) await bossAttack(this.fxc, attacker, target, onImpact);
-    else await performAttack(this.fxc, "bolt", attacker, target, (attacker as Mage).color, onImpact);
+    if (attacker.hasStyle()) await bossAttack(this.fxc, attacker, target, onImpact);
+    else await performAttack(this.fxc, "bolt", attacker, target, attacker.color, onImpact);
     await this.tw.wait(0.3);
   }
 
   async fizzle(side: Side) {
     const caster = this.pair(side)[0];
     caster.charging = false;
-    if (caster instanceof Mage) await caster.fizzle();
+    await caster.fizzle();
     const p = caster.castPoint();
     popText(this.fxc, { x: p.x, y: p.y - 40 }, "MISS", { color: 0x94a3b8, size: 34, rise: 50 });
   }

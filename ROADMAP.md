@@ -12,6 +12,9 @@ The hourly routine works top to bottom: take the first unchecked box. Split big 
   - [x] A2d. Bosses 8–10: wind spirit, hydra, eye core.
   - [x] A2e. Map each `BossId` to its sprite (`subzero` → `frostnest`; the starter to BYTEBAT) in a lookup with a test that every boss has one; add evolve frames for BYTEBAT.
 - [ ] A3. GBA-style battle layout: foe front-sprite top-right on an elliptical platform, player back-sprite bottom-left, HP boxes with name / Lv / HP bar / XP bar, and a bottom text box that types out messages ("Wild NULLOTH appeared!", "BYTEBAT used JOIN CHAIN! It's super effective!"). Keep the existing spell effects, restyled to suit pixel art.
+  - [x] A3a. Battle stage uses the pixel creatures: foe front sprite top-right and BYTEBAT's back sprite bottom-left, each on a grassy stone platform, sliding in at battle start; attack/hurt/faint frames drive the existing spell and counter effects.
+  - [ ] A3b. Handheld-style HP boxes (name / Lv / HP bar / XP bar) replacing the "Data Mage" header bars, foe box top-left and player box bottom-right of the stage.
+  - [ ] A3c. Bottom text box that types out battle messages ("Wild NULLOTH appeared!", "BYTEBAT used JOIN CHAIN! It's super effective!"), plus restyling spell effects for pixel art.
 - [ ] A4. Types and effectiveness: give SQL concept types (Filter, Join, Aggregate, Window, Recursive, Transaction, Schema, Index…) a type chart against boss types. Show "super effective" / "not very effective" and fold the multiplier into damage. Add tests for the chart.
 - [ ] A5. Collection: defeated bosses can be "captured" into a party/box screen (Querydex) with stats, and the starter evolves at chapter milestones (an evolution animation). Saved in localStorage.
 - [ ] A6. Pixel UI pass: pixel font (an OFL font via next/font, e.g. Press Start 2P / Pixelify Sans), menus restyled as handheld-console menus, and transitions (screen wipe on battle start). Must stay readable and touch-friendly on iPhone.
