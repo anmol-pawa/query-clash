@@ -239,3 +239,37 @@ export function ring(layer, cx, cy, rx, ry, c, t = 1) {
     }
   return layer;
 }
+
+/**
+ * Evolve helper: turn opaque pixels into `c` (a white silhouette) in an
+ * ordered-dither pattern, `amount` 0 … 1. At 1 the whole sprite is `c`.
+ */
+export function whiten(layer, amount, c) {
+  const out = new Layer(layer.w, layer.h).draw(layer);
+  for (let y = 0; y < out.h; y++) for (let x = 0; x < out.w; x++) if (out.px[y][x] !== T && BAYER[y & 3][x & 3] < amount) out.px[y][x] = c;
+  return out;
+}
+
+/** Nearest-neighbour scale of a whole layer by `sx`/`sy` about the anchor (ax, ay) — used for the evolve morph pulse. */
+export function scaleLayer(layer, sx, sy = sx, ax = layer.w / 2, ay = layer.h / 2) {
+  const out = new Layer(layer.w, layer.h);
+  for (let y = 0; y < out.h; y++)
+    for (let x = 0; x < out.w; x++) out.px[y][x] = layer.get(Math.floor((x + 0.5 - ax) / sx + ax), Math.floor((y + 0.5 - ay) / sy + ay));
+  return out;
+}
+
+/** Ring every opaque shape with a 1 px halo of `c` on transparent neighbours (a glow outline). */
+export function halo(layer, c) {
+  const out = new Layer(layer.w, layer.h).draw(layer);
+  for (let y = 0; y < out.h; y++)
+    for (let x = 0; x < out.w; x++)
+      if (layer.get(x, y) === T && (layer.get(x - 1, y) !== T || layer.get(x + 1, y) !== T || layer.get(x, y - 1) !== T || layer.get(x, y + 1) !== T)) out.px[y][x] = c;
+  return out;
+}
+
+/** Four-point sparkle (a plus with a bright centre) at (x, y), radius r. */
+export function sparkle(layer, x, y, r, c, core = c) {
+  for (let i = 1; i <= r; i++) for (const [dx, dy] of [[i, 0], [-i, 0], [0, i], [0, -i]]) layer.set(x + dx, y + dy, c);
+  layer.set(x, y, core);
+  return layer;
+}

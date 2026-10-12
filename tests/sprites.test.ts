@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { SPRITES } from "@/game/sprites";
+import { BOSS_SPRITE, STARTER, bossSprite, starterSprite } from "@/game/sprites/roster";
+import { CHAPTERS } from "@/content/chapters";
 import { bounds, frameToRGBA, mirror, overlay, shift, validateSprite, type SpriteDef } from "@/game/sprites/pixel";
 
 describe("sprite library", () => {
@@ -43,6 +45,42 @@ describe("creature roster", () => {
       expect(boss, id).toBeDefined();
       expect([boss!.w, boss!.h]).toEqual([96, 96]);
     }
+  });
+});
+
+describe("sprite lookup", () => {
+  it("every chapter boss has its own 96×96 sprite", () => {
+    const ids = CHAPTERS.map((c) => bossSprite(c.boss).id);
+    expect(new Set(ids).size).toBe(CHAPTERS.length);
+    for (const c of CHAPTERS) expect([bossSprite(c.boss).w, bossSprite(c.boss).h], c.boss).toEqual([96, 96]);
+  });
+  it("maps the bosses whose sprite is renamed", () => {
+    expect(BOSS_SPRITE.subzero).toBe("frostnest");
+    expect(bossSprite("windwraith").name).toBe("GALEFRAME");
+    expect(Object.keys(BOSS_SPRITE)).toHaveLength(10);
+  });
+  it("the starter is BYTEBAT with front and back sprites", () => {
+    expect(STARTER).toEqual({ front: "bytebat", back: "bytebat-back" });
+    expect(starterSprite("front").name).toBe("BYTEBAT");
+    expect(starterSprite("back").anims.idle.length).toBeGreaterThan(1);
+  });
+});
+
+describe("BYTEBAT evolve", () => {
+  const evolve = starterSprite("front").anims.evolve ?? [];
+  const white = (f: readonly string[]) => {
+    const px = f.join("").replace(/\./g, "");
+    return [...px].filter((c) => c === "w").length / px.length;
+  };
+  it("has 6+ frames that start in colour and fade to a white silhouette", () => {
+    expect(evolve.length).toBeGreaterThanOrEqual(6);
+    expect(white(evolve[0])).toBeLessThan(0.1);
+    expect(white(evolve[1])).toBeGreaterThan(white(evolve[0]));
+    expect(white(evolve[3])).toBeGreaterThan(0.75);
+  });
+  it("the silhouette morphs (changes shape) between frames", () => {
+    const sizes = evolve.slice(3).map((f) => f.join("").replace(/\./g, "").length);
+    expect(new Set(sizes).size).toBeGreaterThan(2);
   });
 });
 

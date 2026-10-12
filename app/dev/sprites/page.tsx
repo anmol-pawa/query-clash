@@ -29,7 +29,7 @@ function AnimCanvas({ def, anim, scale }: { def: SpriteDef; anim: string; scale:
 /** Live Pixi preview through PixelSprite, the same path the battle stage uses. */
 function PixiPreview({ def }: { def: SpriteDef }) {
   const host = useRef<HTMLDivElement>(null);
-  const api = useRef<{ attack: () => void; hurt: () => void } | null>(null);
+  const api = useRef<{ play: (anim: string) => void; hurt: () => void } | null>(null);
   useEffect(() => {
     let dead = false;
     let cleanup = () => {};
@@ -54,7 +54,7 @@ function PixiPreview({ def }: { def: SpriteDef }) {
         s.flashAmount = flash > 0 ? (Math.floor(flash * 12) % 2 ? 1 : 0) : 0;
         s.x = 160 + (flash > 0 ? Math.sin(flash * 40) * 4 : 0);
       });
-      api.current = { attack: () => void s.play("attack"), hurt: () => (flash = 1) };
+      api.current = { play: (anim) => void s.play(anim), hurt: () => (flash = 1) };
       cleanup = () => app.destroy(true, { children: true });
     })().catch((e) => console.error(e));
     return () => {
@@ -66,12 +66,17 @@ function PixiPreview({ def }: { def: SpriteDef }) {
     <div className="flex flex-col gap-2">
       <div ref={host} className="overflow-hidden rounded-lg border border-white/10" data-testid={`pixi-${def.id}`} />
       <div className="flex gap-2">
-        <Button size="sm" onClick={() => api.current?.attack()}>
+        <Button size="sm" onClick={() => api.current?.play("attack")}>
           Attack
         </Button>
         <Button size="sm" onClick={() => api.current?.hurt()}>
           Hurt
         </Button>
+        {def.anims.evolve && (
+          <Button size="sm" onClick={() => api.current?.play("evolve")}>
+            Evolve
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -50,3 +50,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests: roster test requires all ten bosses at 96×96; 166 tests.
 - Verified: lint, typecheck, 166 tests, build, build:pages pass. Judged contact sheets for every frame while authoring (respaced hydra heads so the buds stay on canvas, moved the plan tree up, put back-orbit lenses behind the ring). Playwright on the static export `/dev/sprites` at 1280×900 and iPhone 14: all twelve sprites render and animate, no console errors, no horizontal overflow.
 - Next: A2e (map each BossId to its sprite with a test, BYTEBAT evolve frames).
+
+## 2026-10-12 (18:30 IST): A2e boss → sprite lookup + BYTEBAT evolve
+- `game/sprites/roster.ts`: `BOSS_SPRITE: Record<BossId, string>` (`subzero` → `frostnest`, `reaper` → `rowreaper`, `windwraith` → `galeframe`, `hydra` → `recursa`, `optimizer` → `opticore`), `STARTER` (front `bytebat`, back `bytebat-back`), plus `bossSprite()` / `starterSprite()` helpers for the battle stage (A3).
+- BYTEBAT `evolve` (8f, 6 fps): light sparkles gather, the colours dither into a white silhouette with a cyan halo, then the silhouette flickers between a folded smaller shape and a taller "next form" (anchored at the feet) before a sparkle burst. Made with new `scripts/art/paint.mjs` helpers: `whiten`, `scaleLayer`, `halo`, `sparkle`.
+- `/dev/sprites`: the live Pixi preview has an Evolve button for sprites that have an evolve animation.
+- Tests: every chapter boss resolves to its own 96×96 sprite, renamed mappings, starter front/back, and the evolve animation fades to a white silhouette that changes shape: 171 tests. A2 is complete.
+- Verified: lint, typecheck, 171 tests, build, build:pages pass. Judged the contact sheet (fixed the "next form" silhouette clipping at the top). Playwright on the static export `/dev/sprites` at 1280×900 and iPhone 14: evolve row renders, Evolve button plays the morph in Pixi, no console errors, no horizontal overflow. Note: Playwright mouse clicks on the preview's motion buttons (Hurt/Attack/Evolve) didn't fire in headless while DOM `click()` did; worth checking that tap works on a real iPhone when A3 adds battle buttons.
+- Next: A3 (GBA-style battle layout using `bossSprite()` / `starterSprite()`).

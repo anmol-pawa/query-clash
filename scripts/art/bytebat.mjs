@@ -1,6 +1,6 @@
 // BYTEBAT, the player's starter: a round data-bat with circuit-lined wings.
 // Run: node scripts/art/bytebat.mjs
-import { Layer, emit } from "./paint.mjs";
+import { Layer, emit, halo, scaleLayer, sparkle, whiten } from "./paint.mjs";
 
 const W = 64;
 const H = 64;
@@ -274,6 +274,35 @@ function sink(layer, dy) {
   return new Layer(W, H).draw(layer, 0, dy);
 }
 
+/**
+ * Evolve: light gathers, the colours dither away into a white silhouette, and
+ * the silhouette pulses between BYTEBAT's shape and a taller "next form"
+ * (anchored at the feet) before a final flash.
+ */
+function evolveFrames() {
+  const base = frame({ wing: -6 });
+  const tall = frame({ wing: -8, spread: 1 });
+  const folded = frame({ wing: 8, bob: 2 });
+  const sil = (l) => halo(whiten(l, 1, "w"), "e");
+  // the canvas is tight (wingtips touch the edges), so the morph flickers between a
+  // folded, smaller silhouette and a slightly taller one, anchored at the feet
+  const grow = (l, sx, sy) => scaleLayer(l, sx, sy, 32, 60);
+  const sparks = (l, pts) => {
+    for (const [x, y, r] of pts) sparkle(l, x, y, r, "e", "w");
+    return l;
+  };
+  return [
+    sparks(new Layer(W, H).draw(base), [[8, 50, 2], [56, 6, 2]]),
+    sparks(halo(whiten(base, 0.35, "w"), "e"), [[5, 42, 2], [58, 50, 2], [22, 4, 1]]),
+    sparks(halo(whiten(base, 0.7, "w"), "e"), [[4, 52, 1], [60, 56, 2], [44, 3, 2]]),
+    sil(base),
+    sil(grow(folded, 0.84, 0.84)),
+    sil(grow(tall, 1.03, 1.07)),
+    sil(grow(folded, 0.78, 0.78)),
+    sparks(sil(grow(tall, 1.03, 1.07)), [[4, 54, 3], [59, 55, 3], [11, 61, 1], [53, 61, 1]]),
+  ];
+}
+
 emit(new URL("../../game/sprites/creatures/bytebat.ts", import.meta.url), {
   id: "bytebat",
   name: "BYTEBAT",
@@ -281,12 +310,13 @@ emit(new URL("../../game/sprites/creatures/bytebat.ts", import.meta.url), {
   h: H,
   palette,
   comment: "The starter: a round data-bat with circuit-traced wings. Front view, 64×64.",
-  fps: { idle: 6, attack: 8, hurt: 8, faint: 6 },
+  fps: { idle: 6, attack: 8, hurt: 8, faint: 6, evolve: 6 },
   anims: {
     idle: [frame({ wing: -6 }), frame({ wing: 0, bob: 1 }), frame({ wing: 6, bob: 2 }), frame({ wing: 0, bob: 1 })],
     attack: [frame({ wing: -8, spread: 1, mouth: true }), frame({ wing: 8, spread: 2, bob: 1, mouth: true }), frame({ wing: 0, bob: 1 })],
     hurt: [frame({ wing: 4, bob: 2, face: "hurt" }), frame({ wing: 2, bob: 1, face: "hurt" })],
     faint: [frame({ wing: 6, bob: 2, face: "faint" }), sink(frame({ wing: 8, bob: 2, face: "faint" }), 6), sink(frame({ wing: 8, bob: 2, face: "faint" }), 14), sink(frame({ wing: 8, bob: 2, face: "faint" }), 24)],
+    evolve: evolveFrames(),
   },
 });
 
