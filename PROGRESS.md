@@ -67,3 +67,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests: every boss has a distinct counter style; every battle sprite has idle/attack/hurt/faint. 173 tests.
 - Verified: lint, typecheck, 173 tests, build, build:pages pass. Playwright on the static export at 1280×900 and iPhone 14: chapters 1, 7 and 10 show the boss on its platform top-right and BYTEBAT bottom-left; a correct cast (chapter 1) plays FILTER BOLT with damage numbers and the boss hurt flash; a wrong cast (chapter 7) plays Schemaforge's quake counter on BYTEBAT. No console errors, no horizontal overflow; /versus loads cleanly.
 - Next: A3b (handheld-style HP boxes with name / Lv / HP / XP).
+
+## 2026-10-12 (21:50 IST): A3b handheld-style HP boxes
+- `components/battle/HpBox.tsx`: cream cards with a hard dark border and inner bevel, the creature's name and level, an orange "HP" tag and a bar that bands green (>50%) / yellow (>20%) / red with a lag bar showing recent damage. The player's box adds HP numbers and an EXP bar. The foe's box sits top-left of the stage, the player's bottom-right; in versus a ▶ marks whose turn it is.
+- `game/engine/hud.ts`: pure helpers `hpTone`, `levelFor` / `xpForLevel` / `xpProgress` (matching `level()` in lib/save), `bossLevel` (5 per chapter) and `arenaFoeLevel` (+1 per wave). Tests in `tests/hud.test.ts`.
+- BattleScreen: the old "Data Mage" header bars and portraits are gone; the HUD row keeps Focus, the round timer and the boss title. Names now come from the sprites (BYTEBAT vs NULLOTH, SCHEMAFORGE…; versus is P1 BYTEBAT vs P2 BYTEBAT), so banners say e.g. "SCHEMAFORGE strikes!".
+- Verified: lint, typecheck, 177 tests, build, build:pages pass. Playwright on the static export at 1280×900 and iPhone 14 for chapters 1 and 7, versus and arena: boxes sit in the free stage corners without covering either creature, no console errors, no horizontal overflow.
+- Next: A3c (typed-out battle text box and pixel-art restyle of spell effects).

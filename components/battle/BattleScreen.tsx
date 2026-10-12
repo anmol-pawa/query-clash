@@ -12,7 +12,9 @@ import { DbStatus, sqlClient, useDbStatus } from "@/lib/db/client";
 import type { ResultSet } from "@/lib/db/engine";
 import { detectConcepts } from "@/lib/dialect/concepts";
 import type { Dialect } from "@/lib/dialect/lint";
-import { unlockedChapters, updateSave, useSave } from "@/lib/save";
+import { level, unlockedChapters, updateSave, useSave } from "@/lib/save";
+import { arenaFoeLevel, xpProgress } from "@/game/engine/hud";
+import { bossSprite, starterSprite } from "@/game/sprites/roster";
 import { orbitronFamily } from "@/app/fonts";
 import { Bar, Button, Chip, CodeBlock, DIALECT_COLOR, DIALECT_NAME, DialectToggle, LinkButton, Modal, RichText } from "../ui/kit";
 import { Feedback, ResultPanel, ResultTab } from "./ResultPanel";
@@ -22,6 +24,7 @@ import { SqlEditor, SqlEditorHandle } from "./SqlEditor";
 import { SymbolBar } from "./SymbolBar";
 import { isTouch } from "@/lib/touch";
 import { StageHandle, StageView } from "./StageView";
+import { HpBox } from "./HpBox";
 
 export type Mode = "campaign" | "arena" | "versus";
 
@@ -78,7 +81,10 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
   const bossId: BossId | undefined = mode === "campaign" ? chapter.boss : mode === "arena" ? BOSS_ORDER[(wave - 1) % BOSS_ORDER.length] : undefined;
   const bossChapter = CHAPTERS.find((c) => c.boss === bossId);
   const accent = mode === "versus" ? "#f472b6" : (bossChapter?.color ?? chapter.color);
-  const foeName = mode === "versus" ? "Player 2" : (bossChapter?.bossName ?? "");
+  const foeName = mode === "versus" ? "P2 BYTEBAT" : bossId ? bossSprite(bossId).name : "";
+  const playerName = mode === "versus" ? "P1 BYTEBAT" : starterSprite("front").name;
+  const foeLevel = mode === "versus" ? level(save.xp) : arenaFoeLevel(bossChapter?.n ?? chapter.n, mode === "arena" ? wave : 1);
+  const playerLevel = level(save.xp);
 
   const mission = useMemo(() => ALL_MISSIONS.find((m) => m.id === s.missionIds[s.missionIndex]), [s.missionIds, s.missionIndex]);
   const activeSide: "left" | "right" = mode === "versus" ? turn : "left";
@@ -120,7 +126,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
       foeHp = 200;
       playerHp = 200;
     }
-    dispatch({ type: "load", missionIds: ids, player: { name: mode === "versus" ? "Player 1" : "Data Mage", hp: playerHp, maxHp: playerHp }, foe: { name: foeName, hp: foeHp, maxHp: foeHp } });
+    dispatch({ type: "load", missionIds: ids, player: { name: playerName, hp: playerHp, maxHp: playerHp }, foe: { name: foeName, hp: foeHp, maxHp: foeHp } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, chapterNo]);
 
@@ -395,27 +401,26 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
         </div>
       </header>
 
-      {/* HUD */}
-      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <Portrait color="#5eead4" glyph="✦" active={activeSide === "left"} />
-          <div className="min-w-0 flex-1 space-y-1.5">
-            <Bar value={s.player.hp} max={s.player.maxHp} color="#34d399" label={s.player.name || "Data Mage"} />
-            {mode !== "versus" && <Bar value={s.focus} max={MAX_FOCUS} color="#818cf8" height={6} />}
-          </div>
+      {/* HUD: focus meter and round timer (HP lives in the stage's HP boxes) */}
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 px-3 py-1.5 sm:gap-4 sm:px-4">
+        <div className="min-w-0">
+          {mode !== "versus" ? (
+            <>
+              <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">Focus</div>
+              <Bar value={s.focus} max={MAX_FOCUS} color="#818cf8" height={6} />
+            </>
+          ) : (
+            <div className="truncate text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">{activeSide === "left" ? "Player 1's turn" : "Player 2's turn"}</div>
+          )}
         </div>
         <TimerRing pct={timePct} seconds={s.timeLeft} zen={s.timeTotal >= 9999} round={s.missionIndex + 1} total={mode === "campaign" ? s.missionIds.length : undefined} />
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="min-w-0 flex-1">
-            <Bar value={s.foe.hp} max={s.foe.maxHp} color={accent} label={foeName} align="right" />
-            {mode !== "versus" && bossChapter && <div className="mt-1 hidden truncate text-right text-[10px] uppercase tracking-[0.25em] text-white/35 sm:block">{bossChapter.bossTitle}</div>}
-          </div>
-          <Portrait color={accent} glyph={mode === "versus" ? "✦" : "☠"} active={activeSide === "right"} />
-        </div>
+        <div className="min-w-0 truncate text-right text-[10px] uppercase tracking-[0.25em] text-white/35">{mode !== "versus" && bossChapter ? bossChapter.bossTitle : ""}</div>
       </div>
 
       {/* stage */}
       <div ref={stageBox} className="relative mx-3 h-[38vh] min-h-[230px] scroll-mt-2 overflow-hidden rounded-2xl border border-white/10 lg:h-auto lg:min-h-[260px] lg:flex-[0_0_40vh]">
+        <HpBox side="foe" name={foeName} level={foeLevel} hp={s.foe.hp} maxHp={s.foe.maxHp} active={mode === "versus" && activeSide === "right"} className="absolute left-2 top-2 z-10 sm:left-3 sm:top-3" />
+        <HpBox side="player" name={playerName} level={playerLevel} hp={s.player.hp} maxHp={s.player.maxHp} xp={mode === "versus" ? undefined : xpProgress(save.xp)} active={mode === "versus" && activeSide === "left"} className="absolute bottom-2 right-2 z-10 sm:bottom-3 sm:right-3" />
         <StageView key={`${bossId ?? "versus"}-${wave}`} ref={stage} boss={bossId} versus={mode === "versus"} accent={accent} reducedMotion={save.settings.reducedMotion} font={orbitronFamily} onReady={() => setStageReady(true)} />
         <AnimatePresence>
           {banner && (
@@ -592,19 +597,6 @@ function DbBadge({ status }: { status: DbStatus }) {
       <span className={`h-1.5 w-1.5 rounded-full ${status === "booting" ? "animate-pulse" : ""}`} style={{ background: c }} />
       {label}
     </span>
-  );
-}
-
-function Portrait({ color, glyph, active }: { color: string; glyph: string; active: boolean }) {
-  return (
-    <motion.div
-      data-portrait
-      animate={{ boxShadow: active ? `0 0 0 2px ${color}, 0 0 24px -2px ${color}` : "0 0 0 1px rgba(255,255,255,0.1)" }}
-      className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl sm:flex"
-      style={{ background: `radial-gradient(circle at 30% 30%, ${color}55, #0b0718)`, color }}
-    >
-      {glyph}
-    </motion.div>
   );
 }
 
