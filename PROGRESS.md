@@ -74,3 +74,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - BattleScreen: the old "Data Mage" header bars and portraits are gone; the HUD row keeps Focus, the round timer and the boss title. Names now come from the sprites (BYTEBAT vs NULLOTH, SCHEMAFORGE…; versus is P1 BYTEBAT vs P2 BYTEBAT), so banners say e.g. "SCHEMAFORGE strikes!".
 - Verified: lint, typecheck, 177 tests, build, build:pages pass. Playwright on the static export at 1280×900 and iPhone 14 for chapters 1 and 7, versus and arena: boxes sit in the free stage corners without covering either creature, no console errors, no horizontal overflow.
 - Next: A3c (typed-out battle text box and pixel-art restyle of spell effects).
+
+## 2026-10-13 (02:18 IST): A3c typed battle text box
+- `components/battle/BattleTextBox.tsx`: a handheld-console text box under the stage (navy frame, gold inner border, cream card). It types each line out (45 chars/s), holds it, then moves to the next with a bouncing ▼; the last line stays. Tapping finishes the line or skips ahead; reduced motion shows lines whole.
+- `game/engine/battleText.ts`: pure line builders and the typewriter (`typed`, `typeDuration`). Battle start: "Wild NULLOTH appeared!" → "Go! BYTEBAT!" → "Roll Call. What will BYTEBAT do?"; casts: "BYTEBAT used FILTER BOLT!", "A critical hit!", "3× combo!", "A finishing blow!", "NULLOTH took 24 damage!"; misses ("…'s query fizzled!", "… strikes back!"), timeouts and "… fainted!". Versus uses "P2 BYTEBAT wants to battle!".
+- BattleScreen: the text box replaces the campaign/arena "ROUND n" and "TIME UP" banners (versus keeps its player/dialect banner; the attack-name banner with chips stays).
+- Split the rest of A3 into A3d (pixel-art spell effects). Tests in `tests/battleText.test.ts`: 181 tests.
+- Verified: lint, typecheck, 181 tests, build, build:pages pass. Playwright on the static export at 1280×900 and iPhone 14 (chapters 1 and 7): intro lines type out, a wrong cast shows "BYTEBAT's query fizzled!" then the counter line, a correct chapter-1 cast shows "BYTEBAT used …!", "A critical hit!", "NULLOTH took 269 damage!". No console errors, no horizontal overflow.
+- Next: A3d (sprite-based spell and counter effects).

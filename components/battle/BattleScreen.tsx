@@ -24,6 +24,8 @@ import { SqlEditor, SqlEditorHandle } from "./SqlEditor";
 import { SymbolBar } from "./SymbolBar";
 import { isTouch } from "@/lib/touch";
 import { StageHandle, StageView } from "./StageView";
+import { BattleTextBox, type BattleMessage } from "./BattleTextBox";
+import { castLines, faintLine, introLines, missLines, roundLine, timeoutLines } from "@/game/engine/battleText";
 import { HpBox } from "./HpBox";
 
 export type Mode = "campaign" | "arena" | "versus";
@@ -66,6 +68,9 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
   const [hints, setHints] = useState(0);
   const [banner, setBanner] = useState<{ title: string; sub?: string; color: string; chips?: string[] } | null>(null);
   const [debrief, setDebrief] = useState<Debrief | null>(null);
+  const [message, setMessage] = useState<BattleMessage | null>(null);
+  const msgId = useRef(0);
+  const say = (lines: string[]) => setMessage({ id: ++msgId.current, lines, at: performance.now() });
   const dbStatus = useDbStatus();
   const [stageReady, setStageReady] = useState(false);
   const [plan, setPlan] = useState<{ text?: string; label?: string }>({});
@@ -133,7 +138,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
   const st = () => stage.current?.stage() ?? null;
 
   const startRound = useCallback(
-    (idx: number, side: "left" | "right" = activeSide) => {
+    (idx: number, side: "left" | "right" = activeSide, lead: string[] = []) => {
       const m = ALL_MISSIONS.find((x) => x.id === s.missionIds[idx]);
       if (!m) return;
       const d = mode === "versus" && side === "right" ? p2Dialect : save.dialect;
@@ -145,21 +150,21 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
       setTab("result");
       const t = save.settings.zen && mode !== "versus" ? 9999 : missionTime(m, m.chapter);
       dispatch({ type: "begin-round", time: t });
-      setBanner({
-        title: mode === "versus" ? `${side === "left" ? "PLAYER 1" : "PLAYER 2"} — ${DIALECT_NAME[d].toUpperCase()}` : mode === "arena" ? `WAVE ${wave} · ROUND ${s.round + 1}` : `ROUND ${idx + 1}`,
-        sub: m.title,
-        color: mode === "versus" ? (side === "left" ? "#5eead4" : "#f9a8d4") : accent,
-      });
-      setTimeout(() => setBanner(null), 1500);
+      say([...lead, roundLine(mode === "versus" && side === "right" ? foeName : playerName, m.title)]);
+      if (mode === "versus") {
+        setBanner({ title: `${side === "left" ? "PLAYER 1" : "PLAYER 2"} — ${DIALECT_NAME[d].toUpperCase()}`, sub: m.title, color: side === "left" ? "#5eead4" : "#f9a8d4" });
+        setTimeout(() => setBanner(null), 1500);
+      }
       setTimeout(() => editor.current?.focus(), 300);
     },
-    [s.missionIds, s.round, mode, p2Dialect, save.dialect, save.settings.zen, wave, accent, activeSide],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [s.missionIds, s.round, mode, p2Dialect, save.dialect, save.settings.zen, activeSide, foeName, playerName],
   );
 
   const fight = () => {
     sfx.unlock();
     startMusic(mode === "versus" ? 98 : 82 + (bossChapter?.n ?? 1) * 6, 104 + (bossChapter?.n ?? 1) * 3);
-    startRound(s.missionIndex, "left");
+    startRound(s.missionIndex, "left", introLines(mode, foeName, playerName));
   };
 
   /* ------------------------------------------------------------ timer */
@@ -184,15 +189,13 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
     busy.current = true;
     sfx.error();
     if (mode === "versus") {
-      setBanner({ title: "TIME UP", sub: "Turn passes", color: "#f87171" });
-      setTimeout(() => setBanner(null), 1200);
+      say(timeoutLines(foeName, true));
       busy.current = false;
       nextTurn(s.missionIndex + 1);
       return;
     }
     const dmg = counterDamage(mission ? ALL_MISSIONS.find((x) => x.id === mission.id)!.chapter : 1, true);
-    setBanner({ title: "TIME UP", sub: `${foeName} strikes!`, color: "#f87171" });
-    setTimeout(() => setBanner(null), 1200);
+    say(timeoutLines(foeName, false));
     await st()?.counter("right", dmg, () => {
       sfx.hurt();
       dispatch({ type: "timeout", dmg });
@@ -206,6 +209,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
     if (dead) {
       stopMusic();
       sfx.defeat();
+      say([faintLine(playerName)]);
       await st()?.ko("left");
       await st()?.victory("right");
       setEndReady(true);
@@ -250,6 +254,8 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
 
       const chips = [dmg.combo > 0 ? `${dmg.combo + 1}× COMBO` : "", dmg.planLabel, dmg.crit ? "CRITICAL" : "", finisher ? "FINISHER" : ""].filter(Boolean);
       setBanner({ title: dmg.attack.name.toUpperCase(), sub: `-${shown}`, color: "#" + dmg.attack.color.toString(16).padStart(6, "0"), chips });
+      const [user, target] = side === "left" ? [playerName, foeName] : [foeName, playerName];
+      say(castLines({ user, target, attack: dmg.attack.name, damage: shown, crit: dmg.crit, combo: dmg.combo, finisher }));
       sfx.cast(dmg.attack.kind);
       await st()?.attack(side, dmg.attack.kind, dmg.attack.color, shown, dmg.crit, finisher || ko, () => {
         sfx.hit(dmg.crit || finisher);
@@ -265,6 +271,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
 
       if (ko) {
         stopMusic();
+        say([faintLine(target)]);
         await st()?.ko(other);
         sfx.victory();
         st()?.victory(side);
@@ -273,6 +280,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
     } else {
       sfx.miss();
       setTab("tutor");
+      say(missLines(side === "left" ? playerName : foeName, mode === "versus" ? undefined : foeName));
       await st()?.fizzle(side);
       if (mode === "versus") {
         dispatch({ type: "resolve-miss" });
@@ -442,6 +450,9 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
           )}
         </AnimatePresence>
         {(s.phase === "loading" || !stageReady) && <div className="absolute inset-0 flex items-center justify-center bg-[#07050f]/60 font-display text-xs tracking-[0.4em] text-white/50">SUMMONING ARENA…</div>}
+      </div>
+      <div className="px-3 pt-2">
+        <BattleTextBox message={message} instant={save.settings.reducedMotion} />
       </div>
 
       {/* workspace */}
