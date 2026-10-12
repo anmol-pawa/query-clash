@@ -13,3 +13,13 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests: `tests/sprites.test.ts` checks every sprite is rectangular, uses only palette keys, has a 2–4 frame idle that animates, is ≥64×64; plus helper unit tests.
 - Verified: lint, typecheck, 109 tests, build, build:pages all pass. Playwright on the static export (desktop 1280×900 and iPhone 14): viewer and menu render, Pixi preview animates, no console errors, no horizontal overflow.
 - Next: A2 (redraw the player creature team and the 10 bosses as pixel monsters, with back sprites; bosses 96×96). Likely split per boss group; BYTEBAT still needs a back sprite and hurt/faint frames.
+
+## 2026-10-12 (11:20 IST): A2a BYTEBAT back sprite + NULLOTH boss
+- Split A2 into A2a–A2e in ROADMAP.md (bosses in groups of three, then the BossId → sprite lookup and evolve frames).
+- BYTEBAT: added `hurt` (2f, squeezed > < eyes) and `faint` (4f, x eyes, wings droop, sinks into the ground), plus a new `bytebat-back` sprite (64×64, back view with spine circuit trace) with idle/attack/hurt/faint for the player's side of the battle.
+- NULLOTH, the chapter 1 boss (96×96, 14 colours): a hooded void-ghost with ∅ ring eyes, a jagged glowing mouth, wispy clawed arms, a swaying tattered tail and orbiting NULL bits. idle 4f (float + sway), attack 3f (arms raised, mouth open), hurt 2f, faint 4f (dither dissolve).
+- `scripts/art/paint.mjs`: `emit()` now makes valid export names for ids with dashes, takes a `script` name, and writes a PNG contact sheet of every frame when `ART_PREVIEW=<dir>` is set (used to judge the art while authoring).
+- `/dev/sprites`: the live Pixi preview picks a scale that fits 96×96 bosses (they were cropped at 3×).
+- Tests: every sprite must have attack/hurt/faint and its faint must end lower or sparser; roster test for the back sprite and 96×96 boss size.
+- Verified: lint, typecheck, 121 tests, build, build:pages pass. Playwright on the static export at 1280×900 and iPhone 14: all three sprites render and animate, no console errors, no horizontal overflow.
+- Next: A2b (Joinmaster chain golem, Aggregon block golem, ice wraith as 96×96 bosses).

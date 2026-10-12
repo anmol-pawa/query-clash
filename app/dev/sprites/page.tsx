@@ -43,7 +43,7 @@ function PixiPreview({ def }: { def: SpriteDef }) {
       app.canvas.style.width = "100%";
       app.canvas.style.maxWidth = "320px";
       app.canvas.style.imageRendering = "pixelated";
-      const s = new PixelSprite(def, 3);
+      const s = new PixelSprite(def, Math.max(1, Math.min(3, Math.floor(210 / def.h))));
       s.position.set(160, 220);
       app.stage.addChild(s);
       let flash = 0;

@@ -31,7 +31,7 @@ const BELLY = ["j", "i", "l"];
  * pose.wing: tip height offset (−8 up … +8 down); pose.bob: body drop in px;
  * pose.mouth: open mouth; pose.spread: wings pushed outwards.
  */
-function frame({ wing = 0, bob = 0, mouth = false, spread = 0 }) {
+function frame({ wing = 0, bob = 0, mouth = false, spread = 0, face = "normal" }) {
   const out = new Layer(W, H);
   const cy = 37 + bob;
 
@@ -132,6 +132,20 @@ function frame({ wing = 0, bob = 0, mouth = false, spread = 0 }) {
     [26, -1],
     [38, 1],
   ]) {
+    if (face !== "normal") {
+      // squeezed shut (hurt: > <) or knocked out (faint: x x)
+      if (face === "hurt") {
+        const a = -s;
+        out.line(ex - 2 * a, cy - 5, ex + 2 * a, cy - 3, "k");
+        out.line(ex - 2 * a, cy - 1, ex + 2 * a, cy - 3, "k");
+      } else {
+        out.line(ex - 2, cy - 5, ex + 2, cy - 1, "k");
+        out.line(ex - 2, cy - 1, ex + 2, cy - 5, "k");
+      }
+      out.set(ex + s * 3, cy + 3, "r");
+      out.set(ex + s * 2, cy + 3, "r");
+      continue;
+    }
     const e = new Layer(W, H);
     e.ellipse(ex, cy - 3, 4, 4.6, ["w", "w"]);
     e.outline("k");
@@ -166,6 +180,100 @@ function frame({ wing = 0, bob = 0, mouth = false, spread = 0 }) {
   return out;
 }
 
+/** Back view (the player's side of the battle): wings spread, circuit lines down the back. */
+function backFrame({ wing = 0, bob = 0, spread = 0 }) {
+  const out = new Layer(W, H);
+  const cy = 38 + bob;
+  for (const s of [-1, 1]) {
+    const L = new Layer(W, H);
+    const X = (x) => 32 + s * x;
+    const tipY = 13 + wing + bob;
+    const pts = [
+      [X(10), cy - 8],
+      [X(21 + spread), tipY + 2],
+      [X(30 + spread), tipY],
+      [X(31 + spread), tipY + 9 + wing * 0.3],
+      [X(27 + spread), cy + 3 + wing * 0.4],
+      [X(23 + spread * 0.7), cy + wing * 0.3],
+      [X(20 + spread * 0.4), cy + 7 + wing * 0.2],
+      [X(14), cy + 3],
+      [X(10), cy + 5],
+    ];
+    // the back of the membrane is darker; the left side still catches the light
+    L.poly(pts, WING, (x, y) => 0.8 - (y - tipY) / 45 - (s > 0 ? 0.2 : 0) - Math.abs(x - 32) / 140);
+    const bone = "h";
+    L.line(X(11), cy - 6, X(30 + spread), tipY + 1, bone);
+    L.line(X(15), cy - 3, X(27 + spread), cy + 2 + wing * 0.4, bone);
+    L.line(X(13), cy - 1, X(22 + spread * 0.7), cy + wing * 0.3, bone);
+    L.line(X(12), cy - 7, X(21 + spread), tipY + 3, s < 0 ? "g" : "h");
+    L.outline("k");
+    out.draw(L);
+  }
+  // ears, seen from behind (no pink)
+  const ears = new Layer(W, H);
+  for (const s of [-1, 1]) {
+    const X = (x) => 32 + s * x;
+    ears.poly(
+      [
+        [X(5), cy - 11],
+        [X(12), cy - 28],
+        [X(15), cy - 9],
+      ],
+      BODY,
+      (x, y) => 0.6 - (s > 0 ? 0.25 : 0) - (y - (cy - 28)) / 70,
+    );
+  }
+  ears.outline("k");
+  out.draw(ears);
+
+  const body = new Layer(W, H);
+  body.ellipse(32, cy, 16, 15, BODY, { bias: -0.05 });
+  body.ellipse(26, cy + 15, 3, 2, BODY, { bias: -0.3 });
+  body.ellipse(38, cy + 15, 3, 2, BODY, { bias: -0.35 });
+  // tuft on top, and a little tail tuft at the bottom
+  body.poly(
+    [
+      [28, cy - 14],
+      [31, cy - 19],
+      [33, cy - 14],
+    ],
+    BODY,
+    () => 0.65,
+  );
+  body.poly(
+    [
+      [30, cy + 11],
+      [32, cy + 17],
+      [35, cy + 11],
+    ],
+    BODY,
+    () => 0.25,
+  );
+  body.outline("k");
+  out.draw(body);
+  // circuit trace down the spine, branching to the shoulders
+  out.line(32, cy - 11, 32, cy + 6, "e");
+  out.line(32, cy - 5, 26, cy - 1, "e");
+  out.line(32, cy - 5, 38, cy - 1, "f");
+  out.line(32, cy + 2, 28, cy + 6, "e");
+  out.line(32, cy + 2, 36, cy + 6, "f");
+  for (const [x, y] of [
+    [32, cy - 11],
+    [26, cy - 1],
+    [38, cy - 1],
+    [28, cy + 6],
+    [36, cy + 6],
+  ])
+    out.set(x, y, "o");
+  out.set(32, cy - 5, "w");
+  return out;
+}
+
+/** Sink a frame into the ground (for faint), clipping at the bottom edge. */
+function sink(layer, dy) {
+  return new Layer(W, H).draw(layer, 0, dy);
+}
+
 emit(new URL("../../game/sprites/creatures/bytebat.ts", import.meta.url), {
   id: "bytebat",
   name: "BYTEBAT",
@@ -173,9 +281,28 @@ emit(new URL("../../game/sprites/creatures/bytebat.ts", import.meta.url), {
   h: H,
   palette,
   comment: "The starter: a round data-bat with circuit-traced wings. Front view, 64×64.",
-  fps: { idle: 6, attack: 8 },
+  fps: { idle: 6, attack: 8, hurt: 8, faint: 6 },
   anims: {
     idle: [frame({ wing: -6 }), frame({ wing: 0, bob: 1 }), frame({ wing: 6, bob: 2 }), frame({ wing: 0, bob: 1 })],
     attack: [frame({ wing: -8, spread: 1, mouth: true }), frame({ wing: 8, spread: 2, bob: 1, mouth: true }), frame({ wing: 0, bob: 1 })],
+    hurt: [frame({ wing: 4, bob: 2, face: "hurt" }), frame({ wing: 2, bob: 1, face: "hurt" })],
+    faint: [frame({ wing: 6, bob: 2, face: "faint" }), sink(frame({ wing: 8, bob: 2, face: "faint" }), 6), sink(frame({ wing: 8, bob: 2, face: "faint" }), 14), sink(frame({ wing: 8, bob: 2, face: "faint" }), 24)],
+  },
+});
+
+emit(new URL("../../game/sprites/creatures/bytebat-back.ts", import.meta.url), {
+  id: "bytebat-back",
+  name: "BYTEBAT (back)",
+  w: W,
+  h: H,
+  palette,
+  script: "bytebat",
+  comment: "BYTEBAT from behind, for the player's side of the battle. 64×64.",
+  fps: { idle: 6, attack: 8, hurt: 8, faint: 6 },
+  anims: {
+    idle: [backFrame({ wing: -5 }), backFrame({ wing: 0, bob: 1 }), backFrame({ wing: 5, bob: 2 }), backFrame({ wing: 0, bob: 1 })],
+    attack: [backFrame({ wing: -8, spread: 1, bob: -2 }), backFrame({ wing: 7, spread: 2, bob: -3 }), backFrame({ wing: 0, bob: 0 })],
+    hurt: [backFrame({ wing: 5, bob: 2 }), backFrame({ wing: 3, bob: 1 })],
+    faint: [backFrame({ wing: 7, bob: 2 }), sink(backFrame({ wing: 8, bob: 2 }), 6), sink(backFrame({ wing: 8, bob: 2 }), 14), sink(backFrame({ wing: 8, bob: 2 }), 24)],
   },
 });

@@ -20,11 +20,27 @@ describe("sprite library", () => {
       it("uses a limited palette", () => {
         expect(Object.keys(s.palette).length).toBeLessThanOrEqual(24);
       });
+      it("has attack, hurt and faint animations, and faint ends lower or sparser", () => {
+        for (const a of ["attack", "hurt", "faint"]) expect(s.anims[a]?.length ?? 0).toBeGreaterThan(0);
+        const opaque = (f: readonly string[]) => f.join("").replace(/\./g, "").length;
+        const first = s.anims.faint[0];
+        const last = s.anims.faint[s.anims.faint.length - 1];
+        expect(bounds(last)!.y > bounds(first)!.y || opaque(last) < opaque(first)).toBe(true);
+      });
       it("idle frames actually differ (it animates)", () => {
         expect(new Set(s.anims.idle.map((f) => f.join("\n"))).size).toBeGreaterThan(1);
       });
     });
   }
+});
+
+describe("creature roster", () => {
+  it("BYTEBAT has a back sprite and bosses are 96×96", () => {
+    const ids = SPRITES.map((s) => s.id);
+    expect(ids).toContain("bytebat-back");
+    const nulloth = SPRITES.find((s) => s.id === "nulloth")!;
+    expect([nulloth.w, nulloth.h]).toEqual([96, 96]);
+  });
 });
 
 describe("pixel helpers", () => {
