@@ -4,6 +4,9 @@ import { Button, NavLink } from "@/components/ui/kit";
 import { SPRITES } from "@/game/sprites";
 import type { SpriteDef } from "@/game/sprites/pixel";
 import { frameCanvas } from "@/game/sprites/texture";
+import { FX_KINDS, fxSprite } from "@/game/sprites/effects";
+
+const FX_COLORS = [0x60a5fa, 0xf97316, 0x4ade80, 0xe879f9];
 
 /** Plays one animation on a 2D canvas at an integer scale (nearest-neighbour). */
 function AnimCanvas({ def, anim, scale }: { def: SpriteDef; anim: string; scale: number }) {
@@ -97,6 +100,20 @@ export default function SpriteViewer() {
           ))}
         </div>
       </header>
+      <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4" data-testid="fx-effects">
+        <h2 className="font-display text-lg font-bold tracking-widest">MOVE EFFECTS</h2>
+        <span className="font-mono text-xs text-white/50">4 frames each · ramp: outline · shadow · base · light · pale · white, built from the spell colour</span>
+        {FX_KINDS.map((kind) => (
+          <div key={kind} className="flex flex-col gap-1">
+            <span className="font-mono text-xs uppercase text-white/60">{kind}</span>
+            <div className="flex flex-wrap items-end gap-3 rounded-lg p-2" style={{ background: bg }}>
+              {FX_COLORS.map((c) => (
+                <AnimCanvas key={c} def={fxSprite(kind, c)} anim="idle" scale={kind === "beam" ? 4 : 3} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </section>
       {SPRITES.map((def) => (
         <section key={def.id} className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4" data-testid={`sprite-${def.id}`}>
           <div className="flex flex-wrap items-baseline gap-3">

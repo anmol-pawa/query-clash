@@ -13,7 +13,7 @@ import { bossAttack, performAttack } from "./attacks";
 import { BOSS_STYLE, bossSprite, starterSprite } from "@/game/sprites/roster";
 import { Creature } from "./characters/creature";
 import type { RigContext } from "./characters/rig";
-import { Camera, FxContext, popText, ring } from "./fx";
+import { Camera, FxContext, impactSpark, popText, ring } from "./fx";
 import { Particles } from "./particles";
 import { skyTex, vignetteTex } from "./textures";
 import { Tweener, ease } from "./tween";
@@ -63,6 +63,7 @@ export class BattleStage {
   private fighters = new Container();
   private fxLayer = new Container();
   private top = new Container();
+  private pix = new Container();
   private flashRect = new Graphics();
   private vignette!: Sprite;
   private tw = new Tweener();
@@ -170,7 +171,7 @@ export class BattleStage {
     this.fighters.addChild(this.left.root, this.right.root);
 
     this.fxLayer.blendMode = "add";
-    this.camera.addChild(this.bg, this.fighters, this.fx.container, this.fxLayer, this.top);
+    this.camera.addChild(this.bg, this.fighters, this.fx.container, this.fxLayer, this.pix, this.top);
 
     this.flashRect.rect(0, 0, 16, 16).fill({ color: 0xffffff });
     this.flashRect.alpha = 0;
@@ -179,7 +180,7 @@ export class BattleStage {
     this.app.stage.addChild(this.fit, this.vignette, this.flashRect);
 
     this.cam = new Camera(this.camera, this.flashRect, () => this.opts.reducedMotion);
-    this.fxc = { tw: this.tw, fx: this.fx, layer: this.fxLayer, top: this.top, camera: this.cam, reduced: reducedMotion, font: this.opts.font };
+    this.fxc = { tw: this.tw, fx: this.fx, layer: this.fxLayer, top: this.top, pix: this.pix, camera: this.cam, reduced: reducedMotion, font: this.opts.font };
 
     // entrance: both creatures slide in on their platforms from opposite edges
     this.left.root.x = PLAYER.x - 900;
@@ -268,6 +269,7 @@ export class BattleStage {
     const last = i === n - 1;
     const p = target.hitPoint();
     target.hit(last ? (crit || finisher ? 1.6 : 1.1) : 0.5);
+    impactSpark(this.fxc, p, color, last && (crit || finisher) ? 6 : last ? 5 : 3);
     this.cam.shake(last ? (crit || finisher ? 22 : 12) : 5);
     this.cam.hitStop(last ? (crit || finisher ? 0.14 : 0.07) : 0.03);
     if (last) {
@@ -285,6 +287,7 @@ export class BattleStage {
       const last = i === n - 1;
       const p = target.hitPoint();
       target.hit(last ? 1.2 : 0.5);
+      impactSpark(this.fxc, p, attacker.color, last ? 5 : 3);
       this.cam.shake(last ? 14 : 5);
       this.cam.hitStop(last ? 0.08 : 0.02);
       if (last) {
