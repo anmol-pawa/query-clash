@@ -32,3 +32,12 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests: the roster test now requires all four bosses so far to exist at 96×96 (the generic sprite tests cover palette, frames, idle animation and faint).
 - Verified: lint, typecheck, 136 tests, build, build:pages pass. Judged contact sheets for every frame while authoring; Playwright on the static export `/dev/sprites` at 1280×900 and iPhone 14: all three render and animate, no console errors, no horizontal overflow.
 - Next: A2c (reaper, clockwork knight, forge giant).
+
+## 2026-10-12 (16:25 IST): A2c bosses 5–7 (reaper, clockwork knight, forge giant)
+- ROWREAPER (chapter 5, "The DML Reaper", 96×96, 18 colours): a hooded skull reaper in a tattered robe with a steel-bladed scythe; three harvested table rows orbit it (dim behind, glowing in front). idle 4f (float + hem sway + orbit), attack 3f (scythe wound back, then swept down to the left), hurt 2f, faint 4f.
+- TRANSACTOR (chapter 6, "Clockwork Knight of ACID", 96×96, 19 colours): an armoured knight with a brass gear turning behind a chest window, a wind-up key spinning on its back, a clock-face shield whose hands tick each frame, a red plume and a sword. attack 3f (sword raised overhead, then slashed down), hurt 2f, faint 4f.
+- SCHEMAFORGE (chapter 7, "Smith of Structures", 96×96, 18 colours): a cracked-stone forge giant with lava seams, a horned iron helm, a flickering beard of flame and a hot-faced smithing hammer; its leather apron glows with a schema (two tables linked by a key). attack 3f (hammer raised, then slammed in front with impact sparks), hurt 2f, faint 4f.
+- `scripts/art/paint.mjs`: `Layer.set()` now returns the layer so calls chain.
+- Tests: the roster test now requires all seven bosses so far at 96×96 (generic sprite tests cover palette, frames, idle animation and faint): 151 tests.
+- Verified: lint, typecheck, 151 tests, build, build:pages pass. Judged contact sheets for every frame while authoring (fixed clipped scythe/hammer frames); Playwright on the static export `/dev/sprites` at 1280×900 and iPhone 14: all nine sprites render and animate, no console errors, no horizontal overflow.
+- Next: A2d (wind spirit, hydra, eye core).

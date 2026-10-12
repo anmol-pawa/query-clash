@@ -5,9 +5,12 @@ import { NULLOTH } from "./creatures/nulloth";
 import { JOINMASTER } from "./creatures/joinmaster";
 import { AGGREGON } from "./creatures/aggregon";
 import { FROSTNEST } from "./creatures/frostnest";
+import { ROWREAPER } from "./creatures/rowreaper";
+import { TRANSACTOR } from "./creatures/transactor";
+import { SCHEMAFORGE } from "./creatures/schemaforge";
 
 /** Every pixel sprite in the game, shown in /dev/sprites and checked by tests. */
-export const SPRITES: readonly SpriteDef[] = [BYTEBAT, BYTEBAT_BACK, NULLOTH, JOINMASTER, AGGREGON, FROSTNEST];
+export const SPRITES: readonly SpriteDef[] = [BYTEBAT, BYTEBAT_BACK, NULLOTH, JOINMASTER, AGGREGON, FROSTNEST, ROWREAPER, TRANSACTOR, SCHEMAFORGE];
 
 export function spriteById(id: string): SpriteDef | undefined {
   return SPRITES.find((s) => s.id === id);

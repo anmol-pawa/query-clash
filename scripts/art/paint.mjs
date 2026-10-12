@@ -35,6 +35,7 @@ export class Layer {
     x = Math.round(x);
     y = Math.round(y);
     if (x >= 0 && y >= 0 && x < this.w && y < this.h) this.px[y][x] = c;
+    return this;
   }
   /** Pick a ramp entry (dark → light) for brightness v at (x, y), with a narrow dither band. */
   shade(ramp, v, x, y) {
