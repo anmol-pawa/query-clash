@@ -220,3 +220,21 @@ function writePng(file, w, h, rgb) {
   ihdr[9] = 2;
   writeFileSync(file, Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", ihdr), chunk("IDAT", deflateSync(raw)), chunk("IEND", Buffer.alloc(0))]));
 }
+
+/** Faint helper: shift a frame down by `dy` and knock out pixels in an ordered-dither pattern, `amount` 0 … 1. */
+export function dissolve(layer, amount, dy = 0) {
+  const out = new Layer(layer.w, layer.h).draw(layer, 0, dy);
+  for (let y = 0; y < out.h; y++) for (let x = 0; x < out.w; x++) if (BAYER[y & 3][x & 3] < amount) out.px[y][x] = T;
+  return out;
+}
+
+/** A ring outline (1 px, or `t` px thick) on an ellipse. */
+export function ring(layer, cx, cy, rx, ry, c, t = 1) {
+  for (let y = Math.floor(cy - ry - 1); y <= Math.ceil(cy + ry + 1); y++)
+    for (let x = Math.floor(cx - rx - 1); x <= Math.ceil(cx + rx + 1); x++) {
+      const d = Math.hypot((x + 0.5 - cx) / rx, (y + 0.5 - cy) / ry);
+      const r = Math.min(rx, ry);
+      if (d <= 1 && d >= 1 - t / r) layer.set(x, y, c);
+    }
+  return layer;
+}

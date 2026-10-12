@@ -23,3 +23,12 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests: every sprite must have attack/hurt/faint and its faint must end lower or sparser; roster test for the back sprite and 96×96 boss size.
 - Verified: lint, typecheck, 121 tests, build, build:pages pass. Playwright on the static export at 1280×900 and iPhone 14: all three sprites render and animate, no console errors, no horizontal overflow.
 - Next: A2b (Joinmaster chain golem, Aggregon block golem, ice wraith as 96×96 bosses).
+
+## 2026-10-12 (11:55 IST): A2b bosses 2–4 (Joinmaster, Aggregon, ice wraith)
+- JOINMASTER (chapter 2, 96×96, 18 colours): an iron chain golem on rusted stone legs, gold chain-link arms ending in shackled fists, a bandolier chain and a glowing foreign-key lock on its chest, visor helm with chain-gold horns. idle 4f (sway + key pulse), attack 3f (right fist swung overhead, then slammed), hurt 2f, faint 4f.
+- AGGREGON (chapter 3, 96×96, 14 colours): a golem of 2.5D stacked terracotta blocks with a Σ core; its blocks drift apart as it breathes and slam together on attack (fists raised, then compressed). hurt 2f, faint 4f.
+- FROSTNEST (chapter 4, the "Sub-Zero Query" boss; sprite id `frostnest` so we don't reuse an existing character name): an ice wraith with an icicle crown, a cloak trailing to a point, ice shoulder shards, icicle talons and a crystal nested in a crystal (a subquery) on its chest, with drifting snowflakes. idle 4f, attack 3f, hurt 2f, faint 4f.
+- `scripts/art/paint.mjs`: shared `dissolve()` (faint fade) and `ring()` helpers. Each boss has its own script in `scripts/art/`.
+- Tests: the roster test now requires all four bosses so far to exist at 96×96 (the generic sprite tests cover palette, frames, idle animation and faint).
+- Verified: lint, typecheck, 136 tests, build, build:pages pass. Judged contact sheets for every frame while authoring; Playwright on the static export `/dev/sprites` at 1280×900 and iPhone 14: all three render and animate, no console errors, no horizontal overflow.
+- Next: A2c (reaper, clockwork knight, forge giant).

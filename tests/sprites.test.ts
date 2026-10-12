@@ -38,8 +38,11 @@ describe("creature roster", () => {
   it("BYTEBAT has a back sprite and bosses are 96×96", () => {
     const ids = SPRITES.map((s) => s.id);
     expect(ids).toContain("bytebat-back");
-    const nulloth = SPRITES.find((s) => s.id === "nulloth")!;
-    expect([nulloth.w, nulloth.h]).toEqual([96, 96]);
+    for (const id of ["nulloth", "joinmaster", "aggregon", "frostnest"]) {
+      const boss = SPRITES.find((s) => s.id === id);
+      expect(boss, id).toBeDefined();
+      expect([boss!.w, boss!.h]).toEqual([96, 96]);
+    }
   });
 });
 

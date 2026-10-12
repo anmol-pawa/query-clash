@@ -7,10 +7,10 @@ The hourly routine works top to bottom: take the first unchecked box. Split big 
 - [x] A1. Pixel-sprite system: define sprites as palette + character-grid strings in code (e.g. 64×64), render them to Pixi textures with nearest-neighbour scaling, and support a 2–4 frame idle animation. Include a unit test that every sprite map is rectangular and uses only palette keys.
 - [ ] A2. Redraw the player as a creature trainer team. The player owns a starter creature (an original "data sprite" monster). Redraw the 10 bosses as original pixel monsters, keeping each one's theme (null ghost, chain golem, block golem, ice wraith, reaper, clockwork knight, forge giant, wind spirit, hydra, eye core).
   - [x] A2a. BYTEBAT back sprite plus hurt/faint animations; NULLOTH (null ghost) as the first 96×96 boss with idle/attack/hurt/faint.
-  - [ ] A2b. Bosses 2–4: chain golem (Joinmaster), block golem (Aggregon), ice wraith — 96×96, idle/attack/hurt/faint.
+  - [x] A2b. Bosses 2–4: chain golem (Joinmaster), block golem (Aggregon), ice wraith — 96×96, idle/attack/hurt/faint.
   - [ ] A2c. Bosses 5–7: reaper, clockwork knight, forge giant.
   - [ ] A2d. Bosses 8–10: wind spirit, hydra, eye core.
-  - [ ] A2e. Map each `BossId` to its sprite (and the starter to BYTEBAT) in a lookup with a test that every boss has one; add evolve frames for BYTEBAT.
+  - [ ] A2e. Map each `BossId` to its sprite (`subzero` → `frostnest`; the starter to BYTEBAT) in a lookup with a test that every boss has one; add evolve frames for BYTEBAT.
 - [ ] A3. GBA-style battle layout: foe front-sprite top-right on an elliptical platform, player back-sprite bottom-left, HP boxes with name / Lv / HP bar / XP bar, and a bottom text box that types out messages ("Wild NULLOTH appeared!", "BYTEBAT used JOIN CHAIN! It's super effective!"). Keep the existing spell effects, restyled to suit pixel art.
 - [ ] A4. Types and effectiveness: give SQL concept types (Filter, Join, Aggregate, Window, Recursive, Transaction, Schema, Index…) a type chart against boss types. Show "super effective" / "not very effective" and fold the multiplier into damage. Add tests for the chart.
 - [ ] A5. Collection: defeated bosses can be "captured" into a party/box screen (Querydex) with stats, and the starter evolves at chapter milestones (an evolution animation). Saved in localStorage.
