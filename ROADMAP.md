@@ -9,7 +9,7 @@ The hourly routine works top to bottom: take the first unchecked box. Split big 
   - [x] A2a. BYTEBAT back sprite plus hurt/faint animations; NULLOTH (null ghost) as the first 96×96 boss with idle/attack/hurt/faint.
   - [x] A2b. Bosses 2–4: chain golem (Joinmaster), block golem (Aggregon), ice wraith — 96×96, idle/attack/hurt/faint.
   - [x] A2c. Bosses 5–7: reaper, clockwork knight, forge giant.
-  - [ ] A2d. Bosses 8–10: wind spirit, hydra, eye core.
+  - [x] A2d. Bosses 8–10: wind spirit, hydra, eye core.
   - [ ] A2e. Map each `BossId` to its sprite (`subzero` → `frostnest`; the starter to BYTEBAT) in a lookup with a test that every boss has one; add evolve frames for BYTEBAT.
 - [ ] A3. GBA-style battle layout: foe front-sprite top-right on an elliptical platform, player back-sprite bottom-left, HP boxes with name / Lv / HP bar / XP bar, and a bottom text box that types out messages ("Wild NULLOTH appeared!", "BYTEBAT used JOIN CHAIN! It's super effective!"). Keep the existing spell effects, restyled to suit pixel art.
 - [ ] A4. Types and effectiveness: give SQL concept types (Filter, Join, Aggregate, Window, Recursive, Transaction, Schema, Index…) a type chart against boss types. Show "super effective" / "not very effective" and fold the multiplier into damage. Add tests for the chart.

@@ -41,3 +41,12 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests: the roster test now requires all seven bosses so far at 96×96 (generic sprite tests cover palette, frames, idle animation and faint): 151 tests.
 - Verified: lint, typecheck, 151 tests, build, build:pages pass. Judged contact sheets for every frame while authoring (fixed clipped scythe/hammer frames); Playwright on the static export `/dev/sprites` at 1280×900 and iPhone 14: all nine sprites render and animate, no console errors, no horizontal overflow.
 - Next: A2d (wind spirit, hydra, eye core).
+
+## 2026-10-12 (17:35 IST): A2d bosses 8–10 (wind spirit, hydra, eye core)
+- GALEFRAME (chapter 8, "The Windwraith, Dancer of Frames", 96×96, 16 colours): a wind spirit whose body is a spinning funnel with diagonal swirl bands and gust streaks, a pale dancer's mask with a forehead gem in a wind hood, long violet ribbon-arms with wind claws, and a sliding window of three glass panes orbiting it, the lit pane stepping each frame. idle 4f (spin + tip sway), attack 3f (ribbons flung up, then whipped), hurt 2f, faint 4f.
+- RECURSA (chapter 9, "The Recursion Hydra", 96×96, 18 colours): a coiled serpent hydra with three heads; each outer neck buds a smaller head, which buds a smaller one still (recursive members), and a gold base-case gem sits on its coils. Heads open jaws with fangs and tongue on attack (rear up, then strike down). hurt 2f, faint 4f.
+- OPTICORE (chapter 10, "The Optimizer, Eye of the Planner", 96×96, 18 colours): a veined eye in a riveted brass-and-armour ring with shutter lids; its query plan (a ⋈ root over two children and four scans) hangs beneath on glowing cables, and cost lenses orbit it (passing behind the ring). The pupil roves in idle; attack narrows it to a slit with charge sparkles; faint shuts the armoured lid.
+- Sprite ids `galeframe`, `recursa`, `opticore` (the BossId → sprite lookup comes in A2e).
+- Tests: roster test requires all ten bosses at 96×96; 166 tests.
+- Verified: lint, typecheck, 166 tests, build, build:pages pass. Judged contact sheets for every frame while authoring (respaced hydra heads so the buds stay on canvas, moved the plan tree up, put back-orbit lenses behind the ring). Playwright on the static export `/dev/sprites` at 1280×900 and iPhone 14: all twelve sprites render and animate, no console errors, no horizontal overflow.
+- Next: A2e (map each BossId to its sprite with a test, BYTEBAT evolve frames).
