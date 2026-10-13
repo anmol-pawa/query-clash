@@ -5,6 +5,7 @@
  */
 import { useSyncExternalStore } from "react";
 import type { Dialect } from "./dialect/lint";
+import { Dex, migrateDex } from "@/game/engine/querydex";
 
 export interface Settings {
   volume: number;
@@ -24,6 +25,7 @@ export interface SaveData {
   arenaBest: number;
   settings: Settings;
   seenIntro: boolean;
+  dex: Dex; // captured bosses (Querydex)
 }
 
 const KEY = "query-clash-save-v1";
@@ -39,6 +41,7 @@ const DEFAULT: SaveData = {
   arenaBest: 0,
   settings: { volume: 0.6, music: true, reducedMotion: false, zen: false },
   seenIntro: false,
+  dex: {},
 };
 
 let cache: SaveData | null = null;
@@ -48,7 +51,9 @@ function load(): SaveData {
   if (cache) return cache;
   try {
     const raw = localStorage.getItem(KEY);
-    cache = raw ? { ...DEFAULT, ...JSON.parse(raw), settings: { ...DEFAULT.settings, ...(JSON.parse(raw).settings ?? {}) } } : { ...DEFAULT };
+    const parsed = raw ? JSON.parse(raw) : {};
+    const merged: SaveData = { ...DEFAULT, ...parsed, settings: { ...DEFAULT.settings, ...(parsed.settings ?? {}) } };
+    cache = { ...merged, dex: migrateDex(parsed.dex, merged.stars) };
   } catch {
     cache = { ...DEFAULT };
   }

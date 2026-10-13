@@ -8,6 +8,7 @@ import { CHAPTERS } from "@/content/chapters";
 import { CODEX } from "@/content/codex";
 import { setMusic, setVolume, sfx } from "@/game/audio/synth";
 import { sqlClient } from "@/lib/db/client";
+import { caughtCount } from "@/game/engine/querydex";
 import { level, resetSave, unlockedChapters, updateSave, useSave } from "@/lib/save";
 
 const FLOATER_WORDS = ["SELECT", "JOIN", "GROUP BY", "OVER (PARTITION BY)", "WITH RECURSIVE", "CONNECT BY PRIOR", "MERGE INTO", "ROLLBACK", "EXPLAIN", "NVL()", "COALESCE()", "FETCH FIRST", "LATERAL", "PIVOT", "EXISTS", "ROW_NUMBER()", "SAVEPOINT", "CREATE INDEX"];
@@ -39,6 +40,7 @@ export default function Home() {
     { href: "/versus", title: "Versus (hot-seat)", sub: "Two mages, one keyboard", color: "#f472b6", glyph: "⚔" },
     { href: "/sandbox", title: "Sandbox", sub: "Free SQL playground", color: "#60a5fa", glyph: "⌨" },
     { href: "/codex", title: "Codex", sub: `${save.codex.length}/${CODEX.length} entries unlocked: definitions, both dialects, enterprise use, quizzes`, color: "#a78bfa", glyph: "📖", wide: true },
+    { href: "/querydex", title: "Querydex", sub: `${caughtCount(save.dex)}/10 bosses captured`, color: "#e0a030", glyph: "◫" },
     { href: "/bestiary", title: "Bestiary", sub: "Meet the bosses, preview every spell", color: "#4ade80", glyph: "☠" },
   ];
 

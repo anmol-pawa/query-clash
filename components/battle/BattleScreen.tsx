@@ -15,6 +15,8 @@ import type { Dialect } from "@/lib/dialect/lint";
 import { level, unlockedChapters, updateSave, useSave } from "@/lib/save";
 import { arenaFoeLevel, xpProgress } from "@/game/engine/hud";
 import { bossSprite, starterSprite } from "@/game/sprites/roster";
+import { capture, dayOf } from "@/game/engine/querydex";
+import { SpriteCanvas } from "@/components/sprites/SpriteCanvas";
 import { orbitronFamily } from "@/app/fonts";
 import { Bar, Button, Chip, CodeBlock, DIALECT_COLOR, DIALECT_NAME, DialectToggle, LinkButton, Modal, RichText } from "../ui/kit";
 import { Feedback, ResultPanel, ResultTab } from "./ResultPanel";
@@ -344,10 +346,10 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
     if (s.phase === "victory" && mode === "campaign" && !recorded.current) {
       recorded.current = true;
       const stars = starsFor(s.player.hp / s.player.maxHp, s.stats.hints);
-      updateSave((x) => ({ ...x, stars: { ...x.stars, [chapterNo]: Math.max(x.stars[chapterNo] ?? 0, stars) }, xp: x.xp + stars * 60 }));
+      updateSave((x) => ({ ...x, stars: { ...x.stars, [chapterNo]: Math.max(x.stars[chapterNo] ?? 0, stars) }, xp: x.xp + stars * 60, dex: capture(x.dex, chapter.boss, dayOf(new Date())) }));
     }
     if (s.phase === "defeat" && mode === "arena") updateSave((x) => ({ ...x, arenaBest: Math.max(x.arenaBest, wave - 1) }));
-  }, [s.phase, mode, chapterNo, s.player.hp, s.player.maxHp, s.stats.hints, wave]);
+  }, [s.phase, mode, chapterNo, chapter.boss, s.player.hp, s.player.maxHp, s.stats.hints, wave]);
 
   /* ------------------------------------------------------------ actions */
   async function preview() {
@@ -784,6 +786,7 @@ function EndCard({ mode, won, versusWinner, chapter, stats, hp, wave }: { mode: 
             ))}
           </div>
           <p className="mx-auto mt-3 max-w-sm text-sm text-white/65">{chapter.defeat}</p>
+          <CaptureNote boss={chapter.boss} />
         </>
       )}
       {mode === "arena" && <p className="mt-3 text-sm text-white/65">You cleared {wave - 1} wave{wave - 1 === 1 ? "" : "s"}.</p>}
@@ -812,6 +815,35 @@ function EndCard({ mode, won, versusWinner, chapter, stats, hp, wave }: { mode: 
         )}
         <LinkButton href={mode === "campaign" ? "/campaign" : "/"}>{mode === "campaign" ? "Campaign map" : "Main menu"}</LinkButton>
       </div>
+    </div>
+  );
+}
+
+/** "NULLOTH was captured!" on the first win, a win count after that. */
+function CaptureNote({ boss }: { boss: BossId }) {
+  const save = useSave();
+  const rec = save.dex[boss];
+  const def = bossSprite(boss);
+  if (!rec) return null;
+  return (
+    <div className="mx-auto mt-4 flex max-w-sm items-center gap-3 rounded-lg border border-amber-300/30 bg-amber-300/[0.06] p-2 text-left" data-testid="capture-note">
+      <span className="dex-screen flex h-14 w-14 shrink-0 items-end justify-center overflow-hidden">
+        <SpriteCanvas def={def} scale={1} className="h-14 w-14" />
+      </span>
+      <span className="text-sm text-white/75">
+        {rec.wins === 1 ? (
+          <>
+            <b className="text-amber-300">{def.name}</b> was captured! Registered in the Querydex.
+          </>
+        ) : (
+          <>
+            <b className="text-amber-300">{def.name}</b> is already in your Querydex ({rec.wins} wins).
+          </>
+        )}{" "}
+        <Link href="/querydex" className="underline decoration-dotted underline-offset-2 hover:text-white">
+          View
+        </Link>
+      </span>
     </div>
   );
 }

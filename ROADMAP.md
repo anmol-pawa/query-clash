@@ -25,6 +25,8 @@ The hourly routine works top to bottom: take the first unchecked box. Split big 
       - [x] A3d3b. Breath (Recursa), quake rocks (Schemaforge) and a pixel lightning bolt (storm spell).
 - [x] A4. Types and effectiveness: give SQL concept types (Filter, Join, Aggregate, Window, Recursive, Transaction, Schema, Index…) a type chart against boss types. Show "super effective" / "not very effective" and fold the multiplier into damage. Add tests for the chart.
 - [ ] A5. Collection: defeated bosses can be "captured" into a party/box screen (Querydex) with stats, and the starter evolves at chapter milestones (an evolution animation). Saved in localStorage.
+  - [x] A5a. Querydex: a campaign win captures the boss (saved with date and win count; old saves migrate from chapter stars), a `/querydex` party + box screen with animated sprites, silhouettes for unmet bosses, and a stats card (No., type, Lv, HP, wins, stars, weaknesses/resists), plus a capture note on the victory card.
+  - [ ] A5b. Starter evolution: BYTEBAT evolves at chapter milestones (e.g. after chapters 3 and 7) with a white-silhouette morph animation on the victory screen; the evolved form shows in battle, the HP box and the Querydex party.
 - [ ] A6. Pixel UI pass: pixel font (an OFL font via next/font, e.g. Press Start 2P / Pixelify Sans), menus restyled as handheld-console menus, and transitions (screen wipe on battle start). Must stay readable and touch-friendly on iPhone.
 
 ## B. DBMS Interview mode (`/interview`)

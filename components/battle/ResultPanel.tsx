@@ -67,7 +67,7 @@ export function ResultPanel({
               sfx.click();
               setTab(t.id);
             }}
-            className={`relative px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors ${tab === t.id ? "text-white" : "text-white/40 hover:text-white/70"}`}
+            className={`relative px-2 py-1.5 text-xs font-bold uppercase tracking-wider sm:px-3 sm:tracking-widest transition-colors ${tab === t.id ? "text-white" : "text-white/40 hover:text-white/70"}`}
           >
             {t.label}
             {t.dot && <span className="absolute right-0.5 top-1 h-1.5 w-1.5 rounded-full bg-rose-400" />}
