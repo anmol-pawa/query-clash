@@ -520,14 +520,48 @@ export async function bossAttack(c: FxContext, boss: Character & { style: BossAt
     }
     case "quake": {
       const ground = { x: from.x, y: to.y + 120 };
+      const stone = 0xa8a29e;
       c.camera.shake(10, 3);
-      await tw.run(0.45, (k) => {
-        const x = ground.x + (to.x - ground.x) * k;
-        fx.emit({ x, y: ground.y, vx: (Math.random() - 0.5) * 100, vy: -300 - Math.random() * 300, gravity: 900, life: 0.6, size: 12, color });
-        fx.emit({ x, y: ground.y, vx: (Math.random() - 0.5) * 100, vy: -200, gravity: 900, life: 0.5, size: 8, color: 0x78716c });
+      // a line of boulders bursts out of the ground toward the target
+      for (let i = 0; i < 6; i++) {
+        const k0 = (i + 0.5) / 6;
+        const start = { x: ground.x + (to.x - ground.x) * k0, y: ground.y };
+        const rock = fxSpriteOf(c, "rock", stone, start, i % 2 ? 4 : 5);
+        const vx = (Math.random() - 0.5) * 120;
+        const vy = -420 - Math.random() * 180;
+        let time = Math.random();
+        tw.run(0.6, (k) => {
+          const t = k * 0.6;
+          rock.position.set(Math.round(start.x + vx * t), Math.round(start.y + vy * t + 450 * t * t * 2));
+          time += 1 / 60;
+          loopFrame(rock, "rock", stone, time);
+          rock.alpha = k < 0.75 ? 1 : (1 - k) / 0.25;
+        }).then(() => rock.destroy());
+        fx.emit({ x: start.x, y: ground.y, vx: (Math.random() - 0.5) * 100, vy: -300 - Math.random() * 300, gravity: 900, life: 0.6, size: 12, color });
+        fx.burst(start.x, ground.y, { color: 0x78716c, count: 6, speed: 200, gravity: 900 });
+        c.camera.shake(6, 4);
+        await tw.wait(0.07);
+      }
+      // stone spires erupt on either side of the target
+      const spires = [-1, 1].map((side) => {
+        const sp = fxSpriteOf(c, "spike", stone, { x: to.x + side * 110, y: ground.y }, 5);
+        sp.anchor.set(0.5, 1);
+        if (side < 0) sp.scale.x *= -1; // mirrored, so both lean their lit face inward
+        return sp;
       });
+      await tw.run(0.2, (k) => spires.forEach((sp) => setFxFrame(sp, "spike", stone, k * 0.75)));
       onImpact(0, 1);
+      impactSpark(c, to, color, 5);
       ring(c, { x: to.x, y: ground.y }, { color, radius: 200, squash: 0.3, width: 16 });
+      await tw.wait(0.25);
+      spires.forEach((sp) => setFxFrame(sp, "spike", stone, 0.99));
+      await tw.run(0.25, (k) =>
+        spires.forEach((sp) => {
+          sp.alpha = 1 - k;
+          sp.position.y = Math.round(ground.y + k * 30);
+        }),
+      );
+      spires.forEach((sp) => sp.destroy());
       break;
     }
     case "wind": {
@@ -555,17 +589,32 @@ export async function bossAttack(c: FxContext, boss: Character & { style: BossAt
     }
     case "breath": {
       const mouths = isHydra(boss) ? boss.mouths() : [from];
+      let n = 0;
       await tw.run(0.7, () => {
         for (const m of mouths) {
-          for (let i = 0; i < 2 * c.fx.scale; i++) {
-            const dx = to.x - m.x;
-            const dy = to.y - m.y;
-            const d = Math.hypot(dx, dy);
-            fx.emit({ x: m.x, y: m.y, vx: (dx / d) * 900 + (Math.random() - 0.5) * 120, vy: (dy / d) * 900 + (Math.random() - 0.5) * 120, drag: 0.97, life: 0.5, size: 20, sizeEnd: 40, color: Math.random() < 0.5 ? color : 0xfde047, alpha: 0.8 });
+          const dx = to.x - m.x;
+          const dy = to.y - m.y;
+          const d = Math.hypot(dx, dy);
+          if (n++ % 2 === 0) {
+            // a pixel fireball that swells as it flies
+            const puff = fxSpriteOf(c, "flame", color, m, 3);
+            puff.rotation = Math.atan2(dy, dx);
+            const jitter = (Math.random() - 0.5) * 50;
+            let time = Math.random();
+            tw.run(0.32, (k) => {
+              puff.position.set(Math.round(m.x + dx * k - (dy / d) * jitter * k), Math.round(m.y + dy * k + (dx / d) * jitter * k));
+              puff.scale.set(Math.round(3 + k * 4));
+              time += 1 / 60;
+              loopFrame(puff, "flame", color, time);
+            }).then(() => puff.destroy());
           }
+          for (let i = 0; i < c.fx.scale; i++)
+            fx.emit({ x: m.x, y: m.y, vx: (dx / d) * 900 + (Math.random() - 0.5) * 120, vy: (dy / d) * 900 + (Math.random() - 0.5) * 120, drag: 0.97, life: 0.5, size: 14, sizeEnd: 28, color: Math.random() < 0.5 ? color : 0xfde047, alpha: 0.6 });
         }
       });
+      await tw.wait(0.25);
       onImpact(0, 1);
+      impactSpark(c, to, color, 5);
       break;
     }
     case "laser": {

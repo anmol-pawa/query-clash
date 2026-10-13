@@ -200,30 +200,29 @@ export async function ring(c: FxContext, at: Pt, o: { color: number; radius?: nu
   await playFx(c, "ring", at, { color: o.color, scale: Math.min(6, (R * 2) / 29), dur: o.dur ?? 0.4, squash: o.squash });
 }
 
+/** A pixel lightning bolt striking from `from` down to `to`, re-forking as it flickers out. */
 export function lightning(c: FxContext, from: Pt, to: Pt, color: number, width = 5) {
-  const g = new Graphics();
-  c.layer.addChild(g);
-  const draw = () => {
-    g.clear();
-    const segs = 10;
-    g.moveTo(from.x, from.y);
-    for (let i = 1; i <= segs; i++) {
-      const u = i / segs;
-      g.lineTo(from.x + (to.x - from.x) * u + (i < segs ? (Math.random() - 0.5) * 60 : 0), from.y + (to.y - from.y) * u);
-    }
-    g.stroke({ width: width * 2.5, color, alpha: 0.35 });
-    g.moveTo(from.x, from.y);
-    for (let i = 1; i <= segs; i++) {
-      const u = i / segs;
-      g.lineTo(from.x + (to.x - from.x) * u + (i < segs ? (Math.random() - 0.5) * 30 : 0), from.y + (to.y - from.y) * u);
-    }
-    g.stroke({ width, color: 0xffffff, alpha: 0.95 });
-  };
-  draw();
-  return c.tw.run(0.28, (k) => {
-    if (Math.random() < 0.5) draw();
-    g.alpha = 1 - k;
-  }).then(() => g.destroy());
+  const len = Math.hypot(to.x - from.x, to.y - from.y);
+  const s = fxSpriteOf(c, "bolt", color, to, 2);
+  s.anchor.set(0.5, 1); // the tip lands on the target
+  const sy = px(len / 64);
+  s.scale.set(Math.min(px(width * 0.9), sy + 1), sy); // whole-pixel steps; a heavier bolt is wider
+  s.rotation = Math.atan2(to.y - from.y, to.x - from.x) - Math.PI / 2;
+  const glow = glowSprite(color, width * 30, 0.45);
+  glow.position.set(to.x, to.y);
+  c.layer.addChild(glow);
+  let time = Math.random();
+  return c.tw
+    .run(0.3, (k) => {
+      time += 1 / 60;
+      loopFrame(s, "bolt", color, time);
+      s.alpha = k < 0.6 ? 1 : (1 - k) / 0.4;
+      glow.alpha = 0.45 * (1 - k);
+    })
+    .then(() => {
+      s.destroy();
+      glow.destroy();
+    });
 }
 
 /** A pixel sword-swipe crescent, rotated by `angle`. */

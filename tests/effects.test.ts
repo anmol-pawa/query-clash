@@ -33,7 +33,7 @@ describe("pixel move effects", () => {
   });
 
   it("shapes are outlined and shaded (outline, base or light and a white core)", () => {
-    for (const kind of ["orb", "spark", "slash", "ring", "link", "meteor", "brick", "lance", "dome", "minion", "gear", "gust", "shard"] as const)
+    for (const kind of ["orb", "spark", "slash", "ring", "link", "meteor", "brick", "lance", "dome", "minion", "gear", "gust", "shard", "flame", "rock", "spike", "bolt"] as const)
       fxFrames(kind).forEach((f, i) => {
         expect(count(f, "1"), `${kind}[${i}] outline`).toBeGreaterThan(0);
         expect(count(f, "4") + count(f, "5") + count(f, "6"), `${kind}[${i}] shading`).toBeGreaterThan(0);
@@ -180,6 +180,49 @@ describe("pixel effects for portals, join frame, surge and vortex", () => {
       expect(col(20)).toBeLessThan(col(8)); // narrows to the tip
       expect(f.slice(0, 5).join("")).toMatch(/5/);
       expect(f.slice(7).join("")).toMatch(/2/);
+    }
+  });
+
+  it("the breath flame is hottest at its head, with a tail trailing left", () => {
+    for (const f of fxFrames("flame")) {
+      const b = bounds(f)!;
+      expect(b.w).toBeGreaterThan(b.h); // a long flame, not a ball
+      const col = (x: number) => f.map((r) => r[x]).join("");
+      expect(col(16)).toContain("6"); // white-hot head
+      expect(col(6)).not.toContain("6"); // the tail cools
+      expect(col(6).replace(/[.1]/g, "").length).toBeGreaterThan(0);
+    }
+  });
+
+  it("the boulder tumbles: lit top-left, shadowed bottom-right, a new pose each frame", () => {
+    const frames = fxFrames("rock");
+    expect(new Set(frames.map((f) => f.join(""))).size).toBe(4);
+    for (const f of frames) {
+      const at = (x: number, y: number) => f[y][x];
+      expect(["4", "5", "6"]).toContain(at(5, 5));
+      expect(["2", "3"]).toContain(at(10, 10));
+    }
+  });
+
+  it("the stone spire rises from the ground, lit on its left face", () => {
+    const hs = fxFrames("spike").map((f) => bounds(f.map((r) => r.replace(/[^.]/g, (c, i) => (i >= 8 && i <= 16 ? c : "."))))!.h);
+    expect(hs[1]).toBeGreaterThan(hs[0]);
+    expect(hs[2]).toBeGreaterThan(hs[1]);
+    for (const f of fxFrames("spike")) {
+      const ground = f[31];
+      expect(ground.indexOf("5")).toBeLessThan(ground.indexOf("2")); // light left, shadow right
+    }
+  });
+
+  it("the lightning bolt spans top to bottom with a white core and re-forks each frame", () => {
+    const frames = fxFrames("bolt");
+    expect(new Set(frames.map((f) => f.join(""))).size).toBe(4);
+    for (const f of frames) {
+      expect(f[0]).toContain("6");
+      expect(f[63]).toContain("6");
+      const b = bounds(f)!;
+      expect(b.h).toBe(64);
+      expect(f.filter((r) => r.includes("6")).length).toBeGreaterThan(56); // an unbroken core
     }
   });
 });

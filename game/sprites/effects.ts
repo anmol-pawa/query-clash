@@ -12,8 +12,8 @@
 import type { Frame, SpriteDef } from "./pixel";
 import { TRANSPARENT } from "./pixel";
 
-export type FxKind = "orb" | "spark" | "slash" | "ring" | "beam" | "link" | "meteor" | "brick" | "lance" | "dome" | "minion" | "portal" | "grid" | "wave" | "vortex" | "gear" | "gust" | "shard";
-export const FX_KINDS: readonly FxKind[] = ["orb", "spark", "slash", "ring", "beam", "link", "meteor", "brick", "lance", "dome", "minion", "portal", "grid", "wave", "vortex", "gear", "gust", "shard"];
+export type FxKind = "orb" | "spark" | "slash" | "ring" | "beam" | "link" | "meteor" | "brick" | "lance" | "dome" | "minion" | "portal" | "grid" | "wave" | "vortex" | "gear" | "gust" | "shard" | "flame" | "rock" | "spike" | "bolt";
+export const FX_KINDS: readonly FxKind[] = ["orb", "spark", "slash", "ring", "beam", "link", "meteor", "brick", "lance", "dome", "minion", "portal", "grid", "wave", "vortex", "gear", "gust", "shard", "flame", "rock", "spike", "bolt"];
 
 type Grid = string[][];
 
@@ -588,6 +588,154 @@ function shardFrame(f: number): Frame {
   return rows(outline(g));
 }
 
+/**
+ * A breath flame flying right: a hot, round head with a white core and three
+ * licking tongues of fire trailing behind it, flickering in length.
+ */
+function flameFrame(f: number): Frame {
+  const g = blank(24, 20);
+  const hx = 16;
+  const hy = 9.5;
+  const r = 5.5;
+  const L = r + [12, 14, 11, 13][f]; // the tail flickers in length
+  for (let y = 0; y < 20; y++)
+    for (let x = 0; x < 24; x++) {
+      const back = hx - x; // distance behind the head's centre
+      let heat: number;
+      if (back <= 0) {
+        const d = Math.hypot(x - hx, y - hy);
+        if (d > r) continue;
+        heat = 1 - d / (r + 1);
+      } else {
+        if (back > L) continue;
+        const u = back / L;
+        const half = r * (1 - u) ** 0.85 * (1 + 0.28 * Math.sin(back * 1.2 + f * 1.6)) + 0.3; // licking edges
+        const yc = hy + Math.sin(back * 0.45 + f * 1.4) * u * 2.5; // the tail snakes
+        const k = Math.abs(y - yc) / half;
+        if (k > 1) continue;
+        // forked tongues: notches cut into the back half of the tail
+        if (u > 0.5 && k > 0.25 && Math.abs(y - yc) % 3.2 < 0.9 && back % 3 < 1.5) continue;
+        heat = (1 - k) * (1 - u * 0.85) + 0.05;
+      }
+      g[y][x] = heat > 0.62 ? "6" : heat > 0.45 ? "5" : heat > 0.28 ? "4" : heat > 0.14 ? "3" : "2";
+    }
+  // embers spitting off the tail
+  put(g, 1 + (f % 2), 4 + f, "5");
+  put(g, 3 - (f % 2), 15 - f, "4");
+  return rows(outline(g));
+}
+
+/** A tumbling boulder: an irregular, faceted rock lit from the top-left with a crack, turning a quarter each frame. */
+function rockFrame(f: number): Frame {
+  const g = blank(16, 16);
+  const c = 7.5;
+  const radii = [6.6, 5.4, 6.9, 6.1, 5.2, 6.8, 5.8, 6.4]; // a lumpy, uneven outline
+  const turn = f * (Math.PI / 2);
+  const n = radii.length;
+  for (let y = 0; y < 16; y++)
+    for (let x = 0; x < 16; x++) {
+      const dx = x - c;
+      const dy = y - c;
+      const d = Math.hypot(dx, dy);
+      let a = Math.atan2(dy, dx) - turn;
+      a = ((a % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      const i = Math.floor((a / (Math.PI * 2)) * n);
+      const u = (a / (Math.PI * 2)) * n - i;
+      const R = radii[i] + (radii[(i + 1) % n] - radii[i]) * u;
+      if (d > R) continue;
+      // each facet faces outward at its own angle (in screen space): shade it against the top-left light
+      const fa = ((i + 0.5) / n) * Math.PI * 2 + turn;
+      const lit = -(Math.cos(fa) + Math.sin(fa)) / Math.SQRT2;
+      let col = d < R * 0.45 ? (lit > -0.2 ? "4" : "3") : lit > 0.5 ? "5" : lit > 0.05 ? "4" : lit > -0.5 ? "3" : "2";
+      if (d < 2.2 && lit > 0) col = "5";
+      g[y][x] = col;
+    }
+  // a crack that turns with the rock
+  for (let t = 0; t < 4; t++) {
+    const a = turn + 0.6;
+    put(g, c + Math.cos(a) * (t + 0.5) + (t % 2 ? 0.6 : 0), c + Math.sin(a) * (t + 0.5), "2");
+  }
+  put(g, c - 3, c - 3, "6"); // a glint on the lit shoulder
+  return rows(outline(g));
+}
+
+/** A stone spire erupting from the ground: it rises over three frames (shedding rubble), then crumbles at the tip. */
+function spikeFrame(f: number): Frame {
+  const g = blank(24, 32);
+  const base = 31;
+  const cx = 11.5;
+  const h = [9, 20, 28, 27][f];
+  const half = 9;
+  for (let y = base - h; y <= base; y++) {
+    const u = (base - y) / h; // 0 at the ground … 1 at the tip
+    const w = half * (1 - u) ** 1.15 + 0.5 + (y % 6 === 0 ? 0.6 : 0); // a little ledge every few rows
+    for (let x = 0; x < 24; x++) {
+      const dx = x - cx;
+      if (Math.abs(dx) > w) continue;
+      const k = dx / Math.max(0.5, w); // -1 lit left face … 1 shadowed right face
+      let col = k < -0.6 ? "5" : k < -0.05 ? "4" : k < 0.45 ? "3" : "2";
+      if ((base - y) % 7 === 3 && k > -0.6) col = "2"; // strata lines
+      g[y][x] = col;
+    }
+  }
+  if (f === 3) {
+    put(g, cx, base - 27, TRANSPARENT); // the tip chips off
+    put(g, cx + 3, base - 29, "4");
+  }
+  // rubble thrown up by the eruption
+  const rubble = [
+    [[4, 27], [19, 26]],
+    [[3, 18], [20, 20], [6, 24]],
+    [[2, 12], [21, 14], [5, 19]],
+    [[1, 20], [22, 22]],
+  ][f];
+  for (const [x, y] of rubble) {
+    put(g, x, y, "3");
+    put(g, x + 1, y, "2");
+    put(g, x, y - 1, "4");
+  }
+  return rows(outline(g));
+}
+
+/** A lightning bolt striking down: a jagged channel with a white core and a side fork, re-forked every frame. */
+function boltFrame(f: number): Frame {
+  const g = blank(24, 64);
+  const rnd = (i: number) => {
+    const s = Math.sin((i + 1) * 12.9898 + f * 78.233) * 43758.5453;
+    return s - Math.floor(s);
+  };
+  const pts: [number, number][] = [[11.5, 0]];
+  const segs = 8;
+  for (let i = 1; i < segs; i++) pts.push([11.5 + (i % 2 ? 1 : -1) * (2.5 + rnd(i) * 4), (i / segs) * 63]);
+  pts.push([11.5, 63]);
+  const stamp = (x: number, y: number, r: number, col: string) => {
+    for (let yy = Math.floor(y - r); yy <= Math.ceil(y + r); yy++)
+      for (let xx = Math.floor(x - r); xx <= Math.ceil(x + r); xx++) {
+        if (Math.hypot(xx - x, yy - y) > r) continue;
+        const cur = g[yy]?.[xx];
+        if (cur === undefined || (cur !== TRANSPARENT && cur > col)) continue; // keep the brighter shade
+        g[yy][xx] = col;
+      }
+  };
+  const stroke = (path: [number, number][], radii: [number, string][]) => {
+    for (const [r, col] of radii)
+      for (let i = 1; i < path.length; i++) {
+        const [x0, y0] = path[i - 1];
+        const [x1, y1] = path[i];
+        const n = Math.ceil(Math.hypot(x1 - x0, y1 - y0) * 2);
+        for (let t = 0; t <= n; t++) stamp(x0 + ((x1 - x0) * t) / n, y0 + ((y1 - y0) * t) / n, r, col);
+      }
+  };
+  // a fork leaving the channel partway down
+  const at = 2 + (f % 3);
+  const [fx0, fy0] = pts[at];
+  const side = fx0 > 11.5 ? 1 : -1;
+  const fork: [number, number][] = [[fx0, fy0], [fx0 + side * 4, fy0 + 6], [fx0 + side * 3, fy0 + 11], [fx0 + side * 7, fy0 + 17]];
+  stroke(fork, [[1.3, "4"], [0.5, "5"]]);
+  stroke(pts, [[2.4, "3"], [1.7, "4"], [1.1, "5"], [0.5, "6"]]);
+  return rows(outline(g));
+}
+
 const SHAPES: Record<FxKind, { w: number; h: number; frame: (f: number) => Frame; fps: number }> = {
   orb: { w: 16, h: 16, frame: orbFrame, fps: 12 },
   spark: { w: 32, h: 32, frame: sparkFrame, fps: 16 },
@@ -607,6 +755,10 @@ const SHAPES: Record<FxKind, { w: number; h: number; frame: (f: number) => Frame
   gear: { w: 32, h: 32, frame: gearFrame, fps: 14 },
   gust: { w: 32, h: 32, frame: gustFrame, fps: 14 },
   shard: { w: 24, h: 12, frame: shardFrame, fps: 12 },
+  flame: { w: 24, h: 20, frame: flameFrame, fps: 14 },
+  rock: { w: 16, h: 16, frame: rockFrame, fps: 12 },
+  spike: { w: 24, h: 32, frame: spikeFrame, fps: 14 },
+  bolt: { w: 24, h: 64, frame: boltFrame, fps: 20 },
 };
 
 const frameCache = new Map<FxKind, Frame[]>();
