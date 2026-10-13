@@ -4,6 +4,8 @@
  * reveal itself.
  */
 
+import { Effect, effectLine } from "./types";
+
 export type TextMode = "campaign" | "arena" | "versus";
 
 /** Characters revealed per second by the typewriter. */
@@ -38,12 +40,15 @@ export interface CastInfo {
   crit?: boolean;
   combo?: number;
   finisher?: boolean;
+  effect?: Effect;
 }
 
 /** Lines for a correct cast: the move, its bonuses, then the damage dealt. */
 export function castLines(c: CastInfo): string[] {
   const lines = [`${c.user} used ${c.attack.toUpperCase()}!`];
   if (c.crit) lines.push("A critical hit!");
+  const eff = c.effect && effectLine(c.effect);
+  if (eff) lines.push(eff);
   if (c.combo && c.combo > 0) lines.push(`${c.combo + 1}× combo!`);
   if (c.finisher) lines.push("A finishing blow!");
   lines.push(`${c.target} took ${c.damage} damage!`);

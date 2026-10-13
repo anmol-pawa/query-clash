@@ -26,7 +26,8 @@ import { isTouch } from "@/lib/touch";
 import { StageHandle, StageView } from "./StageView";
 import { BattleTextBox, type BattleMessage } from "./BattleTextBox";
 import { castLines, faintLine, introLines, missLines, roundLine, timeoutLines } from "@/game/engine/battleText";
-import { HpBox } from "./HpBox";
+import { HpBox, TypeTag } from "./HpBox";
+import { BOSS_TYPE, TYPE_CHART, TYPE_INFO, effectLine } from "@/game/engine/types";
 
 export type Mode = "campaign" | "arena" | "versus";
 
@@ -86,6 +87,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
   const bossId: BossId | undefined = mode === "campaign" ? chapter.boss : mode === "arena" ? BOSS_ORDER[(wave - 1) % BOSS_ORDER.length] : undefined;
   const bossChapter = CHAPTERS.find((c) => c.boss === bossId);
   const accent = mode === "versus" ? "#f472b6" : (bossChapter?.color ?? chapter.color);
+  const foeType = bossId ? BOSS_TYPE[bossId] : undefined;
   const foeName = mode === "versus" ? "P2 BYTEBAT" : bossId ? bossSprite(bossId).name : "";
   const playerName = mode === "versus" ? "P1 BYTEBAT" : starterSprite("front").name;
   const foeLevel = mode === "versus" ? level(save.xp) : arenaFoeLevel(bossChapter?.n ?? chapter.n, mode === "arena" ? wave : 1);
@@ -240,7 +242,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
 
     if (verdict.correct) {
       const concepts = detectConcepts(sql);
-      let dmg = computeDamage({ concepts, secondsLeft: s.timeLeft, totalSeconds: s.timeTotal, cost: verdict.cost, hintsUsed: s.hintsThisRound, attempts: s.attempts + 1 });
+      let dmg = computeDamage({ concepts, secondsLeft: s.timeLeft, totalSeconds: s.timeTotal, cost: verdict.cost, hintsUsed: s.hintsThisRound, attempts: s.attempts + 1, foeType: side === "left" ? foeType : undefined });
       if (mode === "versus") dmg = { ...dmg, damage: Math.round(dmg.damage * 0.45) };
       if (verdict.plan) setPlan({ text: verdict.plan, label: dmg.planLabel });
       const remaining = s.missionIds.length - s.missionIndex - 1;
@@ -252,10 +254,10 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
       if (finisher) shown = Math.max(shown, s.foe.hp);
       const ko = finisher || (!clamp && targetHp - shown <= 0);
 
-      const chips = [dmg.combo > 0 ? `${dmg.combo + 1}× COMBO` : "", dmg.planLabel, dmg.crit ? "CRITICAL" : "", finisher ? "FINISHER" : ""].filter(Boolean);
+      const chips = [dmg.effect.effect === "super" ? "SUPER EFFECTIVE" : dmg.effect.effect === "resisted" ? "NOT VERY EFFECTIVE" : "", dmg.combo > 0 ? `${dmg.combo + 1}× COMBO` : "", dmg.planLabel, dmg.crit ? "CRITICAL" : "", finisher ? "FINISHER" : ""].filter(Boolean);
       setBanner({ title: dmg.attack.name.toUpperCase(), sub: `-${shown}`, color: "#" + dmg.attack.color.toString(16).padStart(6, "0"), chips });
       const [user, target] = side === "left" ? [playerName, foeName] : [foeName, playerName];
-      say(castLines({ user, target, attack: dmg.attack.name, damage: shown, crit: dmg.crit, combo: dmg.combo, finisher }));
+      say(castLines({ user, target, attack: dmg.attack.name, damage: shown, crit: dmg.crit, combo: dmg.combo, finisher, effect: dmg.effect.effect }));
       sfx.cast(dmg.attack.kind);
       await st()?.attack(side, dmg.attack.kind, dmg.attack.color, shown, dmg.crit, finisher || ko, () => {
         sfx.hit(dmg.crit || finisher);
@@ -427,7 +429,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
 
       {/* stage */}
       <div ref={stageBox} className="relative mx-3 h-[38vh] min-h-[230px] scroll-mt-2 overflow-hidden rounded-2xl border border-white/10 lg:h-auto lg:min-h-[260px] lg:flex-[0_0_40vh]">
-        <HpBox side="foe" name={foeName} level={foeLevel} hp={s.foe.hp} maxHp={s.foe.maxHp} active={mode === "versus" && activeSide === "right"} className="absolute left-2 top-2 z-10 sm:left-3 sm:top-3" />
+        <HpBox side="foe" type={foeType} name={foeName} level={foeLevel} hp={s.foe.hp} maxHp={s.foe.maxHp} active={mode === "versus" && activeSide === "right"} className="absolute left-2 top-2 z-10 sm:left-3 sm:top-3" />
         <HpBox side="player" name={playerName} level={playerLevel} hp={s.player.hp} maxHp={s.player.maxHp} xp={mode === "versus" ? undefined : xpProgress(save.xp)} active={mode === "versus" && activeSide === "left"} className="absolute bottom-2 right-2 z-10 sm:bottom-3 sm:right-3" />
         <StageView key={`${bossId ?? "versus"}-${wave}`} ref={stage} boss={bossId} versus={mode === "versus"} accent={accent} reducedMotion={save.settings.reducedMotion} font={orbitronFamily} onReady={() => setStageReady(true)} />
         <AnimatePresence>
@@ -655,6 +657,7 @@ function IntroCard({ mode, chapter, wave, ready, status, onFight, p2Dialect, set
           </h2>
           <div className="text-xs uppercase tracking-[0.3em] text-white/40">{chapter.bossTitle}</div>
           <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/70">{mode === "arena" ? "Missions come from every chapter you have unlocked. Survive as many waves as you can. You heal between waves." : chapter.intro}</p>
+          <TypeMatchups boss={chapter.boss} />
           {mode === "campaign" && (
             <div className="mt-4 flex flex-wrap justify-center gap-1.5">
               {chapter.topics.map((t) => (
@@ -672,6 +675,29 @@ function IntroCard({ mode, chapter, wave, ready, status, onFight, p2Dialect, set
         </Button>
       </div>
       <p className="mt-3 text-[11px] text-white/35">Tip: tap (or drag) spell cards and schema names into the editor. On a keyboard, Ctrl/⌘+Enter casts.</p>
+    </div>
+  );
+}
+
+/** The boss's type with what it is weak to and what it resists. */
+function TypeMatchups({ boss }: { boss: BossId }) {
+  const t = BOSS_TYPE[boss];
+  const row = TYPE_CHART[t];
+  return (
+    <div className="mx-auto mt-4 flex max-w-md flex-col items-center gap-1.5 text-[11px] text-white/55" data-testid="type-matchups">
+      <div className="flex items-center gap-1.5">
+        Type <TypeTag type={t} />
+      </div>
+      <div className="flex flex-wrap items-center justify-center gap-1.5">
+        <span className="text-emerald-300">Weak to</span>
+        {row.weak.map((m) => (
+          <TypeTag key={m.type} type={m.type} />
+        ))}
+        <span className="ml-2 text-rose-300">Resists</span>
+        {row.resist.map((m) => (
+          <TypeTag key={m.type} type={m.type} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -695,7 +721,16 @@ function DebriefCard({ d, mode, onContinue }: { d: Debrief; mode: Mode; onContin
         <Chip>plan ×{mult.plan.toFixed(2)}</Chip>
         {mult.hints < 1 && <Chip color="#fbbf24">hints ×{mult.hints.toFixed(2)}</Chip>}
         {d.dmg.crit && <Chip color="#fde047">crit ×1.5</Chip>}
+        {mult.type !== 1 && <Chip color={mult.type > 1 ? "#4ade80" : "#f87171"}>{TYPE_INFO[d.dmg.type].name} type ×{mult.type.toFixed(1)}</Chip>}
       </div>
+      {d.dmg.effect.why && (
+        <p className="mt-2 text-sm text-white/70" data-testid="effect-why">
+          <span className="font-semibold" style={{ color: mult.type > 1 ? "#4ade80" : "#f87171" }}>
+            {effectLine(d.dmg.effect.effect)}{" "}
+          </span>
+          {d.dmg.effect.why}
+        </p>
+      )}
 
       <h3 className="mt-5 text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">Canonical answers — learn both dialects</h3>
       <div className="mt-2 grid gap-3 md:grid-cols-2">

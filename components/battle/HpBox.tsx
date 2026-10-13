@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "motion/react";
 import { hpTone } from "@/game/engine/hud";
+import { SqlType, TYPE_INFO } from "@/game/engine/types";
 
 const TONE = { high: "#3ccf6e", mid: "#f2c22e", low: "#ee4b3a" } as const;
 const TONE_SHADE = { high: "#2a9a50", mid: "#c08f12", low: "#b02f24" } as const;
@@ -11,7 +12,7 @@ const TONE_SHADE = { high: "#2a9a50", mid: "#c08f12", low: "#b02f24" } as const;
  * for the player the HP numbers and an XP bar. The foe's box sits top-left of
  * the stage and the player's bottom-right.
  */
-export function HpBox({ side, name, level, hp, maxHp, xp, active = false, className = "" }: { side: "foe" | "player"; name: string; level: number; hp: number; maxHp: number; xp?: number; active?: boolean; className?: string }) {
+export function HpBox({ side, type, name, level, hp, maxHp, xp, active = false, className = "" }: { side: "foe" | "player"; type?: SqlType; name: string; level: number; hp: number; maxHp: number; xp?: number; active?: boolean; className?: string }) {
   const pct = Math.max(0, Math.min(1, maxHp > 0 ? hp / maxHp : 0));
   const tone = hpTone(hp, maxHp);
   const isPlayer = side === "player";
@@ -34,6 +35,7 @@ export function HpBox({ side, name, level, hp, maxHp, xp, active = false, classN
           <span className="min-w-0 flex-1 truncate text-[11px] font-black uppercase leading-tight tracking-wide sm:text-[13px]" data-testid={`${side}-name`}>
             {name}
           </span>
+          {type && <TypeTag type={type} className="self-center" />}
           <span className="shrink-0 text-[10px] font-black leading-tight sm:text-[12px]" data-testid={`${side}-level`}>
             <span className="text-[8px] sm:text-[9px]">Lv</span>
             {level}
@@ -72,5 +74,19 @@ export function HpBox({ side, name, level, hp, maxHp, xp, active = false, classN
         )}
       </div>
     </div>
+  );
+}
+
+/** A small pixel type badge (e.g. JOIN) in the type's colour. */
+export function TypeTag({ type, className = "" }: { type: SqlType; className?: string }) {
+  const t = TYPE_INFO[type];
+  return (
+    <span
+      data-type={type}
+      className={`inline-block shrink-0 rounded-[2px] px-[3px] font-mono text-[7px] font-black uppercase leading-[10px] tracking-wide text-white sm:text-[8px] ${className}`}
+      style={{ background: t.color, boxShadow: "inset 0 -1px 0 rgba(0,0,0,0.35), 0 0 0 1px #2a2c3a" }}
+    >
+      {t.name}
+    </span>
   );
 }

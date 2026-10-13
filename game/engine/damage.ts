@@ -4,9 +4,11 @@
  *   speed  — time left on the clock
  *   plan   — planner cost vs the reference answer (EXPLAIN)
  *   focus  — hints spent this round
+ *   type   — the attack's type against the foe's (see ./types)
  * First-try, hint-free, fast answers crit.
  */
 import { AttackInfo, Concept, attackFor, comboCount } from "@/lib/dialect/concepts";
+import { ATTACK_TYPE, Effectiveness, SqlType, effectiveness } from "./types";
 
 export interface DamageInput {
   concepts: Concept[];
@@ -16,6 +18,8 @@ export interface DamageInput {
   hintsUsed: number;
   attempts: number;
   base?: number;
+  /** The foe's type; omitted for untyped foes (versus). */
+  foeType?: SqlType;
 }
 
 export interface DamageResult {
@@ -23,7 +27,9 @@ export interface DamageResult {
   crit: boolean;
   attack: AttackInfo;
   combo: number;
-  mult: { combo: number; speed: number; plan: number; hints: number; crit: number };
+  type: SqlType;
+  effect: Effectiveness;
+  mult: { combo: number; speed: number; plan: number; hints: number; crit: number; type: number };
   planLabel: string;
 }
 
@@ -45,13 +51,18 @@ export function computeDamage(i: DamageInput): DamageResult {
   const hintsM = Math.max(0.55, 1 - 0.15 * i.hintsUsed);
   const crit = i.attempts === 1 && i.hintsUsed === 0 && speedM >= 1.3;
   const critM = crit ? 1.5 : 1;
-  const damage = Math.round(base * comboM * speedM * plan.mult * hintsM * critM);
+  const attack = attackFor(i.concepts);
+  const type = ATTACK_TYPE[attack.kind];
+  const effect = effectiveness(type, i.foeType);
+  const damage = Math.round(base * comboM * speedM * plan.mult * hintsM * critM * effect.mult);
   return {
     damage,
     crit,
-    attack: attackFor(i.concepts),
+    attack,
+    type,
+    effect,
     combo,
-    mult: { combo: comboM, speed: speedM, plan: plan.mult, hints: hintsM, crit: critM },
+    mult: { combo: comboM, speed: speedM, plan: plan.mult, hints: hintsM, crit: critM, type: effect.mult },
     planLabel: plan.label,
   };
 }
