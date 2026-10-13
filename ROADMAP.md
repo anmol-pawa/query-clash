@@ -17,7 +17,9 @@ The hourly routine works top to bottom: take the first unchecked box. Split big 
   - [x] A3c. Bottom text box that types out battle messages ("Wild NULLOTH appeared!", "BYTEBAT used JOIN CHAIN!"; "It's super effective!" arrives with A4).
   - [ ] A3d. Restyle the spell and counter effects for pixel art: sprite-based projectiles, impact sparks, beams and slashes with frame animation (particles only as extras).
     - [x] A3d1. Pixel FX sprite library (orb, impact spark, slash, shock ring, tileable beam; 4 frames each, colour ramp from the spell colour) and the shared helpers (projectile, beam, slash, ring, impact spark on every hit) drawn with it; shown in /dev/sprites.
-    - [ ] A3d2. Bespoke pixel art for the spells that still draw vector shapes (chain links, meteor, portals, summon minions, join frame, shield dome, bricks, surge wave, storm bolts, vortex, lance).
+    - [ ] A3d2. Bespoke pixel art for the spells that still draw vector shapes.
+      - [x] A3d2a. Chain links, meteor, summon minions, shield dome, bricks and lance.
+      - [ ] A3d2b. Portals (mirror), join frame (blade), surge wave and vortex (storm bolts go with the pixel lightning in A3d3).
     - [ ] A3d3. Bespoke pixel art for the boss counters (gear, wind blades, breath, quake rocks, ice shards) and a pixel lightning bolt.
 - [ ] A4. Types and effectiveness: give SQL concept types (Filter, Join, Aggregate, Window, Recursive, Transaction, Schema, Index…) a type chart against boss types. Show "super effective" / "not very effective" and fold the multiplier into damage. Add tests for the chart.
 - [ ] A5. Collection: defeated bosses can be "captured" into a party/box screen (Querydex) with stats, and the starter evolves at chapter milestones (an evolution animation). Saved in localStorage.

@@ -12,8 +12,8 @@
 import type { Frame, SpriteDef } from "./pixel";
 import { TRANSPARENT } from "./pixel";
 
-export type FxKind = "orb" | "spark" | "slash" | "ring" | "beam";
-export const FX_KINDS: readonly FxKind[] = ["orb", "spark", "slash", "ring", "beam"];
+export type FxKind = "orb" | "spark" | "slash" | "ring" | "beam" | "link" | "meteor" | "brick" | "lance" | "dome" | "minion";
+export const FX_KINDS: readonly FxKind[] = ["orb", "spark", "slash", "ring", "beam", "link", "meteor", "brick", "lance", "dome", "minion"];
 
 type Grid = string[][];
 
@@ -166,12 +166,180 @@ function beamFrame(f: number): Frame {
   return rows(g);
 }
 
+/** A chain link (oval ring, lit on top) with a glint that runs round it. */
+function linkFrame(f: number): Frame {
+  const g = blank(16, 12);
+  const cx = 7.5;
+  const cy = 5.5;
+  for (let y = 0; y < 12; y++)
+    for (let x = 0; x < 16; x++) {
+      const dx = x - cx;
+      const dy = y - cy;
+      const out = Math.hypot(dx / 6.6, dy / 4.6);
+      const inn = Math.hypot(dx / 3.6, dy / 1.7);
+      if (out > 1 || inn < 1) continue;
+      g[y][x] = dy < -1.5 ? (out > 0.8 ? "4" : "5") : dy > 1.5 ? "2" : "3";
+    }
+  const a = -Math.PI * 0.8 + f * (Math.PI / 2);
+  const gx = cx + Math.cos(a) * 5.2;
+  const gy = cy + Math.sin(a) * 3.4;
+  put(g, gx, gy, "6");
+  put(g, gx + 1, gy, "5");
+  return rows(outline(g));
+}
+
+/** A data meteor: a cracked, glowing rock with a flickering flame tail behind it (up-left). */
+function meteorFrame(f: number): Frame {
+  const g = blank(32, 32);
+  const hx = 21;
+  const hy = 21;
+  const r = 6.5;
+  const L = 19;
+  for (let y = 0; y < 32; y++)
+    for (let x = 0; x < 32; x++) {
+      const dx = x - hx;
+      const dy = y - hy;
+      const t = -(dx + dy) / Math.SQRT2; // distance back along the tail
+      const s = (dx - dy) / Math.SQRT2; // across the tail
+      if (t < 0 || t > L) continue;
+      const w = (t < r ? r + 0.5 : (r + 0.5) * (1 - (t - r) / (L - r)) ** 1.4) * (1 + 0.25 * Math.sin(t * 1.1 + f * 1.7)) + (Math.abs(s) % 3 < 1 ? 0.4 : 0); // tongues of flame
+      const k = Math.abs(s) / Math.max(0.5, w);
+      if (k > 1) continue;
+      g[y][x] = k < 0.35 ? (t < L * 0.45 ? "6" : "5") : k < 0.7 ? (t < L * 0.6 ? "5" : "4") : t < L * 0.5 ? "4" : "3";
+    }
+  for (let y = 0; y < 32; y++)
+    for (let x = 0; x < 32; x++) {
+      const dx = x - hx;
+      const dy = y - hy;
+      const d = Math.hypot(dx, dy);
+      if (d > r) continue;
+      const lit = -(dx + dy) / (r * Math.SQRT2); // lit by its own flame
+      let c = lit > 0.45 ? "4" : lit < -0.35 ? "1" : lit < 0.05 ? "2" : "3";
+      if ((x * 7 + y * 3) % 11 === 0 && d < r - 1.5) c = lit > 0 ? "6" : "5"; // glowing cracks
+      g[y][x] = c;
+    }
+  for (let e = 0; e < 3; e++) {
+    const t = ((f * 5 + e * 7) % 12) + L - 4; // embers peeling off the tail
+    const s = (e - 1) * 4 + (f % 2 ? 1 : -1);
+    put(g, hx - (t + s) / Math.SQRT2, hy - (t - s) / Math.SQRT2, e === 1 ? "6" : "5");
+  }
+  return rows(outline(g));
+}
+
+/** A data block: a bevelled table brick with a header row and cell lines, a glint sweeping across. */
+function brickFrame(f: number): Frame {
+  const g = blank(24, 14);
+  const glint = [-6, 5, 16, 40][f];
+  for (let y = 1; y <= 12; y++)
+    for (let x = 1; x <= 22; x++) {
+      let c = "3";
+      if (y <= 3) c = "4"; // header row
+      if (y === 6 || y === 9 || x === 8 || x === 15) c = "2"; // cell lines
+      if (y === 1) c = "5";
+      if (x === 1 && y > 1) c = "4";
+      if (y >= 11 || x === 22) c = "2";
+      const d = x - (y - 1) - glint;
+      if (c !== "2" && d >= 0 && d < 3) c = d === 1 ? "6" : "5";
+      g[y][x] = c;
+    }
+  return rows(outline(g));
+}
+
+/** A spear of light pointing right: a pale shaft, crossguard and a faceted head with a moving glint. */
+function lanceFrame(f: number): Frame {
+  const g = blank(48, 16);
+  for (let x = 4; x <= 31; x++) {
+    g[7][x] = "6";
+    g[8][x] = x < 10 ? "4" : "5";
+  }
+  for (let y = 3; y <= 12; y++) {
+    g[y][29] = "3";
+    g[y][30] = y < 7 ? "4" : "2";
+  }
+  for (let x = 31; x <= 45; x++) {
+    const h = ((45 - x) / 14) * 5.5;
+    for (let y = 0; y < 16; y++) {
+      const dy = y - 7.5;
+      if (Math.abs(dy) > h + 0.5) continue;
+      g[y][x] = Math.abs(dy) < 1 ? "5" : dy < 0 ? "4" : "2";
+    }
+  }
+  const gx = 32 + f * 3;
+  put(g, gx, 7, "6");
+  put(g, gx + 1, 6, "6");
+  put(g, gx + 1, 8, "5");
+  for (let m = 0; m < 3; m++) put(g, ((f * 3 + m * 5) % 9) + 0, 6 + m * 2 - (f % 2), m === 1 ? "6" : "5"); // trailing motes
+  return rows(outline(g));
+}
+
+/** A hexagonal force field: a bright rim and honeycomb struts, a shimmer band sweeping down it. */
+function domeFrame(f: number): Frame {
+  const g = blank(48, 48);
+  const c = 23.5;
+  const R = 21.5;
+  const H = (Math.sqrt(3) / 2) * R;
+  const band = [-18, -6, 6, 18][f];
+  for (let y = 0; y < 48; y++)
+    for (let x = 0; x < 48; x++) {
+      const dx = x - c;
+      const dy = y - c;
+      const h = Math.max(Math.abs(dy) / H, ((Math.sqrt(3) / 2) * Math.abs(dx) + 0.5 * Math.abs(dy)) / H);
+      if (h > 1) continue;
+      const shine = Math.abs(dy - band) < 3;
+      if (h > 1 - 2.6 / H) g[y][x] = shine ? "6" : dy < 0 ? "5" : "4";
+      else if (Math.abs(h - 0.52) < 0.035) g[y][x] = shine ? "5" : "3";
+      else if (h > 0.52) {
+        const ang = Math.atan2(dy, dx);
+        const off = Math.abs(((ang + Math.PI * 2) % (Math.PI / 3)) - Math.PI / 6); // 0 halfway between vertices
+        if (Math.abs(off - Math.PI / 6) * Math.hypot(dx, dy) < 0.7) g[y][x] = shine ? "5" : "3"; // spokes to the vertices
+      }
+    }
+  return rows(outline(g));
+}
+
+/** A tiny data imp summoned in a swarm: a faceted diamond body, big eyes and flapping wings. */
+function minionFrame(f: number): Frame {
+  const g = blank(20, 16);
+  const cx = 10;
+  const cy = 8;
+  const bob = f === 1 ? -1 : f === 3 ? 1 : 0;
+  for (let y = 0; y < 16; y++)
+    for (let x = 0; x < 20; x++) {
+      const dx = x - cx;
+      const dy = y - cy - bob;
+      if (Math.abs(dx) + Math.abs(dy) > 4.5) continue;
+      g[y][x] = dx + dy < -2 ? "4" : dx + dy > 2 ? "2" : "3";
+    }
+  put(g, cx, cy - 4 + bob, "5");
+  const lift = [-1, 0, 1, 0][f];
+  for (let i = 1; i <= 4; i++) {
+    const top = cy + bob - 1 + lift * i - (4 - i) * 0.5;
+    for (let j = 0; j <= 4 - i; j++) {
+      const col = j === 0 ? "4" : "3";
+      put(g, cx - 4 - i, top + j, col);
+      put(g, cx + 4 + i, top + j, col);
+    }
+  }
+  for (const ex of [cx - 2, cx + 1]) {
+    put(g, ex, cy - 1 + bob, "6");
+    put(g, ex, cy + bob, "1");
+  }
+  put(g, cx, cy + 6 + bob, f % 2 ? "6" : "5"); // spark tail
+  return rows(outline(g));
+}
+
 const SHAPES: Record<FxKind, { w: number; h: number; frame: (f: number) => Frame; fps: number }> = {
   orb: { w: 16, h: 16, frame: orbFrame, fps: 12 },
   spark: { w: 32, h: 32, frame: sparkFrame, fps: 16 },
   slash: { w: 32, h: 32, frame: slashFrame, fps: 16 },
   ring: { w: 32, h: 32, frame: ringFrame, fps: 12 },
   beam: { w: 8, h: 16, frame: beamFrame, fps: 14 },
+  link: { w: 16, h: 12, frame: linkFrame, fps: 10 },
+  meteor: { w: 32, h: 32, frame: meteorFrame, fps: 14 },
+  brick: { w: 24, h: 14, frame: brickFrame, fps: 12 },
+  lance: { w: 48, h: 16, frame: lanceFrame, fps: 14 },
+  dome: { w: 48, h: 48, frame: domeFrame, fps: 10 },
+  minion: { w: 20, h: 16, frame: minionFrame, fps: 12 },
 };
 
 const frameCache = new Map<FxKind, Frame[]>();

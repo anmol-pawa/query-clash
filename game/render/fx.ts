@@ -92,13 +92,13 @@ export function glowSprite(color: number, size: number, alpha = 1): Sprite {
 const px = (n: number) => Math.max(2, Math.round(n));
 
 /** A frame-animated pixel effect sprite, centred, on the pixel layer. */
-export function fxSpriteOf(c: FxContext, kind: FxKind, color: number, at: Pt, scale: number): Sprite {
+export function fxSpriteOf(c: FxContext, kind: FxKind, color: number, at: Pt, scale: number, parent: Container = c.pix): Sprite {
   const s = new Sprite(animTextures(fxSprite(kind, color), "idle")[0]);
   s.anchor.set(0.5);
   s.scale.set(px(scale));
   s.roundPixels = true;
   s.position.set(at.x, at.y);
-  c.pix.addChild(s);
+  parent.addChild(s);
   return s;
 }
 
@@ -107,7 +107,7 @@ export function setFxFrame(s: Sprite, kind: FxKind, color: number, k: number) {
   const t = animTextures(fxSprite(kind, color), "idle");
   s.texture = t[Math.min(t.length - 1, Math.floor(k * t.length))];
 }
-function loopFrame(s: Sprite, kind: FxKind, color: number, time: number) {
+export function loopFrame(s: Sprite, kind: FxKind, color: number, time: number) {
   const def = fxSprite(kind, color);
   const t = animTextures(def, "idle");
   s.texture = t[Math.floor(time * (def.fps?.idle ?? 12)) % t.length];

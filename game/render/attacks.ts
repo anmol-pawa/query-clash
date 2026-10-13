@@ -3,12 +3,12 @@
  * own counter-attack. `onImpact(i, n)` fires on every hit so the stage can
  * sync knockback, shake and damage numbers to the exact frame of contact.
  */
-import { Container, Graphics, Text } from "pixi.js";
+import { Container, Graphics, Sprite, Text } from "pixi.js";
 import type { AttackKind } from "@/lib/dialect/concepts";
 import type { BossAttackStyle } from "./characters/bosses";
 import { isHydra } from "./characters/bosses";
 import type { Character } from "./characters/rig";
-import { FxContext, Pt, beam, glowSprite, lightning, projectile, ring, slash } from "./fx";
+import { FxContext, Pt, beam, fxSpriteOf, glowSprite, lightning, loopFrame, projectile, ring, setFxFrame, slash } from "./fx";
 import { ease } from "./tween";
 
 type Impact = (i: number, n: number) => void;
@@ -33,18 +33,28 @@ export async function performAttack(c: FxContext, kind: AttackKind, caster: Char
     }
 
     case "chain": {
-      const g = new Graphics();
-      c.layer.addChild(g);
+      const g = new Container();
+      c.pix.addChild(g);
       const links = 14;
-      const draw = (k: number, pull = 0) => {
-        g.clear();
-        const end = lerp(from, to, 1);
-        for (let i = 0; i < links * k; i++) {
+      const angle = Math.atan2(to.y - from.y, to.x - from.x);
+      const chain = Array.from({ length: links }, (_, i) => {
+        const s = fxSpriteOf(c, "link", color, from, 3, g);
+        s.rotation = angle;
+        if (i % 2) s.scale.y *= 0.5; // every other link is turned edge-on
+        s.visible = false;
+        return s;
+      });
+      let time = 0;
+      const draw = (k: number) => {
+        time += 1 / 60;
+        chain.forEach((s, i) => {
           const u = i / links;
-          const p = lerp(from, { x: end.x - pull, y: end.y }, u);
+          const p = lerp(from, to, u);
           const sag = Math.sin(u * Math.PI) * 30 * (1 - k * 0.6);
-          g.ellipse(p.x, p.y + sag, 13, 8).stroke({ width: 5, color, alpha: 0.95 });
-        }
+          s.visible = i < links * k;
+          s.position.set(Math.round(p.x), Math.round(p.y + sag));
+          loopFrame(s, "link", color, time + i * 0.1);
+        });
       };
       await tw.run(0.3, (k) => draw(k), ease.outCubic);
       onImpact(0, 2);
@@ -57,17 +67,18 @@ export async function performAttack(c: FxContext, kind: AttackKind, caster: Char
       await tw.run(0.25, (k) => {
         g.alpha = 1 - k;
       });
-      g.destroy();
+      g.destroy({ children: true });
       break;
     }
 
     case "slam": {
-      const top = { x: to.x, y: to.y - 330 };
-      const ball = glowSprite(color, 40, 1);
-      const core = glowSprite(0xffffff, 20, 1);
+      const top = { x: to.x - 300 * caster.facing, y: Math.max(170, to.y - 330) }; // stay on screen above a far-off foe
+      const ball = glowSprite(color, 40, 0.7);
       ball.position.set(top.x, top.y);
-      core.position.set(top.x, top.y);
-      c.layer.addChild(ball, core);
+      c.layer.addChild(ball);
+      const core = fxSpriteOf(c, "meteor", color, top, 2);
+      core.rotation = Math.atan2(to.y - top.y, to.x - top.x) - Math.PI / 4; // the flame trails behind the falling rock
+      let time = 0;
       // rows of data compress into a meteor
       await tw.run(0.55, (k) => {
         for (let i = 0; i < 3 * fx.scale; i++) {
@@ -75,13 +86,18 @@ export async function performAttack(c: FxContext, kind: AttackKind, caster: Char
           fx.emit({ x: top.x + Math.cos(a) * 220, y: top.y + Math.sin(a) * 120, toX: top.x, toY: top.y, pull: 30, drag: 0.8, size: 9, life: 0.4, color });
         }
         ball.scale.set((40 + k * 160) / 32);
-        core.scale.set((20 + k * 60) / 32);
+        core.scale.set(2 + Math.floor(k * 4.99));
+        time += 1 / 60;
+        loopFrame(core, "meteor", color, time);
       });
       await tw.run(
         0.16,
         (k) => {
-          const y = top.y + (to.y - top.y) * k;
-          ball.y = core.y = y;
+          const p = lerp(top, to, k);
+          ball.position.set(p.x, p.y);
+          core.position.set(Math.round(p.x), Math.round(p.y));
+          time += 1 / 60;
+          loopFrame(core, "meteor", color, time);
         },
         ease.inQuad,
       );
@@ -124,17 +140,20 @@ export async function performAttack(c: FxContext, kind: AttackKind, caster: Char
       const minions: Container[] = [];
       for (let i = 0; i < 4; i++) {
         const m = new Container();
-        const g = new Graphics();
-        g.poly([0, -16, 12, 0, 0, 16, -12, 0]).fill({ color, alpha: 0.9 }).stroke({ width: 2, color: 0xffffff });
-        m.addChild(glowSprite(color, 70, 0.6), g);
+        m.addChild(glowSprite(color, 70, 0.5));
+        fxSpriteOf(c, "minion", color, { x: 0, y: 0 }, 3, m);
         const a = -Math.PI / 2 + (i - 1.5) * 0.7;
         m.position.set(from.x + Math.cos(a) * 110, from.y + Math.sin(a) * 90 + 40);
         m.scale.set(0);
-        c.layer.addChild(m);
+        c.pix.addChild(m);
         minions.push(m);
         tw.wait(i * 0.08).then(() => tw.to(m.scale, { x: 1, y: 1 }, 0.25, ease.outBack));
       }
-      await tw.wait(0.45);
+      let flap = 0;
+      await tw.run(0.45, () => {
+        flap += 1 / 60;
+        minions.forEach((m, i) => loopFrame(m.children[1] as Sprite, "minion", color, flap + i * 0.08));
+      });
       for (let i = 0; i < minions.length; i++) {
         const m = minions[i];
         const start = { x: m.x, y: m.y };
@@ -143,7 +162,8 @@ export async function performAttack(c: FxContext, kind: AttackKind, caster: Char
           (k) => {
             const p = lerp(start, to, k);
             m.position.set(p.x, p.y - Math.sin(k * Math.PI) * 60);
-            m.rotation += 0.4;
+            flap += 1 / 60;
+            loopFrame(m.children[1] as Sprite, "minion", color, flap);
             fx.emit({ x: m.x, y: m.y, size: 14, life: 0.25, color });
           },
           ease.inQuad,
@@ -189,21 +209,35 @@ export async function performAttack(c: FxContext, kind: AttackKind, caster: Char
     }
 
     case "shield": {
-      const dome = new Graphics();
       const center = caster.hitPoint();
-      dome.position.set(center.x, center.y);
-      const pts: number[] = [];
-      for (let i = 0; i < 6; i++) pts.push(Math.cos((i / 6) * Math.PI * 2) * 150, Math.sin((i / 6) * Math.PI * 2) * 170);
-      dome.poly(pts).fill({ color, alpha: 0.12 }).stroke({ width: 5, color, alpha: 0.9 });
+      const dome = fxSpriteOf(c, "dome", color, center, 6);
+      const fill = glowSprite(color, 300, 0.25);
+      fill.position.set(center.x, center.y);
+      c.layer.addChild(fill);
+      dome.alpha = 0.9;
       dome.scale.set(0);
-      c.layer.addChild(dome);
-      await tw.to(dome.scale, { x: 1, y: 1 }, 0.25, ease.outBack);
-      await tw.wait(0.15);
+      let time = 0;
+      const shimmer = () => {
+        time += 1 / 60;
+        loopFrame(dome, "dome", color, time);
+      };
+      await tw.run(0.25, (k) => {
+        dome.scale.set(Math.max(1, Math.round(ease.outBack(k) * 6)));
+        shimmer();
+      });
+      await tw.run(0.15, shimmer);
       const b = beam(c, from, to, { color, width: 22, dur: 0.45, jitter: 2 });
       await tw.wait(0.08);
       onImpact(0, 1);
       fx.burst(to.x, to.y, { color, count: 40, speed: 500 });
-      tw.to(dome, { alpha: 0 }, 0.4).then(() => dome.destroy());
+      tw.run(0.4, (k) => {
+        dome.alpha = 0.9 * (1 - k);
+        fill.alpha = 0.25 * (1 - k);
+        shimmer();
+      }).then(() => {
+        dome.destroy();
+        fill.destroy();
+      });
       await b;
       break;
     }
@@ -230,18 +264,22 @@ export async function performAttack(c: FxContext, kind: AttackKind, caster: Char
     }
 
     case "forge": {
-      const bricks: Graphics[] = [];
+      const bricks: Sprite[] = [];
       for (let i = 0; i < 4; i++) {
-        const g = new Graphics();
-        const w = i === 3 ? 120 : 60;
-        g.roundRect(-w / 2, -24, w, 48, 6).fill({ color: 0x292524 }).stroke({ width: 4, color });
-        g.position.set(to.x + (i - 1.5) * 50 * (i === 3 ? 0 : 1), to.y - 420);
-        c.top.addChild(g);
-        bricks.push(g);
+        bricks.push(fxSpriteOf(c, "brick", color, { x: to.x + (i - 1.5) * 50 * (i === 3 ? 0 : 1), y: to.y - 420 }, i === 3 ? 5 : 3));
       }
       for (let i = 0; i < bricks.length; i++) {
         const g = bricks[i];
-        await tw.to(g, { y: to.y - (i === 3 ? 20 : 60) }, i === 3 ? 0.22 : 0.14, ease.inQuad);
+        const y0 = g.y;
+        const y1 = to.y - (i === 3 ? 20 : 60);
+        await tw.run(
+          i === 3 ? 0.22 : 0.14,
+          (k) => {
+            g.y = Math.round(y0 + (y1 - y0) * k);
+            setFxFrame(g, "brick", color, k * 0.99);
+          },
+          ease.inQuad,
+        );
         onImpact(i, bricks.length);
         fx.burst(g.x, g.y + 20, { color, count: i === 3 ? 50 : 15, speed: 400, gravity: 800, spark: true });
         if (i === 3) ring(c, { x: to.x, y: to.y + 110 }, { color, radius: 220, squash: 0.3 });
@@ -324,22 +362,21 @@ export async function performAttack(c: FxContext, kind: AttackKind, caster: Char
 
     case "lance": {
       const spear = new Container();
-      const g = new Graphics();
-      g.poly([-120, -5, 40, -5, 70, 0, 40, 5, -120, 5]).fill({ color: 0xfff7cc });
-      g.poly([40, -14, 80, 0, 40, 14]).fill({ color });
-      spear.addChild(glowSprite(color, 160, 0.6), g);
+      spear.addChild(glowSprite(color, 160, 0.5));
+      const head = fxSpriteOf(c, "lance", color, { x: -20, y: 0 }, 3, spear);
       const label = new Text({ text: "{ }", style: { fontFamily: "monospace", fontSize: 26, fill: color, fontWeight: "900" } });
       label.anchor.set(0.5);
       label.position.set(-90, -26);
       spear.addChild(label);
       spear.position.set(from.x, from.y);
       spear.rotation = Math.atan2(to.y - from.y, to.x - from.x);
-      c.layer.addChild(spear);
+      c.pix.addChild(spear);
       await tw.run(
         0.22,
         (k) => {
           const p = lerp(from, to, k);
           spear.position.set(p.x, p.y);
+          setFxFrame(head, "lance", color, k * 0.99);
           fx.emit({ x: p.x, y: p.y, vx: (Math.random() - 0.5) * 60, vy: (Math.random() - 0.5) * 60, life: 0.35, size: 10, color, spark: true });
         },
         ease.inCubic,
