@@ -97,3 +97,49 @@ describe("pixel move effects", () => {
     }
   });
 });
+
+describe("pixel effects for portals, join frame, surge and vortex", () => {
+  it("are outlined and shaded on every frame", () => {
+    for (const kind of ["portal", "grid", "wave", "vortex"] as const)
+      fxFrames(kind).forEach((f, i) => {
+        expect(count(f, "1"), `${kind}[${i}] outline`).toBeGreaterThan(0);
+        expect(count(f, "4") + count(f, "5") + count(f, "6"), `${kind}[${i}] shading`).toBeGreaterThan(0);
+      });
+  });
+
+  it("the portal is a tall oval whose swirl turns from frame to frame", () => {
+    const fs = fxFrames("portal");
+    for (const f of fs) {
+      const b = bounds(f)!;
+      expect(b.h).toBeGreaterThan(b.w * 1.8);
+      expect(f[23][11]).toBe("6"); // bright eye in the middle
+    }
+    expect(fs[0].join("")).not.toBe(fs[1].join(""));
+  });
+
+  it("the join frame is a hollow 2×2 grid with a glint that moves round it", () => {
+    const fs = fxFrames("grid");
+    for (const f of fs) {
+      expect(f[12][10]).toBe("."); // top-left cell is see-through
+      expect(f[36][30]).toBe("."); // bottom-right cell too
+      expect(f[12][19]).not.toBe("."); // the vertical divider
+      expect(f[23][10]).not.toBe("."); // the horizontal divider
+    }
+    expect(new Set(fs.map((f) => f.join(""))).size).toBe(4);
+  });
+
+  it("the wave swells from the back (left) to a curling crest with a dark tube under it", () => {
+    for (const f of fxFrames("wave")) {
+      const top = (x: number) => f.findIndex((r) => r[x] !== ".");
+      expect(top(8)).toBeGreaterThan(top(28)); // rises toward the crest
+      expect(f.join("")).toMatch(/2/);
+      expect(count(f, "6")).toBeGreaterThan(5); // foam on the lip
+    }
+  });
+
+  it("the vortex has a white eye and its arms turn across the loop", () => {
+    const fs = fxFrames("vortex");
+    for (const f of fs) expect(f[23][23]).toBe("6");
+    expect(new Set(fs.map((f) => f.join(""))).size).toBe(4);
+  });
+});

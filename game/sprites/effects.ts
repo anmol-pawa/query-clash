@@ -12,8 +12,8 @@
 import type { Frame, SpriteDef } from "./pixel";
 import { TRANSPARENT } from "./pixel";
 
-export type FxKind = "orb" | "spark" | "slash" | "ring" | "beam" | "link" | "meteor" | "brick" | "lance" | "dome" | "minion";
-export const FX_KINDS: readonly FxKind[] = ["orb", "spark", "slash", "ring", "beam", "link", "meteor", "brick", "lance", "dome", "minion"];
+export type FxKind = "orb" | "spark" | "slash" | "ring" | "beam" | "link" | "meteor" | "brick" | "lance" | "dome" | "minion" | "portal" | "grid" | "wave" | "vortex";
+export const FX_KINDS: readonly FxKind[] = ["orb", "spark", "slash", "ring", "beam", "link", "meteor", "brick", "lance", "dome", "minion", "portal", "grid", "wave", "vortex"];
 
 type Grid = string[][];
 
@@ -328,6 +328,147 @@ function minionFrame(f: number): Frame {
   return rows(outline(g));
 }
 
+/** An upright mirror portal: a bevelled oval rim lit from the left, a swirl turning inside, glints running round. */
+function portalFrame(f: number): Frame {
+  const g = blank(24, 48);
+  const cx = 11.5;
+  const cy = 23.5;
+  for (let y = 0; y < 48; y++)
+    for (let x = 0; x < 24; x++) {
+      const dx = x - cx;
+      const dy = y - cy;
+      const e = Math.hypot(dx / 10.5, dy / 22.5);
+      if (e > 1) continue;
+      if (e > 0.8) {
+        g[y][x] = dx < -3 ? (e > 0.92 ? "4" : "5") : dx > 3 ? "2" : "3";
+        continue;
+      }
+      // the swirl: two arms turning a quarter turn per frame, brighter towards the middle
+      const a = Math.atan2(dy / 2, dx) + e * 5 - f * (Math.PI / 2);
+      const arm = (Math.cos(a * 2) + 1) / 2;
+      if (e < 0.18) g[y][x] = "6";
+      else if (arm > 0.75) g[y][x] = e < 0.45 ? "5" : "4";
+      else if (arm > 0.4) g[y][x] = "3";
+      else if (e > 0.62) g[y][x] = "2";
+    }
+  for (let m = 0; m < 2; m++) {
+    const a = f * (Math.PI / 2) + m * Math.PI - Math.PI / 2;
+    const gx = cx + Math.cos(a) * 9.6;
+    const gy = cy + Math.sin(a) * 20.6;
+    put(g, gx, gy, "6");
+    put(g, gx, gy + 1, "6");
+    put(g, gx, gy - 1, "5");
+  }
+  return rows(outline(g));
+}
+
+/** A join frame: a riveted, bevelled 2×2 table grid with a glint running round its border. */
+function gridFrame(f: number): Frame {
+  const W = 40;
+  const H = 48;
+  const g = blank(W, H);
+  const x0 = 1;
+  const y0 = 1;
+  const x1 = W - 2;
+  const y1 = H - 2;
+  const t = 3;
+  for (let y = y0; y <= y1; y++)
+    for (let x = x0; x <= x1; x++) {
+      const inBorder = x < x0 + t || x > x1 - t || y < y0 + t || y > y1 - t;
+      const midX = Math.floor((x0 + x1) / 2);
+      const midY = Math.floor((y0 + y1) / 2);
+      const onCross = x === midX || x === midX + 1 || y === midY || y === midY + 1;
+      if (inBorder) g[y][x] = x === x0 || y === y0 ? "5" : x === x1 || y === y1 ? "2" : "3";
+      else if (onCross) g[y][x] = x === midX || y === midY ? "4" : "2";
+    }
+  for (const [rx, ry] of [
+    [x0 + 1, y0 + 1],
+    [x1 - 1, y0 + 1],
+    [x0 + 1, y1 - 1],
+    [x1 - 1, y1 - 1],
+  ])
+    g[ry][rx] = "6"; // corner rivets
+  // a glint travelling clockwise round the border, a quarter of the way per frame
+  const per = 2 * (x1 - x0 + y1 - y0);
+  const pos = (u: number): [number, number] => {
+    let d = ((u % per) + per) % per;
+    if (d < x1 - x0) return [x0 + d, y0 + 1];
+    d -= x1 - x0;
+    if (d < y1 - y0) return [x1 - 1, y0 + d];
+    d -= y1 - y0;
+    if (d < x1 - x0) return [x1 - d, y1 - 1];
+    d -= x1 - x0;
+    return [x0 + 1, y1 - d];
+  };
+  for (let i = 0; i < 5; i++) {
+    const [gx, gy] = pos(f * (per / 4) + i);
+    put(g, gx, gy, i === 2 ? "6" : "5");
+  }
+  return rows(outline(g));
+}
+
+/** A breaking data wave rolling right: a shaded swell, a curling lip over a dark tube, foam and flecks of spray. */
+function waveFrame(f: number): Frame {
+  const g = blank(48, 32);
+  const bob = [0, -1, 0, 1][f];
+  const lx = 31 + (f % 2); // centre of the curl
+  const ly = 13 + bob;
+  const R = 8.5;
+  const inside = (x: number, y: number) => Math.hypot(x - lx, y - ly) < R - 3.5;
+  for (let y = 0; y < 31; y++)
+    for (let x = 1; x < 47; x++) {
+      const dx = x - lx;
+      const dy = y - ly;
+      const r = Math.hypot(dx, dy);
+      const back = 30 - 26 * (x / lx) ** 1.7 + bob; // the swell rising to the crest
+      const front = ly + 2 + (x - lx) * 0.75; // the face falling away under the lip
+      const body = x <= lx ? y >= back : y >= Math.min(front, 30);
+      const lip = r <= R && r >= R - 3.5 && (dy < 0 || dx > 0) && !(dx > 0 && dy > R * 0.75);
+      if (lip) {
+        g[y][x] = r > R - 1 ? "6" : r > R - 2 ? "5" : "4"; // foam on the outer edge
+        if (dy > 0 && dx > R - 3) g[y][x] = r > R - 1 ? "5" : "4"; // the falling tip
+      } else if (inside(x, y) && (x > lx - 2 || y < back)) g[y][x] = y > ly ? "2" : "1"; // the hollow tube
+      else if (body) {
+        const depth = x <= lx ? y - back : y - front;
+        let c = depth < 1.2 ? "5" : depth < 3.5 ? "4" : y > 26 ? "2" : "3";
+        if (c === "3" && (x + y * 2 + f * 3) % 9 === 0) c = "4"; // ripple lines
+        g[y][x] = c;
+      }
+    }
+  for (let s = 0; s < 5; s++) {
+    const sx = lx + 4 + ((s * 5 + f * 3) % 10);
+    const sy = ly - R - 2 + ((s * 7 + f * 2) % 7);
+    put(g, sx, sy, s % 2 ? "5" : "6"); // spray off the lip
+  }
+  return rows(outline(g));
+}
+
+/** A recursive vortex: three spiral arms, bright at the eye, turning a third of their period across the loop. */
+function vortexFrame(f: number): Frame {
+  const g = blank(48, 48);
+  const c = 23.5;
+  const third = (Math.PI * 2) / 3;
+  for (let y = 0; y < 48; y++)
+    for (let x = 0; x < 48; x++) {
+      const dx = x - c;
+      const dy = y - c;
+      const r = Math.hypot(dx, dy);
+      if (r > 22.5) continue;
+      if (r < 2.5) {
+        g[y][x] = "6";
+        continue;
+      }
+      const a = Math.atan2(dy, dx) - Math.log(r) * 2.2 + f * (third / 4);
+      const ph = ((a % third) + third) % third; // 0..third across one arm gap
+      const d = Math.min(ph, third - ph) * r; // pixel distance from the arm's centre line
+      const w = 1 + r * 0.12;
+      if (d > w) continue;
+      const k = d / w;
+      g[y][x] = r < 7 ? (k < 0.5 ? "6" : "5") : r < 14 ? (k < 0.4 ? "5" : "4") : k < 0.4 ? "4" : "3";
+    }
+  return rows(outline(g));
+}
+
 const SHAPES: Record<FxKind, { w: number; h: number; frame: (f: number) => Frame; fps: number }> = {
   orb: { w: 16, h: 16, frame: orbFrame, fps: 12 },
   spark: { w: 32, h: 32, frame: sparkFrame, fps: 16 },
@@ -340,6 +481,10 @@ const SHAPES: Record<FxKind, { w: number; h: number; frame: (f: number) => Frame
   lance: { w: 48, h: 16, frame: lanceFrame, fps: 14 },
   dome: { w: 48, h: 48, frame: domeFrame, fps: 10 },
   minion: { w: 20, h: 16, frame: minionFrame, fps: 12 },
+  portal: { w: 24, h: 48, frame: portalFrame, fps: 12 },
+  grid: { w: 40, h: 48, frame: gridFrame, fps: 12 },
+  wave: { w: 48, h: 32, frame: waveFrame, fps: 10 },
+  vortex: { w: 48, h: 48, frame: vortexFrame, fps: 16 },
 };
 
 const frameCache = new Map<FxKind, Frame[]>();

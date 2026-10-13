@@ -8,7 +8,7 @@ import type { AttackKind } from "@/lib/dialect/concepts";
 import type { BossAttackStyle } from "./characters/bosses";
 import { isHydra } from "./characters/bosses";
 import type { Character } from "./characters/rig";
-import { FxContext, Pt, beam, fxSpriteOf, glowSprite, lightning, loopFrame, projectile, ring, setFxFrame, slash } from "./fx";
+import { FxContext, Pt, beam, fxSpriteOf, glowSprite, impactSpark, lightning, loopFrame, projectile, ring, setFxFrame, slash } from "./fx";
 import { ease } from "./tween";
 
 type Impact = (i: number, n: number) => void;
@@ -113,25 +113,35 @@ export async function performAttack(c: FxContext, kind: AttackKind, caster: Char
     case "mirror": {
       const portals = [0.3, 0.55, 0.8].map((u) => {
         const p = lerp(from, to, u);
-        const g = new Graphics();
-        g.position.set(p.x, p.y);
-        g.ellipse(0, 0, 26, 70).stroke({ width: 5, color, alpha: 0.9 });
-        g.ellipse(0, 0, 16, 50).stroke({ width: 3, color: 0xffffff, alpha: 0.6 });
-        g.scale.set(0);
-        c.layer.addChild(g);
-        return g;
+        const s = fxSpriteOf(c, "portal", color, p, 3);
+        s.scale.x = 0; // opens from a slit
+        return s;
       });
-      await Promise.all(portals.map((g, i) => tw.wait(i * 0.07).then(() => tw.to(g.scale, { x: 1, y: 1 }, 0.22, ease.outBack))));
+      let open = true;
+      let time = 0;
+      const spin = async () => {
+        while (open)
+          await tw.run(0.1, () => {
+            if (!open) return; // the portals are gone
+            time += 1 / 60;
+            portals.forEach((s, i) => loopFrame(s, "portal", color, time + i * 0.1));
+          });
+      };
+      spin();
+      await Promise.all(portals.map((s, i) => tw.wait(i * 0.07).then(() => tw.run(0.22, (k) => (s.scale.x = 3 * ease.outBack(k))))));
       const flight = projectile(c, from, to, { color, size: 22, dur: 0.4, arc: 0 });
+      const closing: Promise<void>[] = [];
       for (let i = 0; i < 3; i++) {
         await tw.wait(0.4 * (i === 0 ? 0.3 : 0.25));
-        tw.to(portals[i].scale, { x: 1.5, y: 1.5 }, 0.1).then(() => tw.to(portals[i], { alpha: 0 }, 0.3));
+        const s = portals[i];
+        closing.push(tw.run(0.1, (k) => s.scale.set(3 + k, 3 + k)).then(() => tw.run(0.25, (k) => (s.scale.x = 4 * (1 - k))))); // flares, then closes to a slit
       }
       await flight;
       onImpact(0, 1);
       ring(c, to, { color, radius: 120 });
       fx.burst(to.x, to.y, { color, count: 45, speed: 480 });
-      await tw.wait(0.2);
+      await Promise.all([tw.wait(0.2), ...closing]);
+      open = false;
       portals.forEach((p) => p.destroy());
       break;
     }
@@ -177,22 +187,36 @@ export async function performAttack(c: FxContext, kind: AttackKind, caster: Char
     }
 
     case "blade": {
-      const frame = new Graphics();
-      frame.rect(-60, -90, 120, 180).stroke({ width: 5, color });
-      frame.moveTo(0, -90).lineTo(0, 90).moveTo(-60, 0).lineTo(60, 0).stroke({ width: 2, color, alpha: 0.6 });
-      frame.position.set(to.x - 260 * target.facing, to.y);
+      const frame = fxSpriteOf(c, "grid", color, { x: to.x - 260 * target.facing, y: to.y }, 3);
       frame.alpha = 0;
-      c.layer.addChild(frame);
-      await tw.to(frame, { alpha: 1, x: to.x }, 0.25, ease.outCubic);
+      let time = 0;
+      const glint = () => {
+        time += 1 / 60;
+        loopFrame(frame, "grid", color, time);
+      };
+      const x0 = frame.x;
+      await tw.run(
+        0.25,
+        (k) => {
+          frame.alpha = k;
+          frame.x = Math.round(x0 + (to.x - x0) * k);
+          glint();
+        },
+        ease.outCubic,
+      );
       const angles = [-0.7, 0.9, 0];
       for (let i = 0; i < 3; i++) {
         slash(c, to, { color, angle: angles[i], size: 120 + i * 10 });
-        await tw.wait(0.06);
+        await tw.run(0.06, glint);
         onImpact(i, 3);
         fx.burst(to.x, to.y, { color, count: 20, speed: 520, spark: true });
-        await tw.wait(0.1);
+        await tw.run(0.1, glint);
       }
-      await tw.to(frame, { alpha: 0, x: to.x + 160 * target.facing }, 0.25);
+      await tw.run(0.25, (k) => {
+        frame.alpha = 1 - k;
+        frame.x = Math.round(to.x + 160 * target.facing * k);
+        glint();
+      });
       frame.destroy();
       break;
     }
@@ -291,30 +315,38 @@ export async function performAttack(c: FxContext, kind: AttackKind, caster: Char
     }
 
     case "surge": {
-      const g = new Graphics();
-      c.layer.addChild(g);
       const floorY = to.y + 120;
+      const startY = from.y + 80;
+      const dir = Math.sign(to.x - from.x) || 1;
+      // a big breaker with two smaller swells chasing it, rolling along the floor
+      const waves = [5, 3, 3].map((sc, i) => {
+        const w = fxSpriteOf(c, "wave", color, from, sc);
+        w.anchor.set(0.5, 1);
+        w.scale.x *= dir;
+        w.alpha = i ? 0.75 : 1;
+        return w;
+      });
+      let time = 0;
       await tw.run(
         0.55,
         (k) => {
-          g.clear();
-          const x = from.x + (to.x - from.x) * k;
-          for (let i = 0; i < 4; i++) {
-            g.moveTo(from.x, floorY - i * 30);
-            for (let s = 0; s <= 20; s++) {
-              const xx = from.x + ((x - from.x) * s) / 20;
-              g.lineTo(xx, floorY - i * 30 - Math.max(0, Math.sin((s / 20) * Math.PI)) * 60 * (1 - i * 0.2) - Math.sin(s + k * 20) * 6);
-            }
-            g.stroke({ width: 6 - i, color, alpha: 0.8 - i * 0.15 });
-          }
-          fx.emit({ x, y: floorY - Math.random() * 120, vx: 300 * caster.facing, vy: -100, life: 0.4, size: 12, color });
+          time += 1 / 60;
+          waves.forEach((w, i) => {
+            const lag = i * 0.18;
+            const kk = Math.max(0, (k - lag) / (1 - lag));
+            w.position.set(Math.round(from.x + (to.x - from.x) * kk - dir * i * 70), Math.round(startY + (floorY - startY) * kk + i * 10)); // rolls up from the caster's ground toward the foe's
+            w.visible = k >= lag;
+            loopFrame(w, "wave", color, time + i * 0.13);
+          });
+          fx.emit({ x: waves[0].x, y: waves[0].y - 120 - Math.random() * 60, vx: 300 * dir, vy: -100, life: 0.4, size: 10, color });
         },
         ease.inCubic,
       );
       onImpact(0, 1);
+      impactSpark(c, { x: to.x, y: to.y + 40 }, color, 5);
       fx.burst(to.x, to.y + 40, { color, count: 60, speed: 600, gravity: 700 });
-      await tw.to(g, { alpha: 0 }, 0.25);
-      g.destroy();
+      await tw.run(0.25, (k) => waves.forEach((w, i) => (w.alpha = (i ? 0.75 : 1) * (1 - k))));
+      waves.forEach((w) => w.destroy());
       break;
     }
 
@@ -333,26 +365,24 @@ export async function performAttack(c: FxContext, kind: AttackKind, caster: Char
     }
 
     case "vortex": {
-      const g = new Graphics();
-      g.position.set(to.x, to.y);
-      c.layer.addChild(g);
+      const v = fxSpriteOf(c, "vortex", color, to, 2);
+      const glow = glowSprite(color, 260, 0.35);
+      glow.position.set(to.x, to.y);
+      c.layer.addChild(glow);
+      let time = 0;
       await tw.run(0.75, (k) => {
-        g.clear();
-        for (let arm = 0; arm < 4; arm++) {
-          g.moveTo(0, 0);
-          for (let s = 0; s < 30; s++) {
-            const a = s * 0.25 + arm * (Math.PI / 2) + k * 12;
-            const r = s * 7 * (1 - k * 0.6);
-            g.lineTo(Math.cos(a) * r, Math.sin(a) * r * 0.8);
-          }
-          g.stroke({ width: 4, color, alpha: 0.8 });
-        }
+        time += 1 / 60;
+        loopFrame(v, "vortex", color, time);
+        const sc = Math.max(2, Math.round(2 + 4 * Math.sin(Math.min(1, k * 1.4) * Math.PI * 0.5) - (k > 0.8 ? (k - 0.8) * 15 : 0)));
+        v.scale.set(sc, sc * 0.8); // whole-pixel steps, tilted onto the ground plane
+        v.rotation = -k * 2;
         for (let i = 0; i < 2 * fx.scale; i++) {
           const a = Math.random() * Math.PI * 2;
           fx.emit({ x: to.x + Math.cos(a) * 240, y: to.y + Math.sin(a) * 200, toX: to.x, toY: to.y, pull: 25, drag: 0.85, size: 10, life: 0.5, color });
         }
       });
-      g.destroy();
+      v.destroy();
+      glow.destroy();
       onImpact(0, 1);
       c.camera.flash(0.5, color);
       ring(c, to, { color, radius: 220, width: 20 });
