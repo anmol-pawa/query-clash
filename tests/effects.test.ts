@@ -33,7 +33,7 @@ describe("pixel move effects", () => {
   });
 
   it("shapes are outlined and shaded (outline, base or light and a white core)", () => {
-    for (const kind of ["orb", "spark", "slash", "ring", "link", "meteor", "brick", "lance", "dome", "minion"] as const)
+    for (const kind of ["orb", "spark", "slash", "ring", "link", "meteor", "brick", "lance", "dome", "minion", "gear", "gust", "shard"] as const)
       fxFrames(kind).forEach((f, i) => {
         expect(count(f, "1"), `${kind}[${i}] outline`).toBeGreaterThan(0);
         expect(count(f, "4") + count(f, "5") + count(f, "6"), `${kind}[${i}] shading`).toBeGreaterThan(0);
@@ -141,5 +141,45 @@ describe("pixel effects for portals, join frame, surge and vortex", () => {
     const fs = fxFrames("vortex");
     for (const f of fs) expect(f[23][23]).toBe("6");
     expect(new Set(fs.map((f) => f.join(""))).size).toBe(4);
+  });
+
+  it("the gear is a toothed cog with a see-through hub that turns across the loop", () => {
+    const fs = fxFrames("gear");
+    for (const f of fs) {
+      expect(f[16][16]).toBe("."); // hub hole
+      expect(f[16][20]).not.toBe("."); // solid face around it
+      // teeth: walking round at the tooth radius alternates between solid and gap
+      let changes = 0;
+      let prev = "";
+      for (let i = 0; i < 64; i++) {
+        const a = (i / 64) * Math.PI * 2;
+        const cur = f[Math.round(15.5 + Math.sin(a) * 13.5)][Math.round(15.5 + Math.cos(a) * 13.5)] === "." ? "." : "#";
+        if (prev && cur !== prev) changes++;
+        prev = cur;
+      }
+      expect(changes).toBeGreaterThanOrEqual(12);
+    }
+    expect(new Set(fs.map((f) => f.join(""))).size).toBe(4);
+  });
+
+  it("the wind blade is a crescent, thick in the middle and pointed at the tips, with a white leading edge", () => {
+    for (const f of fxFrames("gust")) {
+      const solid = (y: number) => [...f[y].slice(12)].filter((ch) => ch !== "." && ch !== "1").length; // blade only, not the streaks
+      expect(solid(16)).toBeGreaterThanOrEqual(5);
+      expect(solid(3)).toBeLessThan(solid(16));
+      expect(solid(28)).toBeLessThan(solid(16));
+      expect(f[16].slice(16)).toMatch(/6/); // the leading (right) edge is white-hot
+    }
+  });
+
+  it("the ice shard points right, pale on top and shadowed underneath", () => {
+    for (const f of fxFrames("shard")) {
+      const b = bounds(f)!;
+      expect(b.w).toBeGreaterThan(b.h * 1.8);
+      const col = (x: number) => f.map((r) => r[x]).filter((ch) => ch !== ".").length;
+      expect(col(20)).toBeLessThan(col(8)); // narrows to the tip
+      expect(f.slice(0, 5).join("")).toMatch(/5/);
+      expect(f.slice(7).join("")).toMatch(/2/);
+    }
   });
 });

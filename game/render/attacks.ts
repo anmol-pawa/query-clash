@@ -3,7 +3,7 @@
  * own counter-attack. `onImpact(i, n)` fires on every hit so the stage can
  * sync knockback, shake and damage numbers to the exact frame of contact.
  */
-import { Container, Graphics, Sprite, Text } from "pixi.js";
+import { Container, Sprite, Text } from "pixi.js";
 import type { AttackKind } from "@/lib/dialect/concepts";
 import type { BossAttackStyle } from "./characters/bosses";
 import { isHydra } from "./characters/bosses";
@@ -441,16 +441,36 @@ export async function bossAttack(c: FxContext, boss: Character & { style: BossAt
       return performAttack(c, "chain", boss, target, color, onImpact);
     case "blocks":
       return performAttack(c, "forge", boss, target, color, onImpact);
-    case "shards":
+    case "shards": {
+      const ice = 0x7dd3fc;
+      const angle = Math.atan2(to.y - from.y, to.x - from.x);
       for (let i = 0; i < 5; i++) {
-        projectile(c, { x: from.x, y: from.y + (i - 2) * 30 }, { x: to.x, y: to.y + (i - 2) * 20 }, { color: 0xe0f2fe, size: 12, dur: 0.25, arc: 0, spark: true }).then(() => {
+        const start = { x: from.x, y: from.y + (i - 2) * 30 };
+        const end = { x: to.x, y: to.y + (i - 2) * 20 };
+        const shard = fxSpriteOf(c, "shard", ice, start, 3);
+        shard.rotation = angle;
+        let time = i * 0.1;
+        tw.run(
+          0.25,
+          (k) => {
+            const p = lerp(start, end, k);
+            shard.position.set(Math.round(p.x), Math.round(p.y));
+            time += 1 / 60;
+            loopFrame(shard, "shard", ice, time);
+            if (Math.random() < 0.4) fx.emit({ x: p.x, y: p.y, vx: (Math.random() - 0.5) * 60, vy: (Math.random() - 0.5) * 60, life: 0.3, size: 7, color: 0xe0f2fe, spark: true });
+          },
+          ease.inQuad,
+        ).then(() => {
+          shard.destroy();
           onImpact(i, 5);
-          fx.burst(to.x, to.y, { color: 0xe0f2fe, count: 10, speed: 300, spark: true });
+          impactSpark(c, end, ice, 3);
+          fx.burst(end.x, end.y, { color: 0xe0f2fe, count: 10, speed: 300, spark: true });
         });
         await tw.wait(0.07);
       }
-      await tw.wait(0.3);
+      await tw.wait(0.35);
       break;
+    }
     case "scythe": {
       const hx = boss.body.x;
       await tw.to(boss.body, { x: hx + (to.x - from.x) * 0.55 }, 0.16, ease.inCubic);
@@ -462,24 +482,39 @@ export async function bossAttack(c: FxContext, boss: Character & { style: BossAt
       break;
     }
     case "gear": {
-      const gear = new Graphics();
-      const pts: number[] = [];
-      for (let i = 0; i < 20; i++) pts.push(Math.cos((i / 20) * Math.PI * 2) * (i % 2 ? 30 : 40), Math.sin((i / 20) * Math.PI * 2) * (i % 2 ? 30 : 40));
-      gear.poly(pts).fill({ color }).stroke({ width: 3, color: 0xffffff });
-      gear.position.set(from.x, from.y);
-      c.layer.addChild(gear);
+      const halo = glowSprite(color, 120, 0.35);
+      c.layer.addChild(halo);
+      const gear = fxSpriteOf(c, "gear", color, from, 3);
+      let time = 0;
       await tw.run(
         0.45,
         (k) => {
           const p = lerp(from, to, k);
-          gear.position.set(p.x, p.y - Math.sin(k * Math.PI) * 120);
-          gear.rotation -= 0.5;
-          fx.emit({ x: gear.x, y: gear.y, size: 10, life: 0.3, color, spark: true, vx: (Math.random() - 0.5) * 200, vy: (Math.random() - 0.5) * 200 });
+          const y = p.y - Math.sin(k * Math.PI) * 120;
+          gear.position.set(Math.round(p.x), Math.round(y));
+          halo.position.set(p.x, y);
+          time += 1 / 60;
+          loopFrame(gear, "gear", color, time * 2); // spins fast as it flies
+          if (Math.random() < 0.6) fx.emit({ x: p.x, y, size: 8, life: 0.3, color, spark: true, vx: (Math.random() - 0.5) * 200, vy: (Math.random() - 0.5) * 200 });
         },
         ease.inQuad,
       );
       onImpact(0, 1);
+      impactSpark(c, to, color, 5);
       ring(c, to, { color, radius: 120 });
+      // it grinds against the target for a moment, then drops away
+      await tw.run(0.18, (k) => {
+        time += 1 / 60;
+        loopFrame(gear, "gear", color, time * 3);
+        gear.position.set(Math.round(to.x + (Math.random() - 0.5) * 6), Math.round(to.y));
+        if (Math.random() < 0.8) fx.emit({ x: to.x, y: to.y + 30, vx: (Math.random() - 0.5) * 400, vy: -200 - Math.random() * 200, gravity: 900, life: 0.4, size: 7, color: 0xfde68a, spark: true });
+        halo.alpha = 0.35 * (1 - k);
+      });
+      await tw.run(0.2, (k) => {
+        gear.position.y = Math.round(to.y + k * k * 80);
+        gear.alpha = 1 - k;
+      });
+      halo.destroy();
       gear.destroy();
       break;
     }
@@ -495,26 +530,29 @@ export async function bossAttack(c: FxContext, boss: Character & { style: BossAt
       ring(c, { x: to.x, y: ground.y }, { color, radius: 200, squash: 0.3, width: 16 });
       break;
     }
-    case "wind":
+    case "wind": {
+      const flip = to.x < from.x; // the blade sprite flies right by default
       for (let i = 0; i < 3; i++) {
-        const blade = new Graphics();
-        blade.arc(0, 0, 60, -1.2, 1.2).stroke({ width: 10, color, alpha: 0.9 });
-        blade.arc(0, 0, 60, -1.2, 1.2).stroke({ width: 3, color: 0xffffff });
-        blade.position.set(from.x, from.y + (i - 1) * 50);
-        blade.scale.x = -1;
-        c.layer.addChild(blade);
+        const start = { x: from.x, y: from.y + (i - 1) * 50 };
+        const blade = fxSpriteOf(c, "gust", color, start, 3);
+        if (flip) blade.scale.x *= -1;
+        let time = i * 0.12;
         tw.run(0.35, (k) => {
-          const p = lerp({ x: from.x, y: from.y + (i - 1) * 50 }, to, k);
-          blade.position.set(p.x, p.y);
+          const p = lerp(start, to, k);
+          blade.position.set(Math.round(p.x), Math.round(p.y + Math.sin(k * Math.PI) * (i - 1) * 30));
+          time += 1 / 60;
+          loopFrame(blade, "gust", color, time);
         }).then(() => {
-          onImpact(i, 3);
-          fx.burst(to.x, to.y, { color, count: 15, speed: 350, spark: true });
           blade.destroy();
+          onImpact(i, 3);
+          slash(c, to, { color, angle: (i - 1) * 0.5, size: 110, dur: 0.2 });
+          fx.burst(to.x, to.y, { color, count: 15, speed: 350, spark: true });
         });
         await tw.wait(0.12);
       }
-      await tw.wait(0.3);
+      await tw.wait(0.35);
       break;
+    }
     case "breath": {
       const mouths = isHydra(boss) ? boss.mouths() : [from];
       await tw.run(0.7, () => {

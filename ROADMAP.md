@@ -21,6 +21,8 @@ The hourly routine works top to bottom: take the first unchecked box. Split big 
       - [x] A3d2a. Chain links, meteor, summon minions, shield dome, bricks and lance.
       - [x] A3d2b. Portals (mirror), join frame (blade), surge wave and vortex (storm bolts go with the pixel lightning in A3d3).
     - [ ] A3d3. Bespoke pixel art for the boss counters (gear, wind blades, breath, quake rocks, ice shards) and a pixel lightning bolt.
+      - [x] A3d3a. Gear (Transactor), wind blades (Galeframe) and ice shards (Frostnest).
+      - [ ] A3d3b. Breath (Recursa), quake rocks (Schemaforge) and a pixel lightning bolt (storm spell).
 - [ ] A4. Types and effectiveness: give SQL concept types (Filter, Join, Aggregate, Window, Recursive, Transaction, Schema, Index…) a type chart against boss types. Show "super effective" / "not very effective" and fold the multiplier into damage. Add tests for the chart.
 - [ ] A5. Collection: defeated bosses can be "captured" into a party/box screen (Querydex) with stats, and the starter evolves at chapter milestones (an evolution animation). Saved in localStorage.
 - [ ] A6. Pixel UI pass: pixel font (an OFL font via next/font, e.g. Press Start 2P / Pixelify Sans), menus restyled as handheld-console menus, and transitions (screen wipe on battle start). Must stay readable and touch-friendly on iPhone.

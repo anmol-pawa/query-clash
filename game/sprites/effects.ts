@@ -12,8 +12,8 @@
 import type { Frame, SpriteDef } from "./pixel";
 import { TRANSPARENT } from "./pixel";
 
-export type FxKind = "orb" | "spark" | "slash" | "ring" | "beam" | "link" | "meteor" | "brick" | "lance" | "dome" | "minion" | "portal" | "grid" | "wave" | "vortex";
-export const FX_KINDS: readonly FxKind[] = ["orb", "spark", "slash", "ring", "beam", "link", "meteor", "brick", "lance", "dome", "minion", "portal", "grid", "wave", "vortex"];
+export type FxKind = "orb" | "spark" | "slash" | "ring" | "beam" | "link" | "meteor" | "brick" | "lance" | "dome" | "minion" | "portal" | "grid" | "wave" | "vortex" | "gear" | "gust" | "shard";
+export const FX_KINDS: readonly FxKind[] = ["orb", "spark", "slash", "ring", "beam", "link", "meteor", "brick", "lance", "dome", "minion", "portal", "grid", "wave", "vortex", "gear", "gust", "shard"];
 
 type Grid = string[][];
 
@@ -469,6 +469,125 @@ function vortexFrame(f: number): Frame {
   return rows(outline(g));
 }
 
+/**
+ * A machined cog: eight bevelled teeth lit from the top-left, a recessed face
+ * ring and a see-through hub. It turns a quarter of a tooth per frame, so the
+ * four frames loop as one smooth turn.
+ */
+function gearFrame(f: number): Frame {
+  const g = blank(32, 32);
+  const c = 15.5;
+  const teeth = 8;
+  const pitch = (Math.PI * 2) / teeth;
+  const turn = f * (pitch / 4);
+  const lx = -Math.SQRT1_2;
+  const ly = -Math.SQRT1_2;
+  for (let y = 0; y < 32; y++)
+    for (let x = 0; x < 32; x++) {
+      const dx = x - c;
+      const dy = y - c;
+      const r = Math.hypot(dx, dy);
+      const a = Math.atan2(dy, dx) - turn;
+      const ph = (((a % pitch) + pitch) % pitch) / pitch; // 0..1 across one tooth + gap
+      const tooth = ph > 0.12 && ph < 0.52; // squared-off tooth
+      const R = tooth ? 15 : 11.5;
+      if (r > R || r < 3.5) continue;
+      const lit = r ? (dx * lx + dy * ly) / r : 0; // -1 shadowed side … 1 lit side
+      let col: string;
+      if (r > 10.5) col = lit > 0.4 ? "5" : lit < -0.4 ? "2" : "3"; // rim and teeth
+      else if (r > 9) col = lit > 0 ? "2" : "4"; // the face ring is recessed: lit on the far side
+      else if (r > 5.5) col = lit > 0.3 ? "4" : lit < -0.5 ? "2" : "3";
+      else col = lit > 0 ? "5" : "2"; // hub collar
+      g[y][x] = col;
+    }
+  // four rivets on the face, turning with it, and a glint on the top-left tooth
+  for (let i = 0; i < 4; i++) {
+    const a = turn + i * (Math.PI / 2) + pitch / 4;
+    put(g, c + Math.cos(a) * 7.5, c + Math.sin(a) * 7.5, "6");
+  }
+  put(g, c - 9, c - 6, "6");
+  put(g, c - 8, c - 7, "6");
+  return rows(outline(g));
+}
+
+/**
+ * A wind blade: a thin crescent flying right, its leading (outer) edge white,
+ * with speed streaks trailing behind it and a glint running along the edge.
+ */
+function gustFrame(f: number): Frame {
+  const g = blank(32, 32);
+  const cx = 4;
+  const cy = 15.5;
+  const R = 15;
+  const off = 12; // the inner circle sits behind and is larger, so the blade is thick in the middle and meets in points
+  const Ri = R + off - 6;
+  for (let y = 0; y < 32; y++)
+    for (let x = 0; x < 32; x++) {
+      const dx = x - cx;
+      const dy = y - cy;
+      const r = Math.hypot(dx, dy);
+      const ri = Math.hypot(dx + off, dy);
+      if (r > R || ri < Ri) continue;
+      const k = (R - r) / Math.max(0.5, R - r + ri - Ri); // 0 at the leading edge … 1 at the back
+      g[y][x] = k < 0.22 ? "6" : k < 0.45 ? "5" : k < 0.75 ? "4" : "3";
+    }
+  // a glint sliding along the edge from the top tip to the bottom
+  const ga = -1.05 + f * 0.7;
+  for (let t = -1; t <= 1; t++) put(g, cx + Math.cos(ga + t * 0.07) * (R - 0.6), cy + Math.sin(ga + t * 0.07) * (R - 0.6), "6");
+  // speed streaks behind the blade, flickering in length
+  const streaks = [
+    { y: 8, len: [5, 7, 4, 6][f] },
+    { y: 12, len: [8, 10, 9, 7][f] },
+    { y: 16, len: [11, 9, 12, 10][f] },
+    { y: 20, len: [7, 9, 8, 10][f] },
+    { y: 24, len: [4, 6, 5, 3][f] },
+  ];
+  for (const s of streaks) {
+    const back = g[s.y].findIndex((c) => c !== TRANSPARENT);
+    const gap = 2 + ((f + s.y) % 2);
+    for (let i = 0; i < s.len; i++) {
+      const x = back - gap - i;
+      if (x < 0) break;
+      g[s.y][x] = i < s.len * 0.3 ? "5" : i < s.len * 0.7 ? "4" : "3";
+    }
+  }
+  return rows(outline(g));
+}
+
+/**
+ * An ice shard pointing right: a long faceted crystal with a pale top facet, a
+ * shadowed underside, a bright ridge, a glint that runs to the tip and frost
+ * motes trailing behind.
+ */
+function shardFrame(f: number): Frame {
+  const g = blank(24, 12);
+  const cy = 5.5;
+  const tail = 3;
+  const tip = 23;
+  const back = 7; // the widest point, near the back
+  for (let x = tail; x <= tip; x++) {
+    const half = x < back ? 1.5 + ((x - tail) / (back - tail)) * 3.2 : 4.7 * ((tip - x) / (tip - back)) + 0.3;
+    for (let y = 0; y < 12; y++) {
+      const d = y - cy;
+      if (Math.abs(d) > half) continue;
+      const k = d / Math.max(0.5, half); // -1 top … 1 bottom
+      g[y][x] = k < -0.55 ? "5" : k < -0.1 ? "4" : k < 0.15 ? "5" : k < 0.6 ? "3" : "2";
+    }
+  }
+  // a crack-like facet line across the back
+  put(g, back + 1, cy - 2, "2");
+  put(g, back + 2, cy - 1, "2");
+  // glint travelling along the ridge toward the tip
+  const gx = back + 1 + f * 4;
+  put(g, gx, cy - 1, "6");
+  put(g, gx + 1, cy - 1, "6");
+  put(g, gx, cy - 2, "6");
+  // frost motes behind
+  put(g, 1 - (f % 2), cy - 3 + f, "5");
+  put(g, 0 + ((f + 1) % 2), cy + 3 - (f % 3), "4");
+  return rows(outline(g));
+}
+
 const SHAPES: Record<FxKind, { w: number; h: number; frame: (f: number) => Frame; fps: number }> = {
   orb: { w: 16, h: 16, frame: orbFrame, fps: 12 },
   spark: { w: 32, h: 32, frame: sparkFrame, fps: 16 },
@@ -485,6 +604,9 @@ const SHAPES: Record<FxKind, { w: number; h: number; frame: (f: number) => Frame
   grid: { w: 40, h: 48, frame: gridFrame, fps: 12 },
   wave: { w: 48, h: 32, frame: waveFrame, fps: 10 },
   vortex: { w: 48, h: 48, frame: vortexFrame, fps: 16 },
+  gear: { w: 32, h: 32, frame: gearFrame, fps: 14 },
+  gust: { w: 32, h: 32, frame: gustFrame, fps: 14 },
+  shard: { w: 24, h: 12, frame: shardFrame, fps: 12 },
 };
 
 const frameCache = new Map<FxKind, Frame[]>();
