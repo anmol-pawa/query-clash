@@ -72,7 +72,7 @@ export function dexStats(boss: BossId): DexStats {
 export const EVOLVE_AFTER: readonly number[] = [3, 7];
 
 /**
- * The starter's evolution stage (0 = BYTEBAT, 1 = KILOBAT, …): one step per
+ * The starter's evolution stage (0 = BYTEBAT, 1 = KILOBAT, 2 = GIGAVERN): one step per
  * milestone chapter whose boss is in the dex, capped at the last form drawn.
  */
 export function starterStage(dex: Dex, forms: number): number {

@@ -18,8 +18,26 @@ describe("starter stage of a save", () => {
     expect(starterSprite("front", starterStageOf(win({}, 1, 2, 3))).name).toBe("KILOBAT");
     expect(starterSprite("back", starterStageOf(win({}, 1, 2, 3))).id).toBe("kilobat-back");
   });
+  it("becomes GIGAVERN once chapter 7's boss is captured too", () => {
+    expect(starterSprite("front", starterStageOf(win({}, 1, 2, 3, 4, 5, 6))).name).toBe("KILOBAT");
+    expect(starterSprite("front", starterStageOf(win({}, 1, 2, 3, 4, 5, 6, 7))).name).toBe("GIGAVERN");
+    expect(starterSprite("back", starterStageOf(win({}, 3, 7))).id).toBe("gigavern-back");
+  });
   it("never points past the last drawn form", () => {
+    expect(STARTER_LINE).toHaveLength(3);
     expect(starterStageOf(win({}, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10))).toBe(STARTER_LINE.length - 1);
+  });
+});
+
+describe("evolution timeline KILOBAT → GIGAVERN", () => {
+  const steps = evolutionTimeline(starterSprite("front", 1), starterSprite("front", 2));
+  it("morphs KILOBAT's silhouette into GIGAVERN's and ends on GIGAVERN in colour", () => {
+    expect(steps[0].def.id).toBe("kilobat");
+    const morph = steps.filter((s) => s.beat === "morph");
+    morph.forEach((s, i) => expect(s.def.id).toBe(i % 2 ? "gigavern" : "kilobat"));
+    const last = steps[steps.length - 1];
+    expect(last.def.id).toBe("gigavern");
+    expect(white(last.frame)).toBeLessThan(0.1);
   });
 });
 
@@ -79,6 +97,12 @@ describe("evolvedByCapture (the victory card's evolution, read back from the sav
     expect(evolvedByCapture(win({}, 1, 2, 3, 3), boss(3), forms)).toBeNull();
     expect(evolvedByCapture(win({}, 1, 2, 3), boss(2), forms)).toBeNull();
     expect(evolvedByCapture(win({}, 1, 2, 3, 4), boss(4), forms)).toBeNull();
+  });
+  it("reports GIGAVERN right after chapter 7's boss is first captured, and nothing on chapters between", () => {
+    expect(evolvedByCapture(win({}, 1, 2, 3, 4, 5, 6, 7), boss(7), forms)).toBe(2);
+    expect(evolvedByCapture(win({}, 1, 2, 3, 4, 5, 6), boss(6), forms)).toBeNull();
+    expect(evolvedByCapture(win({}, 1, 2, 3, 4, 5, 6, 7, 7), boss(7), forms)).toBeNull();
+    expect(evolvedByCapture(win({}, 1, 2, 3, 4, 5, 6, 7, 8), boss(8), forms)).toBeNull();
   });
   it("never replays for a capture migrated from an old save", () => {
     const migrated = migrateDex({}, { 1: 3, 2: 2, 3: 1 });

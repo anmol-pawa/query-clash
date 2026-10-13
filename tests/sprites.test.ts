@@ -64,9 +64,9 @@ describe("sprite lookup", () => {
     expect(starterSprite("front").name).toBe("BYTEBAT");
     expect(starterSprite("back").anims.idle.length).toBeGreaterThan(1);
   });
-  it("the starter evolves BYTEBAT → KILOBAT, each form 64×64 with a back sprite, clamped past the last form", () => {
+  it("the starter evolves BYTEBAT → KILOBAT → GIGAVERN, each form 64×64 with a back sprite, clamped past the last form", () => {
     expect(STARTER_LINE[0]).toBe(STARTER);
-    expect(STARTER_LINE.map((_, i) => starterSprite("front", i).name)).toEqual(["BYTEBAT", "KILOBAT"]);
+    expect(STARTER_LINE.map((_, i) => starterSprite("front", i).name)).toEqual(["BYTEBAT", "KILOBAT", "GIGAVERN"]);
     for (let i = 0; i < STARTER_LINE.length; i++) {
       for (const side of ["front", "back"] as const) expect([starterSprite(side, i).w, starterSprite(side, i).h]).toEqual([64, 64]);
       expect(starterSprite("back", i).id).toBe(`${starterSprite("front", i).id}-back`);
@@ -86,7 +86,7 @@ describe("sprite lookup", () => {
   });
 });
 
-describe.each([0, 1])("starter stage %i evolve", (stage) => {
+describe.each([0, 1, 2])("starter stage %i evolve", (stage) => {
   const evolve = starterSprite("front", stage).anims.evolve ?? [];
   const white = (f: readonly string[]) => {
     const px = f.join("").replace(/\./g, "");

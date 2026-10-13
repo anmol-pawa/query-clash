@@ -8,7 +8,11 @@ import { spriteById } from "./index";
 export const STARTER = { front: "bytebat", back: "bytebat-back" } as const;
 
 /** The starter's evolution line, one entry per stage (see `starterStage` in the Querydex engine). */
-export const STARTER_LINE: readonly { front: string; back: string }[] = [STARTER, { front: "kilobat", back: "kilobat-back" }];
+export const STARTER_LINE: readonly { front: string; back: string }[] = [
+  STARTER,
+  { front: "kilobat", back: "kilobat-back" },
+  { front: "gigavern", back: "gigavern-back" },
+];
 
 /**
  * Which pixel sprite plays each chapter boss. Sprite ids differ from some
