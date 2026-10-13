@@ -7,8 +7,8 @@ import { CHAPTERS } from "@/content/chapters";
 import type { BossId } from "@/content/types";
 import { sfx } from "@/game/audio/synth";
 import { levelFor, xpProgress } from "@/game/engine/hud";
-import { caughtCount, dexStats } from "@/game/engine/querydex";
-import { bossSprite, starterSprite } from "@/game/sprites/roster";
+import { EVOLVE_AFTER, caughtCount, dexStats } from "@/game/engine/querydex";
+import { STARTER_LINE, bossSprite, starterSprite, starterStageOf } from "@/game/sprites/roster";
 import { useSave } from "@/lib/save";
 
 const SILHOUETTE = "#1c1f2e";
@@ -17,7 +17,10 @@ const SILHOUETTE = "#1c1f2e";
 export default function QuerydexPage() {
   const save = useSave();
   const [sel, setSel] = useState<BossId>(CHAPTERS[0].boss);
-  const starter = starterSprite("front");
+  const stage = starterStageOf(save.dex);
+  const starter = starterSprite("front", stage);
+  // the next milestone, if a later form is drawn
+  const nextAt = stage + 1 < STARTER_LINE.length ? CHAPTERS.find((c) => c.n === EVOLVE_AFTER[stage]) : undefined;
   const lvl = levelFor(save.xp);
   const caught = save.dex[sel];
   const st = dexStats(sel);
@@ -34,7 +37,7 @@ export default function QuerydexPage() {
       </header>
 
       {/* party */}
-      <section className="dex-frame flex items-center gap-4 p-3" data-testid="dex-party">
+      <section className="dex-frame flex items-center gap-4 p-3" data-testid="dex-party" data-stage={stage}>
         <div className="dex-screen flex h-[88px] w-[88px] shrink-0 items-end justify-center">
           <SpriteCanvas def={starter} scale={1} className="h-[80px] w-[80px]" />
         </div>
@@ -48,6 +51,10 @@ export default function QuerydexPage() {
             <div className="h-full bg-sky-400" style={{ width: `${Math.round(xpProgress(save.xp) * 100)}%` }} />
           </div>
           <div className="mt-1 text-[11px] text-white/50">{save.xp} XP · learns every spell your SQL can cast</div>
+          <div className="mt-0.5 text-[11px] text-sky-300/80" data-testid="dex-evolve">
+            {stage > 0 && <>Evolved from {starterSprite("front", stage - 1).name}. </>}
+            {nextAt ? <>Evolves after capturing {bossSprite(nextAt.boss).name} (chapter {nextAt.n}).</> : stage > 0 ? null : <>Evolves at chapter milestones.</>}
+          </div>
         </div>
       </section>
 

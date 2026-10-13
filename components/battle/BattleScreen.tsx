@@ -14,9 +14,10 @@ import { detectConcepts } from "@/lib/dialect/concepts";
 import type { Dialect } from "@/lib/dialect/lint";
 import { level, unlockedChapters, updateSave, useSave } from "@/lib/save";
 import { arenaFoeLevel, xpProgress } from "@/game/engine/hud";
-import { bossSprite, starterSprite } from "@/game/sprites/roster";
-import { capture, dayOf } from "@/game/engine/querydex";
+import { STARTER_LINE, bossSprite, starterSprite, starterStageOf } from "@/game/sprites/roster";
+import { capture, dayOf, evolvedByCapture } from "@/game/engine/querydex";
 import { SpriteCanvas } from "@/components/sprites/SpriteCanvas";
+import { EvolutionScene } from "@/components/sprites/EvolutionScene";
 import { orbitronFamily } from "@/app/fonts";
 import { Bar, Button, Chip, CodeBlock, DIALECT_COLOR, DIALECT_NAME, DialectToggle, LinkButton, Modal, RichText } from "../ui/kit";
 import { Feedback, ResultPanel, ResultTab } from "./ResultPanel";
@@ -91,7 +92,10 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
   const accent = mode === "versus" ? "#f472b6" : (bossChapter?.color ?? chapter.color);
   const foeType = bossId ? BOSS_TYPE[bossId] : undefined;
   const foeName = mode === "versus" ? "P2 BYTEBAT" : bossId ? bossSprite(bossId).name : "";
-  const playerName = mode === "versus" ? "P1 BYTEBAT" : starterSprite("front").name;
+  // the starter fights the whole battle in the form it started in; a capture that evolves it plays on the victory card
+  const evolvedTo = mode === "campaign" && s.phase === "victory" ? evolvedByCapture(save.dex, chapter.boss, STARTER_LINE.length) : null;
+  const starterNow = mode === "versus" ? 0 : evolvedTo !== null ? evolvedTo - 1 : starterStageOf(save.dex);
+  const playerName = mode === "versus" ? "P1 BYTEBAT" : starterSprite("front", starterNow).name;
   const foeLevel = mode === "versus" ? level(save.xp) : arenaFoeLevel(bossChapter?.n ?? chapter.n, mode === "arena" ? wave : 1);
   const playerLevel = level(save.xp);
 
@@ -433,7 +437,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
       <div ref={stageBox} className="relative mx-3 h-[38vh] min-h-[230px] scroll-mt-2 overflow-hidden rounded-2xl border border-white/10 lg:h-auto lg:min-h-[260px] lg:flex-[0_0_40vh]">
         <HpBox side="foe" type={foeType} name={foeName} level={foeLevel} hp={s.foe.hp} maxHp={s.foe.maxHp} active={mode === "versus" && activeSide === "right"} className="absolute left-2 top-2 z-10 sm:left-3 sm:top-3" />
         <HpBox side="player" name={playerName} level={playerLevel} hp={s.player.hp} maxHp={s.player.maxHp} xp={mode === "versus" ? undefined : xpProgress(save.xp)} active={mode === "versus" && activeSide === "left"} className="absolute bottom-2 right-2 z-10 sm:bottom-3 sm:right-3" />
-        <StageView key={`${bossId ?? "versus"}-${wave}`} ref={stage} boss={bossId} versus={mode === "versus"} accent={accent} reducedMotion={save.settings.reducedMotion} font={orbitronFamily} onReady={() => setStageReady(true)} />
+        <StageView key={`${bossId ?? "versus"}-${wave}`} ref={stage} boss={bossId} versus={mode === "versus"} starter={starterNow} accent={accent} reducedMotion={save.settings.reducedMotion} font={orbitronFamily} onReady={() => setStageReady(true)} />
         <AnimatePresence>
           {banner && (
             <motion.div key={banner.title + banner.sub} className="pointer-events-none absolute inset-x-0 top-6 flex flex-col items-center" initial={{ opacity: 0, scale: 1.4, filter: "blur(8px)" }} animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }} exit={{ opacity: 0, y: -20 }} transition={{ type: "spring", stiffness: 260, damping: 20 }}>
@@ -584,7 +588,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
 
       {/* end screens */}
       <Modal open={(s.phase === "victory" || s.phase === "defeat") && endReady}>
-        <EndCard mode={mode} won={mode === "versus" ? s.player.hp > 0 : s.phase === "victory"} versusWinner={s.player.hp > 0 ? "Player 1" : "Player 2"} chapter={chapter} stats={s.stats} hp={s.player.hp / s.player.maxHp} wave={wave} />
+        <EndCard mode={mode} won={mode === "versus" ? s.player.hp > 0 : s.phase === "victory"} versusWinner={s.player.hp > 0 ? "Player 1" : "Player 2"} chapter={chapter} stats={s.stats} hp={s.player.hp / s.player.maxHp} wave={wave} evolvedTo={evolvedTo} reducedMotion={save.settings.reducedMotion} />
       </Modal>
 
       {/* pause when tab hidden */}
@@ -768,7 +772,7 @@ function DebriefCard({ d, mode, onContinue }: { d: Debrief; mode: Mode; onContin
   );
 }
 
-function EndCard({ mode, won, versusWinner, chapter, stats, hp, wave }: { mode: Mode; won: boolean; versusWinner: string; chapter: Chapter; stats: ReturnType<typeof initialState>["stats"]; hp: number; wave: number }) {
+function EndCard({ mode, won, versusWinner, chapter, stats, hp, wave, evolvedTo, reducedMotion }: { mode: Mode; won: boolean; versusWinner: string; chapter: Chapter; stats: ReturnType<typeof initialState>["stats"]; hp: number; wave: number; evolvedTo: number | null; reducedMotion: boolean }) {
   const stars = starsFor(hp, stats.hints);
   const next = chapterByNumber(chapter.n + 1);
   return (
@@ -787,6 +791,7 @@ function EndCard({ mode, won, versusWinner, chapter, stats, hp, wave }: { mode: 
           </div>
           <p className="mx-auto mt-3 max-w-sm text-sm text-white/65">{chapter.defeat}</p>
           <CaptureNote boss={chapter.boss} />
+          {evolvedTo !== null && <EvolutionScene from={starterSprite("front", evolvedTo - 1)} to={starterSprite("front", evolvedTo)} reducedMotion={reducedMotion} />}
         </>
       )}
       {mode === "arena" && <p className="mt-3 text-sm text-white/65">You cleared {wave - 1} wave{wave - 1 === 1 ? "" : "s"}.</p>}

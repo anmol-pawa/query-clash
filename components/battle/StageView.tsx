@@ -8,8 +8,8 @@ export interface StageHandle {
 }
 
 /** Hosts the PixiJS canvas. Handles React StrictMode double-mounting safely. */
-export const StageView = forwardRef<StageHandle, { boss?: BossId; versus?: boolean; accent: string; reducedMotion: boolean; font: string; onReady?: () => void }>(function StageView(
-  { boss, versus, accent, reducedMotion, font, onReady },
+export const StageView = forwardRef<StageHandle, { boss?: BossId; versus?: boolean; starter?: number; accent: string; reducedMotion: boolean; font: string; onReady?: () => void }>(function StageView(
+  { boss, versus, starter, accent, reducedMotion, font, onReady },
   ref,
 ) {
   const host = useRef<HTMLDivElement>(null);
@@ -23,7 +23,7 @@ export const StageView = forwardRef<StageHandle, { boss?: BossId; versus?: boole
   useEffect(() => {
     let cancelled = false;
     let created: BattleStage | null = null;
-    BattleStage.create(host.current!, { boss, versus, accent: parseInt(accent.slice(1), 16), reducedMotion, font })
+    BattleStage.create(host.current!, { boss, versus, starter, accent: parseInt(accent.slice(1), 16), reducedMotion, font })
       .then((s) => {
         if (cancelled) {
           s.destroy();
@@ -44,7 +44,7 @@ export const StageView = forwardRef<StageHandle, { boss?: BossId; versus?: boole
     };
     // the stage is rebuilt when the opponent changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [boss, versus, accent]);
+  }, [boss, versus, starter, accent]);
 
   useEffect(() => {
     stageRef.current?.setReducedMotion(reducedMotion);

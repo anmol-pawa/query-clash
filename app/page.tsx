@@ -9,6 +9,8 @@ import { CODEX } from "@/content/codex";
 import { setMusic, setVolume, sfx } from "@/game/audio/synth";
 import { sqlClient } from "@/lib/db/client";
 import { caughtCount } from "@/game/engine/querydex";
+import { SpriteCanvas } from "@/components/sprites/SpriteCanvas";
+import { starterSprite, starterStageOf } from "@/game/sprites/roster";
 import { level, resetSave, unlockedChapters, updateSave, useSave } from "@/lib/save";
 
 const FLOATER_WORDS = ["SELECT", "JOIN", "GROUP BY", "OVER (PARTITION BY)", "WITH RECURSIVE", "CONNECT BY PRIOR", "MERGE INTO", "ROLLBACK", "EXPLAIN", "NVL()", "COALESCE()", "FETCH FIRST", "LATERAL", "PIVOT", "EXISTS", "ROW_NUMBER()", "SAVEPOINT", "CREATE INDEX"];
@@ -29,6 +31,7 @@ export default function Home() {
     sqlClient().warmup(); // boot Postgres while the player reads the menu
   }, []);
 
+  const starter = starterSprite("front", starterStageOf(save.dex));
   const cleared = Object.keys(save.stars).length;
   const totalStars = Object.values(save.stars).reduce((a, b) => a + b, 0);
   const next = CHAPTERS[Math.min(unlockedChapters(save), 10) - 1];
@@ -61,7 +64,17 @@ export default function Home() {
 
       <div className="relative mx-auto flex max-w-6xl flex-col px-5 pb-16 pt-10 sm:pt-16">
         <header className="flex items-center justify-between">
-          <div className="text-xs uppercase tracking-[0.3em] text-white/40">Lv {level(save.xp)} · {save.xp} XP</div>
+          <Link href="/querydex" className="flex min-w-0 items-center gap-2 rounded-lg pr-2 hover:bg-white/5" data-testid="menu-starter" aria-label={`Your starter, ${starter.name}`}>
+            <span className="dex-screen flex h-11 w-11 shrink-0 items-end justify-center overflow-hidden">
+              <SpriteCanvas def={starter} scale={1} className="h-10 w-10" />
+            </span>
+            <span className="min-w-0 leading-tight">
+              <span className="block truncate font-display text-xs font-bold tracking-wider text-white/80">{starter.name}</span>
+              <span className="block whitespace-nowrap text-[10px] uppercase tracking-[0.15em] text-white/40">
+                Lv {level(save.xp)} · {save.xp} XP
+              </span>
+            </span>
+          </Link>
           <div className="flex items-center gap-2">
             <DialectToggle value={save.dialect} onChange={(d) => updateSave((s) => ({ ...s, dialect: d }))} />
             <Button size="sm" onClick={() => setSettings(true)}>

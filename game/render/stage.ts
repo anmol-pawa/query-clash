@@ -30,6 +30,8 @@ export type Side = "left" | "right";
 export interface StageOptions {
   boss?: BossId;
   versus?: boolean;
+  /** The player's starter evolution stage (campaign and arena; versus is always stage 0). */
+  starter?: number;
   accent: number;
   reducedMotion: boolean;
   font: string;
@@ -156,7 +158,7 @@ export class BattleStage {
 
     this.rig = { tw: this.tw, fx: this.fx, reduced: reducedMotion, space: this.camera };
 
-    const starterBack = starterSprite("back");
+    const starterBack = starterSprite("back", this.opts.versus ? 0 : this.opts.starter);
     this.left = new Creature(this.rig, starterBack, PLAYER.scale, 0x5eead4, 1);
     this.left.root.position.set(PLAYER.x, PLAYER.y);
     this.left.homeX = PLAYER.x;

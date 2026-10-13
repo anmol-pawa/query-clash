@@ -126,6 +126,16 @@ export const sfx = {
     tone(1318, 0.15, { type: "sine", gain: 0.08 });
     tone(1760, 0.3, { type: "sine", gain: 0.08, delay: 0.1 });
   },
+  /** A rising whole-tone shimmer while the starter glows white. */
+  evolving() {
+    [392, 440, 494, 554, 622, 698, 784, 880].forEach((f, i) => tone(f, 0.18, { type: "triangle", gain: 0.06, delay: i * 0.22 }));
+  },
+  /** The reveal: a bright major arpeggio over a held fifth. */
+  evolved() {
+    [587, 740, 880, 1175].forEach((f, i) => tone(f, 0.3, { type: "square", gain: 0.05, delay: i * 0.09 }));
+    tone(880, 1.0, { type: "sine", gain: 0.07, delay: 0.36 });
+    tone(1319, 1.0, { type: "sine", gain: 0.05, delay: 0.36 });
+  },
 };
 
 /** Minimal step sequencer: bass + arpeggio in a minor key, tempo by intensity. */

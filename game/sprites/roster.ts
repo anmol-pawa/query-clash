@@ -1,4 +1,5 @@
 import type { BossId } from "@/content/types";
+import { type Dex, starterStage } from "@/game/engine/querydex";
 import type { BossAttackStyle } from "@/game/render/characters/bosses";
 import type { SpriteDef } from "./pixel";
 import { spriteById } from "./index";
@@ -32,6 +33,9 @@ export function bossSprite(id: BossId): SpriteDef {
   if (!def) throw new Error(`no sprite "${BOSS_SPRITE[id]}" for boss ${id}`);
   return def;
 }
+
+/** The starter's current stage for a save's Querydex, capped at the forms drawn. */
+export const starterStageOf = (dex: Dex) => starterStage(dex, STARTER_LINE.length);
 
 export function starterSprite(side: keyof typeof STARTER, stage = 0): SpriteDef {
   const form = STARTER_LINE[Math.max(0, Math.min(stage, STARTER_LINE.length - 1))];

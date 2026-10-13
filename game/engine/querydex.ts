@@ -92,3 +92,16 @@ export function evolvedBy(before: Dex, after: Dex, forms: number): number | null
   const b = starterStage(after, forms);
   return b > a ? b : null;
 }
+
+/**
+ * The stage that capturing `boss` for the first time evolved the starter
+ * into, read back from the dex after the capture (null if this boss has been
+ * beaten before, or came from a migrated save, or its capture evolved nothing).
+ */
+export function evolvedByCapture(dex: Dex, boss: BossId, forms: number): number | null {
+  const rec = dex[boss];
+  if (!rec || rec.wins !== 1 || !rec.caught) return null;
+  const before: Dex = { ...dex };
+  delete before[boss];
+  return evolvedBy(before, dex, forms);
+}
