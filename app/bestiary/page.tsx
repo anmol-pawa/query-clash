@@ -7,7 +7,7 @@ import { CHAPTERS } from "@/content/chapters";
 import { sfx } from "@/game/audio/synth";
 import { ATTACKS, AttackKind } from "@/lib/dialect/concepts";
 import { useSave } from "@/lib/save";
-import { orbitronFamily } from "../fonts";
+import { pixelFamily } from "../fonts";
 
 const SPELL_SOURCE: Record<AttackKind, string> = {
   bolt: "WHERE / basic SELECT",
@@ -73,7 +73,7 @@ export default function BestiaryPage() {
         ))}
       </div>
       <div className="relative h-[46vh] min-h-[280px] overflow-hidden rounded-2xl border border-white/10">
-        <StageView key={ch.boss} ref={stage} boss={ch.boss} accent={ch.color} reducedMotion={save.settings.reducedMotion} font={orbitronFamily} />
+        <StageView key={ch.boss} ref={stage} boss={ch.boss} accent={ch.color} reducedMotion={save.settings.reducedMotion} font={pixelFamily} />
       </div>
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
         <section className="panel p-4">

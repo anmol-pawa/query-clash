@@ -2,7 +2,7 @@
 
 @theme inline {
   --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-display: var(--font-orbitron), var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-pixel), var(--font-inter), system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 }
 
@@ -31,9 +31,94 @@ body {
 
 .panel {
   background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  box-shadow: 0 10px 40px -20px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 3px solid #0e0f1a;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px #3a3f63, inset 0 -3px 0 2px #15172a, 0 3px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* ------------------------------------------------------------ pixel UI */
+
+/* Handheld-console buttons: flat fill, hard outline, a bottom ledge that
+   the button presses down into. --btn is the fill, --btn-lo its shadow. */
+.px-btn {
+  --btn: #2b2f4a;
+  --btn-hi: #454a70;
+  --btn-lo: #181a2c;
+  background: var(--btn);
+  border: 2px solid #0e0f1a;
+  border-radius: 4px;
+  box-shadow: inset 0 2px 0 var(--btn-hi), inset 0 -3px 0 var(--btn-lo), 0 2px 0 rgba(0, 0, 0, 0.5);
+  font-family: var(--font-display);
+  image-rendering: pixelated;
+}
+.px-btn:not(:disabled):active {
+  box-shadow: inset 0 2px 0 var(--btn-lo), 0 0 0 rgba(0, 0, 0, 0.5);
+  transform: translateY(2px);
+}
+.px-btn-primary {
+  --btn: var(--accent);
+  --btn-hi: color-mix(in oklab, var(--accent) 55%, white);
+  --btn-lo: color-mix(in oklab, var(--accent) 60%, black);
+}
+.px-btn-gold {
+  --btn: #f2b632;
+  --btn-hi: #ffe08a;
+  --btn-lo: #a8701a;
+}
+.px-btn-danger {
+  --btn: #e0475e;
+  --btn-hi: #ff8a9b;
+  --btn-lo: #8f2238;
+}
+
+/* A menu window: dark fill inside a double outline (dark, then light). */
+.px-window {
+  background: #161a30;
+  border: 3px solid #0e0f1a;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px #c9cdea, inset 0 0 0 4px #0e0f1a, 0 4px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* Main-menu entries: a window with a blinking ▸ cursor on hover/focus. */
+.px-menu-item {
+  position: relative;
+  background: linear-gradient(180deg, #232842, #1a1e34);
+  border: 3px solid #0e0f1a;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px #3a3f63, inset 0 -4px 0 2px #121427, 0 3px 0 rgba(0, 0, 0, 0.5);
+}
+.px-menu-item::before {
+  content: "▸";
+  position: absolute;
+  left: 6px;
+  bottom: 20px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: #fff;
+  opacity: 0;
+}
+.px-menu-item:hover,
+.px-menu-item:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--item, #c9cdea), inset 0 -4px 0 2px #121427, 0 3px 0 rgba(0, 0, 0, 0.5);
+}
+.px-menu-item:hover::before,
+.px-menu-item:focus-visible::before {
+  opacity: 1;
+  animation: px-blink 0.8s steps(1) infinite;
+}
+.px-menu-item:active {
+  transform: translateY(2px);
+}
+@keyframes px-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Hard pixel drop shadow for big titles. */
+.px-shadow {
+  text-shadow: 3px 3px 0 #0e0f1a, 0 3px 0 #0e0f1a;
 }
 
 .neon-text {

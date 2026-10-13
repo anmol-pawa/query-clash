@@ -18,7 +18,7 @@ import { STARTER_LINE, bossSprite, starterSprite, starterStageOf } from "@/game/
 import { capture, dayOf, evolvedByCapture } from "@/game/engine/querydex";
 import { SpriteCanvas } from "@/components/sprites/SpriteCanvas";
 import { EvolutionScene } from "@/components/sprites/EvolutionScene";
-import { orbitronFamily } from "@/app/fonts";
+import { pixelFamily } from "@/app/fonts";
 import { Bar, Button, Chip, CodeBlock, DIALECT_COLOR, DIALECT_NAME, DialectToggle, LinkButton, Modal, RichText } from "../ui/kit";
 import { Feedback, ResultPanel, ResultTab } from "./ResultPanel";
 import { SchemaExplorer } from "./SchemaExplorer";
@@ -437,7 +437,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
       <div ref={stageBox} className="relative mx-3 h-[38vh] min-h-[230px] scroll-mt-2 overflow-hidden rounded-2xl border border-white/10 lg:h-auto lg:min-h-[260px] lg:flex-[0_0_40vh]">
         <HpBox side="foe" type={foeType} name={foeName} level={foeLevel} hp={s.foe.hp} maxHp={s.foe.maxHp} active={mode === "versus" && activeSide === "right"} className="absolute left-2 top-2 z-10 sm:left-3 sm:top-3" />
         <HpBox side="player" name={playerName} level={playerLevel} hp={s.player.hp} maxHp={s.player.maxHp} xp={mode === "versus" ? undefined : xpProgress(save.xp)} active={mode === "versus" && activeSide === "left"} className="absolute bottom-2 right-2 z-10 sm:bottom-3 sm:right-3" />
-        <StageView key={`${bossId ?? "versus"}-${wave}`} ref={stage} boss={bossId} versus={mode === "versus"} starter={starterNow} accent={accent} reducedMotion={save.settings.reducedMotion} font={orbitronFamily} onReady={() => setStageReady(true)} />
+        <StageView key={`${bossId ?? "versus"}-${wave}`} ref={stage} boss={bossId} versus={mode === "versus"} starter={starterNow} accent={accent} reducedMotion={save.settings.reducedMotion} font={pixelFamily} onReady={() => setStageReady(true)} />
         <AnimatePresence>
           {banner && (
             <motion.div key={banner.title + banner.sub} className="pointer-events-none absolute inset-x-0 top-6 flex flex-col items-center" initial={{ opacity: 0, scale: 1.4, filter: "blur(8px)" }} animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }} exit={{ opacity: 0, y: -20 }} transition={{ type: "spring", stiffness: 260, damping: 20 }}>

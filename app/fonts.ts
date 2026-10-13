@@ -1,8 +1,9 @@
-import { Inter, JetBrains_Mono, Orbitron } from "next/font/google";
+import { Inter, JetBrains_Mono, Tiny5 } from "next/font/google";
 
-export const orbitron = Orbitron({ subsets: ["latin"], weight: ["500", "700", "900"], variable: "--font-orbitron" });
+/** The pixel display font (OFL): titles, menus, HP boxes and battle text. */
+export const pixel = Tiny5({ subsets: ["latin"], weight: "400", variable: "--font-pixel" });
 export const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 export const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
 
 /** Resolved family name, for canvas text in the PixiJS stage. */
-export const orbitronFamily = orbitron.style.fontFamily;
+export const pixelFamily = pixel.style.fontFamily;

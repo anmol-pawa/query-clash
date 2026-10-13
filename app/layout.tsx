@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { PwaRegister } from "@/components/PwaRegister";
-import { inter, jetbrains, orbitron } from "./fonts";
+import { inter, jetbrains, pixel } from "./fonts";
 
 export const metadata: Metadata = {
   title: "Query Clash — SQL battle arena",
@@ -18,7 +18,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrains.variable} ${orbitron.variable} h-full`}>
+    <html lang="en" className={`${inter.variable} ${jetbrains.variable} ${pixel.variable} h-full`}>
       <body className="min-h-full">
         {children}
         <PwaRegister />

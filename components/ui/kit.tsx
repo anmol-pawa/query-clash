@@ -7,11 +7,12 @@ import type { Dialect } from "@/lib/dialect/lint";
 
 type Variant = "primary" | "ghost" | "danger" | "gold";
 
+// handheld-console buttons: see .px-btn in globals.css
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-[var(--accent)] text-[#06040d] shadow-[0_0_30px_-6px_var(--accent)] hover:brightness-110",
-  ghost: "bg-white/5 text-white/90 border border-white/10 hover:bg-white/10",
-  danger: "bg-rose-500/90 text-white hover:bg-rose-500",
-  gold: "bg-amber-300 text-[#1a1203] shadow-[0_0_30px_-6px_#fcd34d] hover:brightness-110",
+  primary: "px-btn px-btn-primary text-[#06040d]",
+  ghost: "px-btn text-white/90 hover:brightness-125",
+  danger: "px-btn px-btn-danger text-white",
+  gold: "px-btn px-btn-gold text-[#1a1203]",
 };
 
 export function Button({
@@ -38,16 +39,14 @@ export function Button({
     <motion.button
       type={type}
       title={title}
-      whileHover={disabled ? undefined : { y: -2, scale: 1.02 }}
-      whileTap={disabled ? undefined : { scale: 0.96 }}
-      onHoverStart={() => !disabled && sfx.hover()}
+            onHoverStart={() => !disabled && sfx.hover()}
       onClick={() => {
         if (disabled) return;
         sfx.click();
         onClick?.();
       }}
       disabled={disabled}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl font-semibold tracking-wide transition-[filter,background-color] disabled:cursor-not-allowed disabled:opacity-40 ${sz} ${VARIANTS[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 font-semibold tracking-wide transition-[filter] disabled:cursor-not-allowed disabled:opacity-40 ${sz} ${VARIANTS[variant]} ${className}`}
     >
       {children}
     </motion.button>
@@ -65,7 +64,7 @@ export function LinkButton({ href, children, variant = "ghost", size = "md", cla
         sfx.click();
         onClick?.();
       }}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl font-semibold tracking-wide transition-[filter,background-color,transform] hover:-translate-y-0.5 active:scale-95 ${sz} ${VARIANTS[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 font-semibold tracking-wide transition-[filter] hover:brightness-110 ${sz} ${VARIANTS[variant]} ${className}`}
     >
       {children}
     </Link>
@@ -93,7 +92,7 @@ export function Bar({ value, max, color, label, align = "left", danger = 0.3, he
           </span>
         </div>
       )}
-      <div className="relative overflow-hidden rounded-full border border-white/10 bg-black/50" style={{ height }}>
+      <div className="relative overflow-hidden rounded-[3px] border-2 border-[#0e0f1a] bg-[#2a2d40] shadow-[0_0_0_1px_#c9cdea55]" style={{ height }}>
         {/* lag bar: shows recent damage */}
         <motion.div
           className={`absolute inset-y-0 bg-white/40 ${align === "right" ? "right-0" : "left-0"}`}
@@ -102,11 +101,12 @@ export function Bar({ value, max, color, label, align = "left", danger = 0.3, he
         />
         <motion.div
           className={`absolute inset-y-0 ${align === "right" ? "right-0" : "left-0"}`}
-          style={{ background: low ? "linear-gradient(90deg,#f43f5e,#fb7185)" : `linear-gradient(90deg, ${color}, color-mix(in oklab, ${color} 60%, white))`, boxShadow: `0 0 16px ${low ? "#f43f5e" : color}` }}
+          style={{ background: low ? "#f43f5e" : color, boxShadow: `inset 0 -3px 0 ${low ? "#9f1239" : `color-mix(in oklab, ${color} 55%, black)`}` }}
           animate={{ width: `${pct * 100}%` }}
           transition={{ type: "spring", stiffness: 140, damping: 20 }}
         />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.25),transparent_55%)]" />
+        {/* flat top highlight, one pixel row */}
+        <div className="absolute inset-x-0 top-0 h-[2px] bg-white/35" />
       </div>
     </div>
   );
@@ -115,7 +115,7 @@ export function Bar({ value, max, color, label, align = "left", danger = 0.3, he
 export function Chip({ children, color, className = "" }: { children: ReactNode; color?: string; className?: string }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wide ${className}`}
+      className={`inline-flex items-center gap-1 rounded-[3px] border-2 px-2 font-display py-0.5 text-[11px] font-semibold tracking-wide ${className}`}
       style={{ borderColor: color ? `${color}55` : "rgba(255,255,255,0.12)", color: color ?? "rgba(255,255,255,0.75)", background: color ? `${color}14` : "rgba(255,255,255,0.04)" }}
     >
       {children}
@@ -129,7 +129,7 @@ export function DialectToggle({ value, onChange, disabled }: { value: Dialect; o
     { id: "oracle", label: "Oracle", color: "#f87171" },
   ];
   return (
-    <div className="relative inline-flex shrink-0 rounded-xl border border-white/10 bg-black/40 p-1" role="radiogroup" aria-label="SQL dialect">
+    <div className="px-window relative inline-flex shrink-0 p-1.5" role="radiogroup" aria-label="SQL dialect">
       {opts.map((o) => (
         <button
           key={o.id}
@@ -140,10 +140,10 @@ export function DialectToggle({ value, onChange, disabled }: { value: Dialect; o
             sfx.click();
             onChange(o.id);
           }}
-          className="relative z-10 px-2.5 py-1.5 text-xs font-bold tracking-wide transition-colors disabled:cursor-not-allowed sm:px-3"
+          className="relative z-10 px-2.5 py-1.5 font-display text-xs font-bold tracking-wide transition-colors disabled:cursor-not-allowed sm:px-3"
           style={{ color: value === o.id ? "#0b0718" : "rgba(255,255,255,0.7)" }}
         >
-          {value === o.id && <motion.span layoutId="dialect-pill" className="absolute inset-0 -z-10 rounded-lg" style={{ background: o.color, boxShadow: `0 0 20px -4px ${o.color}` }} transition={{ type: "spring", stiffness: 400, damping: 30 }} />}
+          {value === o.id && <motion.span layoutId="dialect-pill" className="absolute inset-0 -z-10 rounded-[3px]" style={{ background: o.color, boxShadow: `inset 0 -3px 0 color-mix(in oklab, ${o.color} 55%, black)` }} transition={{ type: "spring", stiffness: 400, damping: 30 }} />}
           {o.label}
         </button>
       ))}
@@ -158,7 +158,7 @@ export function Modal({ open, children, onClose, wide }: { open: boolean; childr
         <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <div className="absolute inset-0 bg-[#05030d]/80" onClick={onClose} />
           <motion.div
-            className={`panel relative max-h-[90vh] w-full overflow-y-auto scroll-thin p-6 ${wide ? "max-w-4xl" : "max-w-xl"}`}
+            className={`px-window relative max-h-[90vh] w-full overflow-y-auto scroll-thin p-6 ${wide ? "max-w-4xl" : "max-w-xl"}`}
             initial={{ y: 40, scale: 0.94, opacity: 0 }}
             animate={{ y: 0, scale: 1, opacity: 1 }}
             exit={{ y: 20, scale: 0.97, opacity: 0 }}

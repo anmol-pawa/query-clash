@@ -238,7 +238,7 @@ export function popText(c: FxContext, at: Pt, text: string, o: { color: number; 
     style: {
       fontFamily: `${c.font}, system-ui, sans-serif`,
       fontSize: o.size ?? 54,
-      fontWeight: "900",
+      fontWeight: "700",
       fill: o.color,
       stroke: { color: 0x0b0718, width: 8 },
       dropShadow: { color: o.color, blur: 16, distance: 0, alpha: 0.9 },
