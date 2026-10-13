@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SPRITES } from "@/game/sprites";
-import { BOSS_SPRITE, BOSS_STYLE, STARTER, bossSprite, starterSprite } from "@/game/sprites/roster";
+import { BOSS_SPRITE, BOSS_STYLE, STARTER, STARTER_LINE, bossSprite, starterSprite } from "@/game/sprites/roster";
 import { CHAPTERS } from "@/content/chapters";
 import { bounds, frameToRGBA, mirror, overlay, shift, validateSprite, type SpriteDef } from "@/game/sprites/pixel";
 
@@ -64,19 +64,30 @@ describe("sprite lookup", () => {
     expect(starterSprite("front").name).toBe("BYTEBAT");
     expect(starterSprite("back").anims.idle.length).toBeGreaterThan(1);
   });
+  it("the starter evolves BYTEBAT → KILOBAT, each form 64×64 with a back sprite, clamped past the last form", () => {
+    expect(STARTER_LINE[0]).toBe(STARTER);
+    expect(STARTER_LINE.map((_, i) => starterSprite("front", i).name)).toEqual(["BYTEBAT", "KILOBAT"]);
+    for (let i = 0; i < STARTER_LINE.length; i++) {
+      for (const side of ["front", "back"] as const) expect([starterSprite(side, i).w, starterSprite(side, i).h]).toEqual([64, 64]);
+      expect(starterSprite("back", i).id).toBe(`${starterSprite("front", i).id}-back`);
+    }
+    expect(starterSprite("front", 99).id).toBe(STARTER_LINE[STARTER_LINE.length - 1].front);
+    expect(starterSprite("front", -1).id).toBe("bytebat");
+  });
   it("every boss keeps a distinct counter-attack style for the battle stage", () => {
     const styles = CHAPTERS.map((c) => BOSS_STYLE[c.boss].style);
     expect(new Set(styles).size).toBe(CHAPTERS.length);
     expect(BOSS_STYLE.hydra.style).toBe("breath");
   });
   it("every battle sprite has the animations the stage plays", () => {
-    for (const def of [...CHAPTERS.map((c) => bossSprite(c.boss)), starterSprite("back"), starterSprite("front")])
+    const starters = STARTER_LINE.flatMap((_, i) => [starterSprite("back", i), starterSprite("front", i)]);
+    for (const def of [...CHAPTERS.map((c) => bossSprite(c.boss)), ...starters])
       for (const anim of ["idle", "attack", "hurt", "faint"]) expect(def.anims[anim], `${def.id}.${anim}`).toBeDefined();
   });
 });
 
-describe("BYTEBAT evolve", () => {
-  const evolve = starterSprite("front").anims.evolve ?? [];
+describe.each([0, 1])("starter stage %i evolve", (stage) => {
+  const evolve = starterSprite("front", stage).anims.evolve ?? [];
   const white = (f: readonly string[]) => {
     const px = f.join("").replace(/\./g, "");
     return [...px].filter((c) => c === "w").length / px.length;

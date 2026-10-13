@@ -27,6 +27,9 @@ The hourly routine works top to bottom: take the first unchecked box. Split big 
 - [ ] A5. Collection: defeated bosses can be "captured" into a party/box screen (Querydex) with stats, and the starter evolves at chapter milestones (an evolution animation). Saved in localStorage.
   - [x] A5a. Querydex: a campaign win captures the boss (saved with date and win count; old saves migrate from chapter stars), a `/querydex` party + box screen with animated sprites, silhouettes for unmet bosses, and a stats card (No., type, Lv, HP, wins, stars, weaknesses/resists), plus a capture note on the victory card.
   - [ ] A5b. Starter evolution: BYTEBAT evolves at chapter milestones (e.g. after chapters 3 and 7) with a white-silhouette morph animation on the victory screen; the evolved form shows in battle, the HP box and the Querydex party.
+    - [x] A5b1. KILOBAT (BYTEBAT's first evolution) front + back sprites with idle/attack/hurt/faint/evolve, the `STARTER_LINE` and a staged `starterSprite`, and the pure `starterStage` / `evolvedBy` milestone logic (after chapters 3 and 7), with tests.
+    - [ ] A5b2. Wire the stage in: the evolved form in battle (back sprite, HP box name), the Querydex party panel and the main menu; an evolution scene on the victory card when a capture evolves the starter (BYTEBAT's evolve frames morphing into KILOBAT, then "BYTEBAT evolved into KILOBAT!").
+    - [ ] A5b3. The final form (after chapter 7): a third original 64×64 front + back sprite with all animations, added to `STARTER_LINE`.
 - [ ] A6. Pixel UI pass: pixel font (an OFL font via next/font, e.g. Press Start 2P / Pixelify Sans), menus restyled as handheld-console menus, and transitions (screen wipe on battle start). Must stay readable and touch-friendly on iPhone.
 
 ## B. DBMS Interview mode (`/interview`)

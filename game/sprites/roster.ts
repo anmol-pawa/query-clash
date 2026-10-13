@@ -6,6 +6,9 @@ import { spriteById } from "./index";
 /** The player's starter creature: its front sprite (menus, Querydex) and back sprite (battle). */
 export const STARTER = { front: "bytebat", back: "bytebat-back" } as const;
 
+/** The starter's evolution line, one entry per stage (see `starterStage` in the Querydex engine). */
+export const STARTER_LINE: readonly { front: string; back: string }[] = [STARTER, { front: "kilobat", back: "kilobat-back" }];
+
 /**
  * Which pixel sprite plays each chapter boss. Sprite ids differ from some
  * BossIds on purpose (e.g. `subzero` → `frostnest`) so no sprite reuses an
@@ -30,9 +33,10 @@ export function bossSprite(id: BossId): SpriteDef {
   return def;
 }
 
-export function starterSprite(side: keyof typeof STARTER): SpriteDef {
-  const def = spriteById(STARTER[side]);
-  if (!def) throw new Error(`no starter sprite "${STARTER[side]}"`);
+export function starterSprite(side: keyof typeof STARTER, stage = 0): SpriteDef {
+  const form = STARTER_LINE[Math.max(0, Math.min(stage, STARTER_LINE.length - 1))];
+  const def = spriteById(form[side]);
+  if (!def) throw new Error(`no starter sprite "${form[side]}"`);
   return def;
 }
 

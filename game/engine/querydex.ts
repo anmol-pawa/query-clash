@@ -67,3 +67,28 @@ export function dexStats(boss: BossId): DexStats {
     resist: TYPE_CHART[type].resist,
   };
 }
+
+/** The starter evolves after capturing the boss of each of these chapters. */
+export const EVOLVE_AFTER: readonly number[] = [3, 7];
+
+/**
+ * The starter's evolution stage (0 = BYTEBAT, 1 = KILOBAT, …): one step per
+ * milestone chapter whose boss is in the dex, capped at the last form drawn.
+ */
+export function starterStage(dex: Dex, forms: number): number {
+  const reached = EVOLVE_AFTER.filter((n) => {
+    const c = CHAPTERS.find((ch) => ch.n === n);
+    return !!c && !!dex[c.boss];
+  }).length;
+  return Math.max(0, Math.min(reached, forms - 1));
+}
+
+/**
+ * The stage a capture just evolved the starter into, or null if it didn't
+ * (for the victory screen's evolution scene).
+ */
+export function evolvedBy(before: Dex, after: Dex, forms: number): number | null {
+  const a = starterStage(before, forms);
+  const b = starterStage(after, forms);
+  return b > a ? b : null;
+}
