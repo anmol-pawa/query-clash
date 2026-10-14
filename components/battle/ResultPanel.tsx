@@ -1,6 +1,6 @@
 "use client";
-import { AnimatePresence, motion } from "motion/react";
-import { useDeferredValue, useMemo } from "react";
+import { motion } from "motion/react";
+import { useDeferredValue, useMemo, useRef } from "react";
 import type { ResultSet, RunResult } from "@/lib/db/engine";
 import { DialectError, NeedColumns } from "@/lib/dialect/errors";
 import { Dialect, lintOracle } from "@/lib/dialect/lint";
@@ -8,8 +8,9 @@ import { transpileOracle } from "@/lib/dialect/oracle";
 import { sfx } from "@/game/audio/synth";
 import { Button, CodeBlock } from "../ui/kit";
 import { ResultGrid } from "./ResultGrid";
+import { ResultTab, resultTabs, stepTab } from "./tabs";
 
-export type ResultTab = "result" | "target" | "tutor" | "lens" | "plan";
+export type { ResultTab };
 
 export interface Feedback {
   run?: RunResult;
@@ -47,51 +48,74 @@ export function ResultPanel({
   planLabel?: string;
   hideTarget?: boolean;
 }) {
-  const tabs: { id: ResultTab; label: string; dot?: boolean }[] = [
-    { id: "result", label: "Result" },
-    ...(hideTarget ? [] : [{ id: "target" as const, label: "Target" }]),
-    { id: "tutor", label: "Tutor", dot: !!feedback && (feedback.run?.ok === false || feedback.correct === false) },
-    { id: "lens", label: "Lens" },
-    { id: "plan", label: "Plan" },
-  ];
+  const tabs = resultTabs({ hideTarget, tutorAlert: !!feedback && (feedback.run?.ok === false || feedback.correct === false) });
+  const strip = useRef<HTMLDivElement>(null);
+  const pick = (id: ResultTab) => {
+    sfx.click();
+    setTab(id);
+  };
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="mb-2 flex gap-1 border-b border-white/10" role="tablist">
+      <div
+        ref={strip}
+        className="mb-3 flex gap-1 overflow-x-auto pb-1 scroll-thin"
+        role="tablist"
+        aria-label="Result window"
+        onKeyDown={(e) => {
+          // D-pad: left/right walks the tabs and wraps, like a handheld menu
+          if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+          e.preventDefault();
+          const next = stepTab(tabs, tab, e.key === "ArrowRight" ? 1 : -1);
+          pick(next);
+          strip.current?.querySelector<HTMLButtonElement>(`[data-tab="${next}"]`)?.focus();
+        }}
+      >
         {tabs.map((t) => (
           <button
             key={t.id}
             role="tab"
+            data-tab={t.id}
             aria-selected={tab === t.id}
-            onClick={() => {
-              sfx.click();
-              setTab(t.id);
-            }}
-            className={`relative px-2 py-1.5 text-xs font-bold uppercase tracking-wider sm:px-3 sm:tracking-widest transition-colors ${tab === t.id ? "text-white" : "text-white/40 hover:text-white/70"}`}
+            tabIndex={tab === t.id ? 0 : -1}
+            onClick={() => pick(t.id)}
+            className="px-tab relative shrink-0 px-2 py-1.5 text-xs uppercase tracking-wide sm:px-2.5"
           >
             {t.label}
-            {t.dot && <span className="absolute right-0.5 top-1 h-1.5 w-1.5 rounded-full bg-rose-400" />}
-            {tab === t.id && <motion.span layoutId="rtab" className="absolute inset-x-1 -bottom-px h-0.5 rounded bg-[var(--accent)]" />}
+            {t.alert && <span className="absolute -right-1 -top-1 h-2.5 w-2.5 border-2 border-[#0e0f1a] bg-rose-400" aria-label="needs attention" />}
           </button>
         ))}
       </div>
       <div className="min-h-0 flex-1 overflow-auto scroll-thin">
-        <AnimatePresence mode="wait">
-          <motion.div key={tab} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
-            {tab === "result" && <ResultTabView feedback={feedback} />}
-            {tab === "target" && <TargetView expected={expected} scouted={scouted} onScout={onScout} cost={scoutCost} canScout={canScout} />}
-            {tab === "tutor" && <TutorView feedback={feedback} dialect={dialect} />}
-            {tab === "lens" && <LensView dialect={dialect} sql={sql} />}
-            {tab === "plan" && <PlanView plan={plan} label={planLabel} dialect={dialect} />}
-          </motion.div>
-        </AnimatePresence>
+        {/* switch instantly like a handheld menu; an exit animation could strand the old tab on fast D-pad input */}
+        <motion.div key={tab} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.12 }}>
+          {tab === "result" && <ResultTabView feedback={feedback} />}
+          {tab === "target" && <TargetView expected={expected} scouted={scouted} onScout={onScout} cost={scoutCost} canScout={canScout} />}
+          {tab === "tutor" && <TutorView feedback={feedback} dialect={dialect} />}
+          {tab === "lens" && <LensView dialect={dialect} sql={sql} />}
+          {tab === "plan" && <PlanView plan={plan} label={planLabel} dialect={dialect} />}
+        </motion.div>
       </div>
     </div>
   );
 }
 
+/** --tone for the pixel message boxes and tags. */
+const TONE = {
+  err: { "--tone": "#fb7185" },
+  warn: { "--tone": "#fbbf24" },
+  ok: { "--tone": "#4ade80" },
+  info: { "--tone": "#38bdf8" },
+  oracle: { "--tone": "#f87171" },
+  muted: { "--tone": "#8b90b8" },
+} as Record<string, React.CSSProperties>;
+
 function Empty({ children }: { children: React.ReactNode }) {
-  return <div className="flex h-32 items-center justify-center px-6 text-center text-sm text-white/35">{children}</div>;
+  return (
+    <div className="flex h-32 items-center justify-center px-6 text-center text-sm text-white/35">
+      <p>{children}</p>
+    </div>
+  );
 }
 
 function ResultTabView({ feedback }: { feedback: Feedback | null }) {
@@ -99,8 +123,8 @@ function ResultTabView({ feedback }: { feedback: Feedback | null }) {
   const r = feedback.run;
   if (!r.ok)
     return (
-      <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm">
-        <div className="font-bold text-rose-300">{r.error.title}</div>
+      <div className="px-box p-3 text-sm" style={TONE.err}>
+        <div className="px-box-title text-sm">{r.error.title}</div>
         <div className="mt-1 font-mono text-xs text-rose-200/80">{r.error.oracle ?? r.error.message}</div>
       </div>
     );
@@ -110,9 +134,9 @@ function ResultTabView({ feedback }: { feedback: Feedback | null }) {
         <span className="font-mono">
           {r.command} · {r.statements} statement{r.statements === 1 ? "" : "s"} · {r.ms.toFixed(0)} ms
         </span>
-        {feedback.preview && <span className="rounded bg-white/10 px-1.5 py-0.5 uppercase tracking-widest">preview</span>}
-        {feedback.correct === true && <span className="rounded bg-emerald-400/20 px-1.5 py-0.5 font-bold uppercase tracking-widest text-emerald-300">match</span>}
-        {feedback.correct === false && <span className="rounded bg-rose-400/20 px-1.5 py-0.5 font-bold uppercase tracking-widest text-rose-300">no match</span>}
+        {feedback.preview && <span className="px-tag text-[11px]">preview</span>}
+        {feedback.correct === true && <span className="px-tag text-[11px]" style={TONE.ok}>match</span>}
+        {feedback.correct === false && <span className="px-tag text-[11px]" style={TONE.err}>no match</span>}
       </div>
       {r.result ? <ResultGrid result={r.result} /> : <Empty>Statement executed — no rows returned.</Empty>}
     </div>
@@ -142,20 +166,20 @@ function TutorView({ feedback, dialect }: { feedback: Feedback | null; dialect: 
     <div className="flex flex-col gap-3 text-sm">
       {r && !r.ok && (
         <>
-          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3">
-            <div className="text-xs font-bold uppercase tracking-widest text-rose-300">{r.error.title}</div>
+          <div className="px-box p-3" style={TONE.err}>
+            <div className="px-box-title text-xs">{r.error.title}</div>
             <p className="mt-1.5 leading-relaxed text-white/80">{r.error.explain}</p>
           </div>
           {dialect === "oracle" && r.error.oracle && (
-            <div className="rounded-xl border border-red-400/30 bg-black/40 p-3 font-mono text-xs">
-              <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-red-300/80">Oracle would say</div>
+            <div className="px-box p-3 font-mono text-xs" style={TONE.oracle}>
+              <div className="px-box-title mb-1 text-[11px]">Oracle would say</div>
               <div className="text-red-200">{r.error.oracle}</div>
             </div>
           )}
           {/* lint errors (ORA-/PLS-) were raised before the query reached PostgreSQL */}
           {!/^(ORA|PLS)-/.test(r.error.code ?? "") && (
-          <div className="rounded-xl border border-white/10 bg-black/40 p-3 font-mono text-xs">
-            <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-white/40">{dialect === "oracle" ? "Emulator (PostgreSQL) message" : "PostgreSQL message"}</div>
+          <div className="px-box p-3 font-mono text-xs" style={TONE.muted}>
+            <div className="px-box-title mb-1 text-[11px]">{dialect === "oracle" ? "Emulator (PostgreSQL) message" : "PostgreSQL message"}</div>
             <div className="text-white/70">
               {r.error.code ? `[${r.error.code}] ` : ""}
               {r.error.message}
@@ -163,8 +187,8 @@ function TutorView({ feedback, dialect }: { feedback: Feedback | null; dialect: 
           </div>
           )}
           {r.error.mismatch.length > 0 && (
-            <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 p-3">
-              <div className="text-xs font-bold uppercase tracking-widest text-amber-300">Wrong dialect?</div>
+            <div className="px-box p-3" style={TONE.warn}>
+              <div className="px-box-title text-xs">Wrong dialect?</div>
               <ul className="mt-1.5 list-disc space-y-1 pl-4 text-white/80">
                 {r.error.mismatch.map((m) => (
                   <li key={m.found}>
@@ -177,16 +201,16 @@ function TutorView({ feedback, dialect }: { feedback: Feedback | null; dialect: 
         </>
       )}
       {r?.ok && feedback.correct === false && (
-        <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 p-3">
-          <div className="text-xs font-bold uppercase tracking-widest text-amber-300">Valid SQL — wrong answer</div>
+        <div className="px-box p-3" style={TONE.warn}>
+          <div className="px-box-title text-xs">Valid SQL — wrong answer</div>
           <p className="mt-1.5 leading-relaxed text-white/80">{feedback.reason}</p>
           <p className="mt-2 text-xs text-white/50">Tip: open the Target tab to scout the expected result, or buy a hint.</p>
         </div>
       )}
       {r?.ok && feedback.correct !== false && <Empty>{feedback.correct ? "Direct hit! Nothing to fix." : "No problems detected."}</Empty>}
       {r?.notes && r.notes.length > 0 && (
-        <div className="rounded-xl border border-sky-400/20 bg-sky-400/5 p-3">
-          <div className="text-xs font-bold uppercase tracking-widest text-sky-300">Dialect notes</div>
+        <div className="px-box p-3" style={TONE.info}>
+          <div className="px-box-title text-xs">Dialect notes</div>
           <ul className="mt-1.5 list-disc space-y-1 pl-4 text-xs leading-relaxed text-white/70">
             {r.notes.map((n, i) => (
               <li key={i}>{n}</li>
@@ -223,7 +247,7 @@ function LensView({ dialect, sql }: { dialect: Dialect; sql: string }) {
   if (!out || (!out.sql && !out.error)) return <Empty>Start typing Oracle SQL — the PostgreSQL translation appears here live.</Empty>;
   return (
     <div className="flex flex-col gap-2">
-      {out.error ? <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-200">{out.error}</div> : <CodeBlock code={out.sql} label="Runs on the engine as PostgreSQL" color="#60a5fa" />}
+      {out.error ? <div className="px-box p-3 text-xs text-rose-200" style={TONE.err}>{out.error}</div> : <CodeBlock code={out.sql} label="Runs on the engine as PostgreSQL" color="#60a5fa" />}
       {out.notes.length > 0 && (
         <ul className="list-disc space-y-1 pl-5 text-xs leading-relaxed text-white/65">
           {out.notes.map((n, i) => (
@@ -240,7 +264,7 @@ function PlanView({ plan, label, dialect }: { plan?: string; label?: string; dia
   if (!plan) return <Empty>After a successful SELECT, the planner&apos;s execution plan appears here. Cheaper plans deal bonus damage.</Empty>;
   return (
     <div className="flex flex-col gap-2">
-      {label && <div className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">{label}</div>}
+      {label && <div className="px-box-title text-xs" style={{ "--tone": "var(--accent)" } as React.CSSProperties}>{label}</div>}
       <CodeBlock code={plan} label={dialect === "oracle" ? "Plan (PostgreSQL planner; Oracle: EXPLAIN PLAN + DBMS_XPLAN)" : "EXPLAIN"} />
     </div>
   );

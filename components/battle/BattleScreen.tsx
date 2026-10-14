@@ -389,6 +389,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
   }
 
   const phaseLocked = s.phase !== "round";
+  const castReady = !phaseLocked && dbStatus === "ready" && !!sql.trim();
   const timePct = s.timeTotal >= 9999 ? 1 : s.timeLeft / Math.max(1, s.timeTotal);
 
   /* ------------------------------------------------------------ render */
@@ -531,19 +532,19 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
             <SqlEditor ref={editor} value={sql} onChange={setSql} dialect={dialect} onRun={cast} onPreview={preview} readOnly={s.phase === "casting"} />
           </div>
           <SymbolBar onInsert={(k) => editor.current?.insert(k)} />
-          <div className="flex items-center gap-2">
+          <div className="px-tray flex items-center gap-2 p-2" data-testid="command-bar">
             <Button size="sm" onClick={preview} disabled={phaseLocked || dbStatus !== "ready"} title="Run without attacking (Ctrl/⌘+Shift+Enter)">
-              ▷ Preview
+              ▷ PREVIEW
             </Button>
             <Button size="sm" onClick={() => setSql("")} disabled={phaseLocked}>
-              Clear
+              CLEAR
             </Button>
-            <span className="hide-on-touch ml-auto hidden text-[11px] text-white/35 sm:inline">Ctrl/⌘ + Enter</span>
-            <motion.div className="ml-auto hidden lg:block" animate={s.phase === "round" && sql.trim() ? { scale: [1, 1.04, 1] } : {}} transition={{ repeat: Infinity, duration: 1.6 }}>
-              <Button variant="primary" size="lg" onClick={cast} disabled={phaseLocked || dbStatus !== "ready" || !sql.trim()} className="font-display tracking-[0.2em]">
+            <span className="hide-on-touch ml-auto hidden font-display text-[11px] text-white/35 sm:inline">CTRL/⌘ + ENTER</span>
+            <div className="ml-auto hidden lg:block">
+              <Button variant="primary" size="lg" onClick={cast} disabled={phaseLocked || dbStatus !== "ready" || !sql.trim()} className={`tracking-[0.2em] ${castReady ? "px-cursor" : ""}`}>
                 {s.phase === "casting" ? "CASTING…" : "⚡ CAST"}
               </Button>
-            </motion.div>
+            </div>
           </div>
         </section>
 
@@ -568,12 +569,14 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
       </div>
 
       {/* phones/tablets: CAST stays under the thumb while scrolling */}
-      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-2 border-t border-white/10 bg-[#07050f]/95 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] lg:hidden">
-        <Button size="sm" onClick={preview} disabled={phaseLocked || dbStatus !== "ready" || !sql.trim()}>
-          ▷ Preview
+      <div className="px-window fixed inset-x-0 bottom-0 z-40 flex items-center gap-2 !rounded-none px-3 pt-2.5 pb-[max(0.6rem,env(safe-area-inset-bottom))] lg:hidden" data-testid="command-bar-mobile">
+        <Button size="sm" onClick={preview} disabled={phaseLocked || dbStatus !== "ready" || !sql.trim()} className="py-3">
+          ▷ PREVIEW
         </Button>
-        <div className="font-mono text-xs text-white/40 tabular-nums">{s.timeTotal >= 9999 ? "∞" : `${Math.ceil(s.timeLeft)}s`}</div>
-        <Button variant="primary" onClick={cast} disabled={phaseLocked || dbStatus !== "ready" || !sql.trim()} className="ml-auto flex-1 py-3 font-display tracking-[0.2em]">
+        <div className="px-tray min-w-[3.25rem] px-2 py-1.5 text-center font-display text-sm tabular-nums text-white/80" aria-label="Time left">
+          {s.timeTotal >= 9999 ? "∞" : `${Math.ceil(s.timeLeft)}s`}
+        </div>
+        <Button variant="primary" onClick={cast} disabled={phaseLocked || dbStatus !== "ready" || !sql.trim()} className={`ml-auto flex-1 py-3 tracking-[0.2em] ${castReady ? "px-cursor" : ""}`}>
           {s.phase === "casting" ? "CASTING…" : "⚡ CAST"}
         </Button>
       </div>

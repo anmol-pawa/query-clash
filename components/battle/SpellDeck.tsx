@@ -36,8 +36,9 @@ export function SpellDeck({ dialect, maxChapter, onCast }: { dialect: Dialect; m
               sfx.click();
               setGroup(g);
             }}
-            className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest transition-colors"
-            style={{ color: g === active ? "#0b0718" : GROUP_COLOR[g], background: g === active ? GROUP_COLOR[g] : `${GROUP_COLOR[g]}14` }}
+            aria-pressed={g === active}
+            className="px-tab px-2 py-0.5 text-[11px] uppercase tracking-wide"
+            style={{ "--tab": GROUP_COLOR[g], color: g === active ? "#fff" : GROUP_COLOR[g] } as React.CSSProperties}
           >
             {g}
           </button>
@@ -53,10 +54,10 @@ export function SpellDeck({ dialect, maxChapter, onCast }: { dialect: Dialect; m
               ev.dataTransfer.setData("text/plain", plainTemplate(c.tpl[dialect]));
               ev.dataTransfer.effectAllowed = "copy";
             }}
-            initial={{ opacity: 0, y: 14, rotate: -3 }}
-            animate={{ opacity: 1, y: 0, rotate: 0 }}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.03, type: "spring", stiffness: 300, damping: 22 }}
-            whileHover={{ y: -6, rotate: -1.5, scale: 1.04 }}
+            whileHover={{ y: -4 }}
             whileTap={{ scale: 0.95 }}
             onHoverStart={() => sfx.hover()}
             onClick={() => {
@@ -64,10 +65,9 @@ export function SpellDeck({ dialect, maxChapter, onCast }: { dialect: Dialect; m
               onCast(c.tpl[dialect]);
             }}
             title={`${c.desc}\n\n${plainTemplate(c.tpl[dialect])}`}
-            className="group relative flex w-[104px] shrink-0 cursor-grab flex-col items-start gap-1 overflow-hidden rounded-xl border p-2.5 text-left active:cursor-grabbing"
-            style={{ borderColor: `${GROUP_COLOR[c.group]}55`, background: `linear-gradient(160deg, ${GROUP_COLOR[c.group]}22, rgba(10,7,24,0.9) 60%)` }}
+            className="px-card relative flex w-[104px] shrink-0 cursor-grab flex-col items-start gap-1 overflow-hidden p-2.5 pt-3 text-left active:cursor-grabbing"
+            style={{ "--card": GROUP_COLOR[c.group] } as React.CSSProperties}
           >
-            <span className="absolute -right-4 -top-4 h-12 w-12 rounded-full blur-xl transition-opacity group-hover:opacity-100" style={{ background: GROUP_COLOR[c.group], opacity: 0.25 }} />
             <span className="font-mono text-[12px] font-bold leading-tight" style={{ color: GROUP_COLOR[c.group] }}>
               {c.label}
             </span>
