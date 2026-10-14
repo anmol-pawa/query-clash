@@ -246,3 +246,23 @@ a,
     animation: none;
   }
 }
+
+/* Campaign overworld: the selected node's blinking cursor and the starter hopping by the newest node */
+.map-cursor {
+  text-shadow: 2px 2px 0 #0e0f1a;
+  animation: px-blink 0.8s steps(1) infinite;
+}
+.map-hop {
+  animation: map-hop 1.2s steps(1) infinite;
+}
+@keyframes map-hop {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-cursor,
+  .map-hop {
+    animation: none;
+  }
+}

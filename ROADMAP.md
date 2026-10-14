@@ -34,6 +34,10 @@ The hourly routine works top to bottom: take the first unchecked box. Split big 
   - [x] A6a. Pixel font (Tiny5, OFL, via next/font) for every display face and the Pixi stage text; the UI kit (buttons, modals, chips, HP bars, dialect toggle, panels) restyled as handheld-console windows with hard outlines and press ledges; the main menu as a handheld menu (pixel title, colour tabs, blinking ▸ cursor).
   - [x] A6b. Battle-start transition: a pixel screen wipe (e.g. diagonal block wipe or flash bands) into every battle (campaign, arena, versus), skipped under reduced motion.
   - [ ] A6c. Restyle the remaining screens' bespoke menus (campaign map nodes, battle command bar and result tabs, codex and bestiary lists, victory/defeat cards) to the handheld style.
+    - [x] A6c1. Campaign map as a pixel overworld: a generated pixel map (a biome per chapter, a road, a river with a bridge, trees/rocks/crystals, stone platforms, fog over locked chapters), boss sprites on the nodes (silhouettes when locked), the starter by the newest node, a blinking cursor, and the side panel's boss portrait.
+    - [ ] A6c2. Battle command bar and result tabs.
+    - [ ] A6c3. Codex and bestiary lists.
+    - [ ] A6c4. Victory/defeat cards.
 
 ## B. DBMS Interview mode (`/interview`)
 

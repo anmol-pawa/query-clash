@@ -1,32 +1,22 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { BOSS_GLYPH } from "@/components/menu/bossGlyph";
+import { OverworldMap } from "@/components/menu/OverworldMap";
+import { SpriteCanvas } from "@/components/sprites/SpriteCanvas";
 import { Chip, LinkButton, NavLink } from "@/components/ui/kit";
 import { CHAPTERS } from "@/content/chapters";
 import { sfx } from "@/game/audio/synth";
 import { sqlClient } from "@/lib/db/client";
+import { MAP_NODES } from "@/game/render/overworld";
+import { bossSprite, starterSprite, starterStageOf } from "@/game/sprites/roster";
 import { unlockedChapters, useSave } from "@/lib/save";
-
-// winding path positions (percent of the map box)
-const POS: [number, number][] = [
-  [8, 78],
-  [22, 58],
-  [14, 32],
-  [32, 18],
-  [46, 40],
-  [40, 70],
-  [60, 80],
-  [70, 54],
-  [62, 26],
-  [86, 22],
-];
 
 export default function CampaignPage() {
   const save = useSave();
   const unlocked = unlockedChapters(save);
   const [sel, setSel] = useState(unlocked);
   const ch = CHAPTERS[sel - 1];
+  const starter = starterSprite("front", starterStageOf(save.dex));
 
   useEffect(() => {
     sqlClient().warmup();
@@ -34,8 +24,6 @@ export default function CampaignPage() {
   useEffect(() => {
     document.documentElement.style.setProperty("--accent", ch.color);
   }, [ch.color]);
-
-  const path = POS.map(([x, y], i) => `${i ? "L" : "M"} ${x * 10} ${y * 6}`).join(" ");
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-7xl flex-col px-4 py-6">
@@ -46,48 +34,42 @@ export default function CampaignPage() {
       </header>
 
       <div className="mt-6 grid flex-1 gap-5 lg:grid-cols-[1fr_380px]">
-        <div className="panel relative aspect-[5/3] w-full overflow-hidden">
-          <div className="grid-bg absolute inset-0 opacity-60" />
-          <svg viewBox="0 0 1000 600" className="absolute inset-0 h-full w-full" preserveAspectRatio="none">
-            <path d={path} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
-            <motion.path d={path} fill="none" stroke="var(--accent)" strokeWidth="3" strokeDasharray="8 10" strokeLinecap="round" initial={{ pathLength: 0 }} animate={{ pathLength: Math.max(0.02, (unlocked - 1) / 9) }} transition={{ duration: 1.6, ease: "easeInOut" }} />
-          </svg>
+        <div className="panel relative aspect-[5/3] w-full overflow-hidden p-0" data-testid="overworld">
+          <OverworldMap unlocked={unlocked} className="absolute inset-0 h-full w-full" />
           {CHAPTERS.map((c, i) => {
-            const [x, y] = POS[i];
+            const [x, y] = MAP_NODES[i];
             const locked = c.n > unlocked;
             const stars = save.stars[c.n] ?? 0;
             const active = sel === c.n;
             return (
-              <motion.button
-                key={c.n}
-                data-testid={`node-${c.n}`}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.1 + i * 0.06, type: "spring", stiffness: 260, damping: 18 }}
-                whileHover={locked ? {} : { scale: 1.12 }}
-                whileTap={locked ? {} : { scale: 0.95 }}
-                onHoverStart={() => !locked && sfx.hover()}
-                onClick={() => {
-                  sfx.click();
-                  setSel(c.n);
-                }}
-                className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
-                style={{ left: `${x}%`, top: `${y}%` }}
-              >
-                <div
-                  className="relative flex h-14 w-14 items-center justify-center rounded-2xl text-2xl sm:h-16 sm:w-16 sm:text-3xl"
-                  style={{
-                    background: locked ? "#15122a" : `radial-gradient(circle at 30% 30%, ${c.color}66, #0b0718 70%)`,
-                    color: locked ? "rgba(255,255,255,0.2)" : c.color,
-                    boxShadow: active ? `0 0 0 3px ${c.color}, 0 0 40px ${c.color}` : locked ? "inset 0 0 0 1px rgba(255,255,255,0.08)" : `inset 0 0 0 1px ${c.color}66`,
+              <div key={c.n} className="pointer-events-none absolute" style={{ left: `${x}%`, top: `${y}%` }}>
+                <motion.button
+                  data-testid={`node-${c.n}`}
+                  aria-label={locked ? `Chapter ${c.n} (locked)` : `Chapter ${c.n}: ${c.bossName}`}
+                  aria-pressed={active}
+                  initial={{ y: -12, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 + i * 0.05, duration: 0.25, ease: "easeOut" }}
+                  onHoverStart={() => !locked && sfx.hover()}
+                  onClick={() => {
+                    sfx.click();
+                    setSel(c.n);
                   }}
+                  className="pointer-events-auto absolute bottom-[-5px] left-0 flex w-11 sm:w-16 -translate-x-1/2 flex-col items-center rounded-[3px] outline-none focus-visible:outline-2 focus-visible:outline-white"
                 >
-                  {locked ? "🔒" : BOSS_GLYPH[c.boss]}
-                  {c.n === unlocked && !stars && <span className="absolute -right-1 -top-1 h-3 w-3 animate-ping rounded-full" style={{ background: c.color }} />}
+                  {active && <span className="map-cursor font-display text-sm leading-none text-white sm:text-base">▼</span>}
+                  <SpriteCanvas def={bossSprite(c.boss)} scale={1} silhouette={locked ? "#4a4f78" : undefined} label={locked ? "Unknown boss" : c.bossName} className={`h-11 w-11 sm:h-16 sm:w-16 ${locked ? "opacity-75" : ""} ${active ? "drop-shadow-[0_0_6px_rgba(255,255,255,0.7)]" : ""}`} />
+                </motion.button>
+                <div className="absolute left-0 top-[7px] flex -translate-x-1/2 items-center gap-0.5 whitespace-nowrap rounded-[3px] border-2 border-[#0e0f1a] px-1 font-display text-[10px] leading-[12px] sm:top-[10px] sm:text-xs" style={{ background: locked ? "#2b2f4a" : c.color, color: locked ? "rgba(255,255,255,0.45)" : "#0e0f1a" }}>
+                  {c.n}
+                  {stars > 0 && <span className="text-[#0e0f1a]">{"★".repeat(stars)}</span>}
                 </div>
-                <div className="mt-1 text-[10px] font-bold uppercase tracking-widest text-white/60">{c.n}</div>
-                <div className="text-[11px] leading-none text-amber-300">{"★".repeat(stars)}</div>
-              </motion.button>
+                {c.n === unlocked && (
+                  <div className="map-hop absolute bottom-[-6px] w-7 sm:w-10 left-[-30px] sm:left-[-44px]" data-testid="map-starter">
+                    <SpriteCanvas def={starter} scale={1} label={`${starter.name} is here`} className="h-7 w-7 sm:h-10 sm:w-10" />
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
@@ -98,8 +80,8 @@ export default function CampaignPage() {
               Chapter {ch.n} · {ch.title}
             </div>
             <div className="mt-3 flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl text-4xl" style={{ background: `radial-gradient(circle at 30% 30%, ${ch.color}55, #0b0718)`, color: ch.color, textShadow: `0 0 20px ${ch.color}` }}>
-                {BOSS_GLYPH[ch.boss]}
+              <div className="dex-screen flex h-20 w-20 shrink-0 items-end justify-center overflow-hidden">
+                <SpriteCanvas def={bossSprite(ch.boss)} scale={1} silhouette={ch.n > unlocked ? "#141630" : undefined} className="h-[76px] w-[76px]" />
               </div>
               <div>
                 <h2 className="font-display text-2xl font-black tracking-wide" style={{ color: ch.color }}>
@@ -120,7 +102,7 @@ export default function CampaignPage() {
             <ol className="mt-2 space-y-1.5 text-sm">
               {ch.missions.map((m, i) => (
                 <li key={m.id} className="flex items-center gap-2">
-                  <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${save.cleared.includes(m.id) ? "bg-emerald-400 text-black" : "bg-white/10 text-white/50"}`}>{save.cleared.includes(m.id) ? "✓" : i + 1}</span>
+                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border-2 border-[#0e0f1a] font-display text-[10px] ${save.cleared.includes(m.id) ? "bg-emerald-400 text-black" : "bg-[#2b2f4a] text-white/60"}`}>{save.cleared.includes(m.id) ? "✓" : i + 1}</span>
                   <span className="text-white/80">{m.title}</span>
                   {m.kind === "defense" && <span className="text-[10px] uppercase tracking-widest text-rose-300">defend</span>}
                 </li>
@@ -132,7 +114,7 @@ export default function CampaignPage() {
                   ENTER BATTLE
                 </LinkButton>
               ) : (
-                <div className="rounded-xl border border-white/10 p-3 text-center text-sm text-white/45">Defeat {CHAPTERS[ch.n - 2].bossName} to unlock.</div>
+                <div className="px-window p-3 text-center text-sm text-white/55">Defeat {CHAPTERS[ch.n - 2].bossName} to unlock.</div>
               )}
             </div>
           </motion.aside>
