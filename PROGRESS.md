@@ -172,3 +172,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Split A6 into A6a (this), A6b (battle-start screen wipe) and A6c (remaining bespoke menus).
 - Verified: lint, typecheck, 258 tests, build:pages pass. Playwright on the static export at 1280×900 and iPhone 14: menu, campaign, Querydex and the chapter 1 battle intro render in the pixel font with the new windows and buttons. No console errors, no horizontal overflow.
 - Next: A6b (battle-start screen wipe).
+
+## 2026-10-14 (08:20 IST): A6b battle-start screen wipe
+- Took over a stale lock (23:43 UTC, from a run that never released it; main was green).
+- `game/render/wipe.ts`: the transition as a pure timeline (~1.36 s): two white encounter flashes, eight dark bands that sweep shut from alternating edges (staggered top to bottom, each with a lit bottom row and an accent-coloured leading edge), a short hold, then a diagonal block dissolve from the top-left, with each block shrinking in four whole steps so it stays chunky.
+- `components/battle/BattleWipe.tsx` draws it on a fixed full-screen canvas above everything (`pointer-events: none`, so it never blocks the intro card) and unmounts when done. `BattleScreen` mounts it keyed on boss and wave, so it plays into every campaign battle, every arena wave and versus, in the chapter's accent colour. It renders nothing when reduced motion is on in the settings or in the OS.
+- Tests (`tests/wipe.test.ts`): the flash blinks, every band closed before the reveal and staggered, the screen covered until the reveal then dissolving along the diagonal, the stepped block sizes, the grid covering phone and desktop viewports, and the phase order and length: 264 tests.
+- Verified: lint, typecheck, 264 tests, build, build:pages pass. Playwright on the static export at 1280×900 and iPhone 14, with the page clock frozen at points along the timeline: screenshots of the flash, the bands sweeping shut, the full cover and the block dissolve over the chapter 1 intro card. The wipe also plays and clears on /arena and /versus. With reduced motion set there is no overlay. No console errors, no horizontal overflow.
+- Next: A6c (restyle the remaining bespoke menus to the handheld style).

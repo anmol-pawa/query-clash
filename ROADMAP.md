@@ -32,7 +32,7 @@ The hourly routine works top to bottom: take the first unchecked box. Split big 
     - [x] A5b3. The final form (after chapter 7): a third original 64×64 front + back sprite with all animations, added to `STARTER_LINE`.
 - [ ] A6. Pixel UI pass: pixel font (an OFL font via next/font, e.g. Press Start 2P / Pixelify Sans), menus restyled as handheld-console menus, and transitions (screen wipe on battle start). Must stay readable and touch-friendly on iPhone.
   - [x] A6a. Pixel font (Tiny5, OFL, via next/font) for every display face and the Pixi stage text; the UI kit (buttons, modals, chips, HP bars, dialect toggle, panels) restyled as handheld-console windows with hard outlines and press ledges; the main menu as a handheld menu (pixel title, colour tabs, blinking ▸ cursor).
-  - [ ] A6b. Battle-start transition: a pixel screen wipe (e.g. diagonal block wipe or flash bands) into every battle (campaign, arena, versus), skipped under reduced motion.
+  - [x] A6b. Battle-start transition: a pixel screen wipe (e.g. diagonal block wipe or flash bands) into every battle (campaign, arena, versus), skipped under reduced motion.
   - [ ] A6c. Restyle the remaining screens' bespoke menus (campaign map nodes, battle command bar and result tabs, codex and bestiary lists, victory/defeat cards) to the handheld style.
 
 ## B. DBMS Interview mode (`/interview`)

@@ -30,6 +30,7 @@ import { StageHandle, StageView } from "./StageView";
 import { BattleTextBox, type BattleMessage } from "./BattleTextBox";
 import { castLines, faintLine, introLines, missLines, roundLine, timeoutLines } from "@/game/engine/battleText";
 import { HpBox, TypeTag } from "./HpBox";
+import { BattleWipe } from "./BattleWipe";
 import { BOSS_TYPE, TYPE_CHART, TYPE_INFO, effectLine } from "@/game/engine/types";
 
 export type Mode = "campaign" | "arena" | "versus";
@@ -393,6 +394,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
   /* ------------------------------------------------------------ render */
   return (
     <div className="flex min-h-dvh flex-col pb-24 lg:h-dvh lg:pb-0">
+      <BattleWipe key={`wipe-${bossId ?? "versus"}-${wave}`} reducedMotion={save.settings.reducedMotion} accent={accent} />
       {/* top bar */}
       <header className="flex items-center gap-2 border-b sm:gap-3 border-white/5 bg-black/30 px-4 py-2 backdrop-blur">
         <Link href={mode === "campaign" ? "/campaign" : "/"} className="shrink-0 text-sm text-white/50 hover:text-white">
