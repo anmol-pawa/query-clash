@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { ReactNode } from "react";
+import { CSSProperties, ReactNode } from "react";
 import { sfx } from "@/game/audio/synth";
 import type { Dialect } from "@/lib/dialect/lint";
 
@@ -196,12 +196,8 @@ export function RichText({ text }: { text: string }) {
 
 export function CodeBlock({ code, label, color }: { code: string; label?: string; color?: string }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-white/10 bg-black/50">
-      {label && (
-        <div className="border-b border-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: color ?? "rgba(255,255,255,0.5)" }}>
-          {label}
-        </div>
-      )}
+    <div className="px-term overflow-hidden" style={{ "--tone": color ?? "#8b90b8" } as CSSProperties}>
+      {label && <div className="px-term-title px-3 py-1 font-display text-[11px] uppercase tracking-[0.12em]">{label}</div>}
       {/* wraps on phones so the SQL is readable without sideways scrolling */}
       <pre className="overflow-x-auto p-3 font-mono text-[12.5px] leading-relaxed break-words whitespace-pre-wrap text-white/85 scroll-thin sm:whitespace-pre">{code}</pre>
     </div>

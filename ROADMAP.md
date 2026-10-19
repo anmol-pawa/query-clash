@@ -36,7 +36,7 @@ The hourly routine works top to bottom: take the first unchecked box. Split big 
   - [ ] A6c. Restyle the remaining screens' bespoke menus (campaign map nodes, battle command bar and result tabs, codex and bestiary lists, victory/defeat cards) to the handheld style.
     - [x] A6c1. Campaign map as a pixel overworld: a generated pixel map (a biome per chapter, a road, a river with a bridge, trees/rocks/crystals, stone platforms, fog over locked chapters), boss sprites on the nodes (silhouettes when locked), the starter by the newest node, a blinking cursor, and the side panel's boss portrait.
     - [x] A6c2. Battle command bar and result tabs.
-    - [ ] A6c3. Codex and bestiary lists.
+    - [x] A6c3. Codex and bestiary lists.
     - [ ] A6c4. Victory/defeat cards.
 
 ## B. DBMS Interview mode (`/interview`)
