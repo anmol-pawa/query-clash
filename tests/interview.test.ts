@@ -189,7 +189,7 @@ describe("decks", () => {
     const easy = buildDeck(QUESTIONS, GENERATORS, { topic: "basics", seed: 7, size: 50, difficulties: [1] });
     expect(easy.length).toBeGreaterThan(0);
     expect(easy.every((x) => x.difficulty === 1)).toBe(true);
-    expect(buildDeck(QUESTIONS, GENERATORS, { topic: "normalization", seed: 1, size: 5 })).toEqual([]);
+    expect(buildDeck(QUESTIONS, GENERATORS, { topic: "transactions", seed: 1, size: 5 })).toEqual([]);
   });
 });
 
@@ -204,7 +204,7 @@ describe("topic picker", () => {
     expect(basics.solved).toBe(2);
     expect(basics.generators).toBe(1);
     expect(basics.playable).toBe(true);
-    expect(all.find((r) => r.topic.id === "normalization")!.playable).toBe(false);
+    expect(all.find((r) => r.topic.id === "transactions")!.playable).toBe(false);
 
     const easy = topicRows(TOPICS, QUESTIONS, GENERATORS, [easyIds[0], "basics-relation-props"], 1)[0];
     expect(easy.total).toBe(easyIds.length);

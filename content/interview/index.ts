@@ -1,5 +1,6 @@
 import { BASICS, BASICS_GENERATORS } from "./basics";
 import { ER, ER_GENERATORS } from "./er";
+import { NORMALIZATION, NORMALIZATION_GENERATORS } from "./normalization";
 import type { Generator, Question, Topic, TopicId } from "./types";
 
 export type * from "./types";
@@ -17,6 +18,6 @@ export const TOPICS: Topic[] = [
   { id: "sql", foe: "subzero", title: "Interview SQL", blurb: "Nth highest salary, gaps and islands, top-N per group…", color: "#4ade80" },
 ];
 
-export const QUESTIONS: Question[] = [...BASICS, ...ER];
-export const GENERATORS: Generator[] = [...BASICS_GENERATORS, ...ER_GENERATORS];
+export const QUESTIONS: Question[] = [...BASICS, ...ER, ...NORMALIZATION];
+export const GENERATORS: Generator[] = [...BASICS_GENERATORS, ...ER_GENERATORS, ...NORMALIZATION_GENERATORS];
 export type { TopicId };
