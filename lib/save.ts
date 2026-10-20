@@ -26,6 +26,7 @@ export interface SaveData {
   settings: Settings;
   seenIntro: boolean;
   dex: Dex; // captured bosses (Querydex)
+  interview: string[]; // DBMS Interview question ids answered correctly at least once
 }
 
 const KEY = "query-clash-save-v1";
@@ -42,6 +43,7 @@ const DEFAULT: SaveData = {
   settings: { volume: 0.6, music: true, reducedMotion: false, zen: false },
   seenIntro: false,
   dex: {},
+  interview: [],
 };
 
 let cache: SaveData | null = null;

@@ -1,0 +1,21 @@
+import { BASICS, BASICS_GENERATORS } from "./basics";
+import type { Generator, Question, Topic, TopicId } from "./types";
+
+export type * from "./types";
+
+/** The interview curriculum, in study order. Topics without questions yet show as "coming soon". */
+export const TOPICS: Topic[] = [
+  { id: "basics", foe: "nulloth", title: "DBMS Fundamentals", blurb: "Why a DBMS, schema levels, SQL sublanguages, relations and keys.", color: "#60a5fa" },
+  { id: "er", foe: "joinmaster", title: "ER & Relational Model", blurb: "Entities, cardinality, ER→tables, keys and relational algebra.", color: "#34d399" },
+  { id: "normalization", foe: "schemaforge", title: "Normalization", blurb: "Functional dependencies, closures, keys and 1NF–BCNF.", color: "#a78bfa" },
+  { id: "transactions", foe: "transactor", title: "Transactions", blurb: "ACID, schedules, serializability and isolation anomalies.", color: "#f472b6" },
+  { id: "concurrency", foe: "reaper", title: "Concurrency & Recovery", blurb: "2PL, deadlocks, timestamps, MVCC, WAL and ARIES.", color: "#fb923c" },
+  { id: "storage", foe: "aggregon", title: "Storage & Indexing", blurb: "B+ trees, hashing, clustered and covering indexes.", color: "#facc15" },
+  { id: "query", foe: "optimizer", title: "Query Processing", blurb: "Join algorithms, I/O cost, selectivity and EXPLAIN plans.", color: "#22d3ee" },
+  { id: "distributed", foe: "hydra", title: "Distributed & NoSQL", blurb: "CAP, replication, sharding, 2PC and NoSQL stores.", color: "#f87171" },
+  { id: "sql", foe: "subzero", title: "Interview SQL", blurb: "Nth highest salary, gaps and islands, top-N per group…", color: "#4ade80" },
+];
+
+export const QUESTIONS: Question[] = [...BASICS];
+export const GENERATORS: Generator[] = [...BASICS_GENERATORS];
+export type { TopicId };
