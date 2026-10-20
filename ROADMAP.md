@@ -30,14 +30,14 @@ The hourly routine works top to bottom: take the first unchecked box. Split big 
     - [x] A5b1. KILOBAT (BYTEBAT's first evolution) front + back sprites with idle/attack/hurt/faint/evolve, the `STARTER_LINE` and a staged `starterSprite`, and the pure `starterStage` / `evolvedBy` milestone logic (after chapters 3 and 7), with tests.
     - [x] A5b2. Wire the stage in: the evolved form in battle (back sprite, HP box name), the Querydex party panel and the main menu; an evolution scene on the victory card when a capture evolves the starter (BYTEBAT's evolve frames morphing into KILOBAT, then "BYTEBAT evolved into KILOBAT!").
     - [x] A5b3. The final form (after chapter 7): a third original 64×64 front + back sprite with all animations, added to `STARTER_LINE`.
-- [ ] A6. Pixel UI pass: pixel font (an OFL font via next/font, e.g. Press Start 2P / Pixelify Sans), menus restyled as handheld-console menus, and transitions (screen wipe on battle start). Must stay readable and touch-friendly on iPhone.
+- [x] A6. Pixel UI pass: pixel font (an OFL font via next/font, e.g. Press Start 2P / Pixelify Sans), menus restyled as handheld-console menus, and transitions (screen wipe on battle start). Must stay readable and touch-friendly on iPhone.
   - [x] A6a. Pixel font (Tiny5, OFL, via next/font) for every display face and the Pixi stage text; the UI kit (buttons, modals, chips, HP bars, dialect toggle, panels) restyled as handheld-console windows with hard outlines and press ledges; the main menu as a handheld menu (pixel title, colour tabs, blinking ▸ cursor).
   - [x] A6b. Battle-start transition: a pixel screen wipe (e.g. diagonal block wipe or flash bands) into every battle (campaign, arena, versus), skipped under reduced motion.
-  - [ ] A6c. Restyle the remaining screens' bespoke menus (campaign map nodes, battle command bar and result tabs, codex and bestiary lists, victory/defeat cards) to the handheld style.
+  - [x] A6c. Restyle the remaining screens' bespoke menus (campaign map nodes, battle command bar and result tabs, codex and bestiary lists, victory/defeat cards) to the handheld style.
     - [x] A6c1. Campaign map as a pixel overworld: a generated pixel map (a biome per chapter, a road, a river with a bridge, trees/rocks/crystals, stone platforms, fog over locked chapters), boss sprites on the nodes (silhouettes when locked), the starter by the newest node, a blinking cursor, and the side panel's boss portrait.
     - [x] A6c2. Battle command bar and result tabs.
     - [x] A6c3. Codex and bestiary lists.
-    - [ ] A6c4. Victory/defeat cards.
+    - [x] A6c4. Victory/defeat cards.
 
 ## B. DBMS Interview mode (`/interview`)
 

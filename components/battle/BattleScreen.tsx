@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { ALL_MISSIONS, CHAPTERS, chapterByNumber, missionTime } from "@/content/chapters";
 import { codexById } from "@/content/codex";
 import type { BossId, Chapter } from "@/content/types";
@@ -18,6 +18,9 @@ import { STARTER_LINE, bossSprite, starterSprite, starterStageOf } from "@/game/
 import { capture, dayOf, evolvedByCapture } from "@/game/engine/querydex";
 import { SpriteCanvas } from "@/components/sprites/SpriteCanvas";
 import { EvolutionScene } from "@/components/sprites/EvolutionScene";
+import type { SpriteDef } from "@/game/sprites/pixel";
+import { PLATFORM_STONE, STAR_DIM, STAR_LIT } from "@/game/sprites/ui";
+import { endBanner, reportRows, sceneSides, starRow } from "./endCard";
 import { pixelFamily } from "@/app/fonts";
 import { Bar, Button, Chip, CodeBlock, DIALECT_COLOR, DIALECT_NAME, DialectToggle, LinkButton, Modal, RichText } from "../ui/kit";
 import { Feedback, ResultPanel, ResultTab } from "./ResultPanel";
@@ -593,7 +596,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
 
       {/* end screens */}
       <Modal open={(s.phase === "victory" || s.phase === "defeat") && endReady}>
-        <EndCard mode={mode} won={mode === "versus" ? s.player.hp > 0 : s.phase === "victory"} versusWinner={s.player.hp > 0 ? "Player 1" : "Player 2"} chapter={chapter} stats={s.stats} hp={s.player.hp / s.player.maxHp} wave={wave} evolvedTo={evolvedTo} reducedMotion={save.settings.reducedMotion} />
+        <EndCard mode={mode} won={mode === "versus" ? s.player.hp > 0 : s.phase === "victory"} versusWinner={s.player.hp > 0 ? "Player 1" : "Player 2"} chapter={chapter} stats={s.stats} hp={s.player.hp / s.player.maxHp} wave={wave} evolvedTo={evolvedTo} reducedMotion={save.settings.reducedMotion} player={starterSprite("front", starterNow)} foe={bossId ? bossSprite(bossId) : starterSprite("front", 0)} />
       </Modal>
 
       {/* pause when tab hidden */}
@@ -777,46 +780,71 @@ function DebriefCard({ d, mode, onContinue }: { d: Debrief; mode: Mode; onContin
   );
 }
 
-function EndCard({ mode, won, versusWinner, chapter, stats, hp, wave, evolvedTo, reducedMotion }: { mode: Mode; won: boolean; versusWinner: string; chapter: Chapter; stats: ReturnType<typeof initialState>["stats"]; hp: number; wave: number; evolvedTo: number | null; reducedMotion: boolean }) {
+function EndCard({ mode, won, versusWinner, chapter, stats, hp, wave, evolvedTo, reducedMotion, player, foe }: { mode: Mode; won: boolean; versusWinner: string; chapter: Chapter; stats: ReturnType<typeof initialState>["stats"]; hp: number; wave: number; evolvedTo: number | null; reducedMotion: boolean; player: SpriteDef; foe: SpriteDef }) {
   const stars = starsFor(hp, stats.hints);
   const next = chapterByNumber(chapter.n + 1);
+  const banner = endBanner(mode, won, versusWinner);
+  const sides = sceneSides(mode, won, versusWinner);
+  const message =
+    mode === "arena"
+      ? `You cleared ${wave - 1} wave${wave - 1 === 1 ? "" : "s"}.`
+      : mode === "versus"
+        ? `${versusWinner} takes the duel. Swap seats for a rematch.`
+        : won
+          ? chapter.defeat
+          : "Study the Codex and the Tutor tab, then try again. Every attempt teaches the pattern.";
   return (
-    <div className="text-center" data-testid="end-card">
-      <div className={`font-display text-4xl font-black tracking-[0.2em] ${won ? "text-amber-300" : "text-rose-400"}`} style={{ textShadow: won ? "0 0 30px #fbbf24" : "0 0 30px #f43f5e" }}>
-        {mode === "versus" ? `${versusWinner.toUpperCase()} WINS` : mode === "arena" ? "RUN OVER" : won ? "VICTORY" : "DEFEATED"}
+    <div className="text-center" data-testid="end-card" style={{ "--tone": banner.tone } as CSSProperties}>
+      <div className="px-box px-3 py-3">
+        <div className="font-display text-3xl font-black tracking-[0.18em] sm:text-4xl" style={{ color: banner.tone, textShadow: "3px 3px 0 #0e0f1a" }} data-testid="end-banner">
+          {banner.title}
+        </div>
+        <div className="mt-1 font-display text-[11px] uppercase tracking-[0.2em] text-white/55">{mode === "campaign" ? `Chapter ${chapter.n} · ${foe.name}` : mode === "arena" ? `Arena · wave ${wave}` : "Versus duel"}</div>
       </div>
+
+      {evolvedTo === null && (
+        <div className="dex-screen relative mt-3 flex items-end justify-around gap-2 px-2 pb-2 pt-4" data-testid="end-scene">
+          <SceneCreature def={player} pose={sides.left} flip={false} />
+          <SceneCreature def={foe} pose={sides.right} flip />
+        </div>
+      )}
+
+      {mode === "campaign" && won && (
+        <div className="mt-3 flex justify-center gap-3" role="img" aria-label={`${stars} of 3 stars`} data-testid="end-stars">
+          {starRow(stars).map((lit, i) => (
+            <motion.span key={i} initial={reducedMotion ? false : { scale: 0, y: -12 }} animate={{ scale: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.25, ease: "backOut", duration: 0.3 }} className="inline-flex">
+              <SpriteCanvas def={lit ? STAR_LIT : STAR_DIM} scale={3} label={lit ? "star" : "no star"} />
+            </motion.span>
+          ))}
+        </div>
+      )}
+
+      <div className="px-box relative mx-auto mt-3 max-w-sm px-3 py-2.5 pr-6 text-left text-sm leading-relaxed text-white/80" style={{ "--tone": "#c9cdea" } as CSSProperties}>
+        {message}
+        <span className="absolute bottom-1 right-2 animate-[px-blink_0.8s_steps(1)_infinite] font-display text-xs text-white/70">▼</span>
+      </div>
+
       {mode === "campaign" && won && (
         <>
-          <div className="mt-3 flex justify-center gap-2 text-4xl">
-            {[1, 2, 3].map((i) => (
-              <motion.span key={i} initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} transition={{ delay: 0.3 + i * 0.2, type: "spring" }} className={i <= stars ? "text-amber-300 drop-shadow-[0_0_12px_#fbbf24]" : "text-white/15"}>
-                ★
-              </motion.span>
-            ))}
-          </div>
-          <p className="mx-auto mt-3 max-w-sm text-sm text-white/65">{chapter.defeat}</p>
           <CaptureNote boss={chapter.boss} />
           {evolvedTo !== null && <EvolutionScene from={starterSprite("front", evolvedTo - 1)} to={starterSprite("front", evolvedTo)} reducedMotion={reducedMotion} />}
         </>
       )}
-      {mode === "arena" && <p className="mt-3 text-sm text-white/65">You cleared {wave - 1} wave{wave - 1 === 1 ? "" : "s"}.</p>}
-      {mode === "campaign" && !won && <p className="mt-3 text-sm text-white/65">Study the Codex and the Tutor tab, then try again. Every attempt teaches the pattern.</p>}
-      <div className="mx-auto mt-5 grid max-w-sm grid-cols-3 gap-2 text-center">
-        {[
-          ["Hits", stats.hits],
-          ["Misses", stats.misses],
-          ["Crits", stats.crits],
-          ["Damage", stats.damageDealt],
-          ["Best combo", stats.bestCombo + 1],
-          ["Hints", stats.hints],
-        ].map(([k, v]) => (
-          <div key={k} className="rounded-lg border border-white/10 bg-white/[0.03] py-2">
-            <div className="font-display text-lg font-bold">{v}</div>
-            <div className="text-[10px] uppercase tracking-widest text-white/40">{k}</div>
-          </div>
-        ))}
+
+      <div className="px-box mx-auto mt-3 max-w-sm px-3 py-2 text-left" data-testid="end-report">
+        <div className="px-box-title text-[11px]">Battle report</div>
+        <dl className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0.5">
+          {reportRows(stats).map(([k, v]) => (
+            <div key={k} className="flex items-baseline gap-1 text-xs">
+              <dt className="uppercase tracking-wider text-white/55">{k}</dt>
+              <span aria-hidden className="mb-1 flex-1 border-b-2 border-dotted border-white/15" />
+              <dd className="font-display text-base text-white">{v}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
-      <div className="mt-6 flex flex-wrap justify-center gap-2">
+
+      <div className="mt-5 flex flex-wrap justify-center gap-2">
         <Button onClick={() => window.location.reload()}>Rematch</Button>
         {mode === "campaign" && won && next && (
           <LinkButton href={`/battle/${next.n}`} variant="primary">
@@ -829,6 +857,22 @@ function EndCard({ mode, won, versusWinner, chapter, stats, hp, wave, evolvedTo,
   );
 }
 
+/** A creature on its stone platform: standing and animated, or knocked over as a dark still. */
+function SceneCreature({ def, pose, flip }: { def: SpriteDef; pose: "stand" | "fainted"; flip: boolean }) {
+  const fainted = pose === "fainted";
+  return (
+    <div className="flex min-w-0 flex-col items-center" data-pose={pose}>
+      {/* drawn at 1×, shown at 1× on phones and an exact 2× from sm up */}
+      <div className={`flex h-24 items-end justify-center sm:h-48 ${fainted ? "opacity-70" : ""}`} style={{ transform: fainted ? `translateY(18%) rotate(${flip ? -90 : 90}deg) scale(0.8)` : flip ? "scaleX(-1)" : undefined }}>
+        <SpriteCanvas def={def} scale={1} silhouette={fainted ? "#3d4466" : undefined} label={`${def.name}${fainted ? " (fainted)" : ""}`} className="w-[var(--w)] sm:w-[calc(var(--w)*2)]" style={{ "--w": `${def.w}px` } as CSSProperties} />
+      </div>
+      <span className="-mt-2 sm:-mt-4">
+        <SpriteCanvas def={PLATFORM_STONE} scale={1} label="" className="block w-24 sm:w-48" />
+      </span>
+    </div>
+  );
+}
+
 /** "NULLOTH was captured!" on the first win, a win count after that. */
 function CaptureNote({ boss }: { boss: BossId }) {
   const save = useSave();
@@ -836,7 +880,7 @@ function CaptureNote({ boss }: { boss: BossId }) {
   const def = bossSprite(boss);
   if (!rec) return null;
   return (
-    <div className="mx-auto mt-4 flex max-w-sm items-center gap-3 rounded-lg border border-amber-300/30 bg-amber-300/[0.06] p-2 text-left" data-testid="capture-note">
+    <div className="px-box mx-auto mt-3 flex max-w-sm items-center gap-3 p-2 text-left" style={{ "--tone": "#f2b632" } as CSSProperties} data-testid="capture-note">
       <span className="dex-screen flex h-14 w-14 shrink-0 items-end justify-center overflow-hidden">
         <SpriteCanvas def={def} scale={1} className="h-14 w-14" />
       </span>

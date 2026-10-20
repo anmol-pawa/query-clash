@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { type CSSProperties, useEffect, useRef } from "react";
 import { SpriteDef, frameToRGBA, hexToRgb } from "@/game/sprites/pixel";
 
 /**
@@ -7,7 +7,7 @@ import { SpriteDef, frameToRGBA, hexToRgb } from "@/game/sprites/pixel";
  * (nearest-neighbour), without Pixi. `silhouette` paints every pixel one
  * colour, for creatures you have not met yet.
  */
-export function SpriteCanvas({ def, anim = "idle", scale, silhouette, className = "", label }: { def: SpriteDef; anim?: string; scale: number; silhouette?: string; className?: string; label?: string }) {
+export function SpriteCanvas({ def, anim = "idle", scale, silhouette, className = "", label, style }: { def: SpriteDef; anim?: string; scale: number; silhouette?: string; className?: string; label?: string; style?: CSSProperties }) {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const recolor = silhouette ? () => hexToRgb(silhouette) : undefined;
@@ -32,5 +32,5 @@ export function SpriteCanvas({ def, anim = "idle", scale, silhouette, className 
     const id = setInterval(draw, 1000 / (def.fps?.[anim] ?? 4));
     return () => clearInterval(id);
   }, [def, anim, scale, silhouette]);
-  return <canvas ref={ref} width={def.w * scale} height={def.h * scale} role="img" aria-label={label ?? def.name} className={`max-w-full [image-rendering:pixelated] ${className}`} />;
+  return <canvas ref={ref} width={def.w * scale} height={def.h * scale} role="img" aria-label={label ?? def.name} className={`max-w-full [image-rendering:pixelated] ${className}`} style={style} />;
 }

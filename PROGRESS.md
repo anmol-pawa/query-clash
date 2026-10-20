@@ -207,3 +207,13 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests (`tests/codexList.test.ts`): categories and colours, category and search filtering, per-tab counts, row states and the masked title: 280 tests.
 - Verified: lint, typecheck, 280 tests, build, build:pages pass. Playwright on the static export at 1280×900 and iPhone 14 with a seeded save: Codex list, opening an entry, answering the quiz wrong, the Joins tab, study mode and an empty search; Bestiary with chapter 4 selected and Join Chain playing. No console errors, no horizontal overflow.
 - Next: A6c4 (victory/defeat cards).
+
+## 2026-10-20 (05:40 IST): A6c4 victory/defeat cards
+- Took over a stale lock (2026-10-19 19:42 UTC, from a run that never released it; main was green).
+- `game/sprites/ui.ts`: new in-repo UI sprites in the palette + grid format: an outlined 13×13 rating star (gold ramp with a twinkle frame, plus a dim slate version) and a stone platform generated from the ellipse equation (outline, lit top, shaded rim, specks).
+- `components/battle/endCard.ts`: the card as plain data: banner text and tint per mode (VICTORY / DEFEATED / RUN OVER / PLAYER n WINS), the star row, who stands and who has fainted in the result scene, and the battle report rows.
+- End card restyled to the handheld style: a pixel banner box with a hard drop shadow and a chapter/arena/versus subtitle; a dex-screen result scene with both creatures on stone platforms (the winner animated, the loser a dark knocked-over silhouette; hidden when the evolution scene plays); pixel stars that pop in (static under reduced motion); a message box with a blinking ▼; the capture note as a gold message box; and a BATTLE REPORT stat sheet with dotted leaders. Sprites show at an exact 1× on phones and 2× from `sm` up. `SpriteCanvas` takes a `style`.
+- With this, A6 (pixel UI pass) is complete.
+- Tests (`tests/endCard.test.ts`): banners and tones per mode, star clamping, scene sides for every mode/outcome, report order and combo counting, and the star/platform sprites (valid, symmetric star with outlined tips, outlined platform with a lit top over a shaded rim): 287 tests.
+- Verified: lint, typecheck, 287 tests, build, build:pages pass. Playwright on the static export at 1280×900 and iPhone 14: won chapter 1 by casting all 7 solutions (VICTORY, 3 stars, capture note, report) and lost it by casting wrong queries (DEFEATED, BYTEBAT fainted, NULLOTH standing). No console errors, no horizontal overflow.
+- Next: B1 (DBMS Interview mode engine, route, topic picker and battle wrapper).
