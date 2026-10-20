@@ -1,13 +1,19 @@
 import type { Generator, Question } from "./types";
 import {
+  bcnfDecompose,
+  bcnfViolation,
   candidateKeys,
   closure,
   fdsText,
+  fdText,
   lostDependencies,
   losslessBinary,
+  losslessChase,
   NORMAL_FORMS,
   normalForm,
+  partNormalForm,
   setText,
+  synthesize3nf,
   type Fd,
   type NormalForm,
 } from "@/lib/dbms/fd";
@@ -334,6 +340,44 @@ export const NORMALIZATION: Question[] = [
     tags: ["denormalization"],
     askedAt: "Common in system-design rounds.",
   },
+  {
+    id: "nf-bcnf-step",
+    topic: "normalization",
+    kind: "mcq",
+    prompt: "R(A, B, C) with F = { A → B, B → C } is not in BCNF because of B → C. Splitting R on that violation gives:",
+    choices: ["R1(B, C) and R2(A, B)", "R1(B, C) and R2(A, C)", "R1(A, B) and R2(C)", "R1(A, C) and R2(A, B, C)"],
+    answer: 0,
+    explanation: "On a violation X → Y, BCNF decomposition makes R1 = X ∪ Y = BC and R2 = R − Y = AB. They share B, and B → C makes B a key of R1, so the split is lossless. Both parts are now in BCNF.",
+    difficulty: 2,
+    tags: ["bcnf", "decomposition"],
+  },
+  {
+    id: "nf-bcnf-always-lossless",
+    topic: "normalization",
+    kind: "truefalse",
+    prompt: "The BCNF decomposition algorithm always produces a lossless-join decomposition.",
+    answer: true,
+    explanation: "True. Each split on X → Y keeps X in both halves, and X → Y makes X a key of X ∪ Y, so every step passes the binary lossless test. What BCNF can lose is dependency preservation.",
+    difficulty: 1,
+    tags: ["bcnf", "lossless join"],
+  },
+  {
+    id: "nf-dept-advisor",
+    topic: "normalization",
+    kind: "mcq",
+    prompt: "dept_advisor(s_ID, i_ID, dept_name) with i_ID → dept_name and s_ID, dept_name → i_ID. What does 3NF synthesis produce?",
+    choices: [
+      "dept_advisor itself: it is already in 3NF",
+      "(i_ID, dept_name) and (s_ID, i_ID)",
+      "(s_ID, dept_name) and (i_ID, dept_name)",
+      "(s_ID, i_ID) and (s_ID, dept_name)",
+    ],
+    answer: 0,
+    explanation: "The cover gives (i_ID, dept_name) and (s_ID, dept_name, i_ID). The second contains a candidate key and also contains the first, so the first is dropped. dept_name is prime, so i_ID → dept_name is allowed in 3NF. BCNF would split it into (i_ID, dept_name) and (s_ID, i_ID) and lose s_ID, dept_name → i_ID.",
+    difficulty: 3,
+    tags: ["3nf", "bcnf", "decomposition"],
+    askedAt: "The classic 3NF-but-not-BCNF example from Silberschatz.",
+  },
 ];
 
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
@@ -539,4 +583,128 @@ export const preservationGen: Generator = {
   },
 };
 
-export const NORMALIZATION_GENERATORS: Generator[] = [closureGen, keyCountGen, highestNfGen, losslessGen, preservationGen];
+export const decompText = (parts: readonly (readonly string[])[]): string => parts.map((p, i) => `R${i + 1}(${p.join("")})`).join(", ");
+const decompKey = (parts: readonly (readonly string[])[]) => parts.map((p) => [...p].sort().join("")).sort().join("|");
+
+/** A random decomposition of `rel` into 2–3 parts that cover it, none inside another. */
+function randomDecomp(r: () => number, rel: readonly string[]): string[][] {
+  for (;;) {
+    const parts = Array.from({ length: randInt(r, 2, 3) }, () => shuffled(r, rel).slice(0, randInt(r, 2, rel.length - 1)).sort());
+    const covers = rel.every((a) => parts.some((p) => p.includes(a)));
+    const nested = parts.some((p, i) => parts.some((q, j) => i !== j && p.every((a) => q.includes(a))));
+    if (covers && !nested) return parts;
+  }
+}
+
+/** Why a decomposition fails a goal, or null if it meets it. The goal is lossless + every part in BCNF, or lossless + preserving + every part in 3NF. */
+export function decompFault(rel: readonly string[], parts: readonly string[][], fds: readonly Fd[], goal: "bcnf" | "3nf"): string | null {
+  const missing = rel.filter((a) => !parts.some((p) => p.includes(a)));
+  if (missing.length) return `drops ${missing.join(", ")}`;
+  if (!losslessChase(rel, parts, fds)) return "lossy";
+  if (goal === "3nf") {
+    const lost = lostDependencies(parts, fds);
+    if (lost.length) return `loses ${fdsText(lost)}`;
+    const bad = parts.findIndex((p) => NORMAL_FORMS.indexOf(partNormalForm(p, fds)) < NORMAL_FORMS.indexOf("3NF"));
+    return bad < 0 ? null : `R${bad + 1} is not in 3NF`;
+  }
+  const bad = parts.findIndex((p) => bcnfViolation(p, fds));
+  if (bad < 0) return null;
+  const v = bcnfViolation(parts[bad], fds)!;
+  return `R${bad + 1} is not in BCNF (${setText(v.lhs)} → ${setText(v.rhs)})`;
+}
+
+/** Three wrong decompositions (each with its fault), distinct from the right one and from each other. Plausible ones first. */
+function wrongDecomps(r: () => number, rel: readonly string[], fds: readonly Fd[], goal: "bcnf" | "3nf", right: string[][], plausible: string[][][]) {
+  const seen = new Set([decompKey(right)]);
+  const out: { parts: string[][]; fault: string }[] = [];
+  const offer = (parts: string[][]) => {
+    const fault = decompFault(rel, parts, fds, goal);
+    if (fault && !seen.has(decompKey(parts)) && parts.length > 1) {
+      seen.add(decompKey(parts));
+      out.push({ parts, fault });
+    }
+  };
+  for (const p of plausible) if (out.length < 2) offer(p);
+  for (let i = 0; out.length < 3 && i < 500; i++) offer(randomDecomp(r, rel));
+  return out;
+}
+
+/** Shuffle the right decomposition among the wrong ones into an MCQ. */
+function decompChoices(r: () => number, right: string[][], wrong: { parts: string[][]; fault: string }[]) {
+  const opts = shuffled(r, [{ parts: right, fault: null as string | null }, ...wrong]);
+  const letter = (i: number) => "ABCD"[i];
+  return {
+    choices: opts.map((o) => decompText(o.parts)),
+    answer: opts.findIndex((o) => o.fault === null),
+    faults: opts.flatMap((o, i) => (o.fault ? [`${letter(i)}: ${o.fault}`] : [])).join("; "),
+  };
+}
+
+/** "Which is a lossless BCNF decomposition?", answered by `bcnfDecompose`; every distractor is checked to fail. */
+export const bcnfDecompGen: Generator = {
+  id: "nf-gen-bcnf",
+  topic: "normalization",
+  difficulty: 3,
+  tags: ["bcnf", "decomposition"],
+  askedAt: "\"Decompose this into BCNF\" follows every normal-form question.",
+  generate(seed) {
+    const r = rng(seed * 7919 + 1);
+    const { rel, fds } = drawUntil(seed, (q) => randomSchema(q, randInt(q, 4, 5)), (s) => normalForm(s.rel, s.fds).form !== "BCNF" && bcnfDecompose(s.rel, s.fds).parts.length <= 3);
+    const { parts, steps } = bcnfDecompose(rel, fds);
+    // Plausible slips: splitting on the violation but dropping X from the rest, or stopping after the first split.
+    const first = steps[0];
+    const rest = rel.filter((a) => !first.into[0].includes(a));
+    const plausible = [...(rest.length ? [[first.into[0], rest]] : []), first.into];
+    const { choices, answer, faults } = decompChoices(r, parts, wrongDecomps(r, rel, fds, "bcnf", parts, plausible));
+    const trace = steps.map((s) => `${setText(s.part)} breaks BCNF on ${fdText(s.fd)}, so split it into ${setText(s.into[0])} and ${setText(s.into[1])}`).join("; ");
+    return {
+      id: `nf-gen-bcnf-${seed}`,
+      topic: "normalization",
+      kind: "mcq",
+      prompt: `${schemaText(rel, fds)}. Which is a lossless decomposition with every relation in BCNF?`,
+      choices,
+      answer,
+      explanation: `${trace}. Each split keeps X in both halves, so it stays lossless. Wrong options: ${faults}.`,
+      difficulty: 3,
+      tags: bcnfDecompGen.tags,
+      askedAt: bcnfDecompGen.askedAt,
+    };
+  },
+};
+
+/** "Which is a lossless, dependency-preserving 3NF decomposition?", answered by `synthesize3nf`; every distractor is checked to fail. */
+export const synth3nfGen: Generator = {
+  id: "nf-gen-3nf",
+  topic: "normalization",
+  difficulty: 3,
+  tags: ["3nf", "decomposition", "dependency preservation"],
+  generate(seed) {
+    const r = rng(seed * 7919 + 2);
+    const { rel, fds } = drawUntil(
+      seed,
+      (q) => randomSchema(q, randInt(q, 4, 5)),
+      (s) => ["1NF", "2NF"].includes(normalForm(s.rel, s.fds).form) && synthesize3nf(s.rel, s.fds).parts.length <= 3,
+    );
+    const { parts, cover, addedKey } = synthesize3nf(rel, fds);
+    // Plausible slips: forgetting the key relation, or using the BCNF decomposition (which may lose an FD).
+    const noKey = cover.map((f) => [...new Set([...f.lhs, ...f.rhs])].sort());
+    const plausible = [noKey, bcnfDecompose(rel, fds).parts];
+    const { choices, answer, faults } = decompChoices(r, parts, wrongDecomps(r, rel, fds, "3nf", parts, plausible));
+    return {
+      id: `nf-gen-3nf-${seed}`,
+      topic: "normalization",
+      kind: "mcq",
+      prompt: `${schemaText(rel, fds)}. Which decomposition is lossless, dependency-preserving and has every relation in 3NF?`,
+      choices,
+      answer,
+      explanation:
+        `A minimal cover is { ${fdsText(cover)} }; one relation per left side` +
+        (addedKey ? `, plus the candidate key ${setText(addedKey)} since none of them holds a key` : ` (one of them already holds a candidate key)`) +
+        `, dropping any relation inside another, gives ${decompText(parts)}. Wrong options: ${faults}.`,
+      difficulty: 3,
+      tags: synth3nfGen.tags,
+    };
+  },
+};
+
+export const NORMALIZATION_GENERATORS: Generator[] = [closureGen, keyCountGen, highestNfGen, losslessGen, preservationGen, bcnfDecompGen, synth3nfGen];

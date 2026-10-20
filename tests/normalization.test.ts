@@ -157,7 +157,7 @@ describe("normalization content", () => {
     expect(nf.length).toBeGreaterThanOrEqual(20);
     expect([...new Set(nf.map((q) => q.kind))].sort()).toEqual(["mcq", "multi", "numeric", "order", "short", "truefalse"]);
     expect([...new Set(nf.map((q) => q.difficulty))].sort()).toEqual([1, 2, 3]);
-    expect(GENERATORS.filter((g) => g.topic === "normalization")).toHaveLength(5);
+    expect(GENERATORS.filter((g) => g.topic === "normalization")).toHaveLength(7);
   });
 
   it("keys each fixed answer correctly", () => {

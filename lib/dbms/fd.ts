@@ -220,3 +220,66 @@ export function lostDependencies(parts: readonly (readonly string[])[], fds: rea
     return !subset(f.rhs, z);
   });
 }
+
+/**
+ * A BCNF violation on a sub-schema Ri, judged against F⁺ (not just the FDs written on Ri): the smallest X ⊆ Ri whose
+ * closure adds something in Ri without covering Ri. Returns X and what it determines inside Ri, or null if Ri is in BCNF.
+ */
+export function bcnfViolation(part: readonly string[], fds: readonly Fd[]): { lhs: string[]; rhs: string[] } | null {
+  const ri = norm(part);
+  for (const x of subsets(ri).sort((a, b) => a.length - b.length)) {
+    if (!x.length) continue;
+    const inside = closure(x, fds).filter((a) => ri.includes(a));
+    const adds = inside.filter((a) => !x.includes(a));
+    if (adds.length && !subset(ri, inside)) return { lhs: x, rhs: adds };
+  }
+  return null;
+}
+
+/** The highest normal form of a sub-schema, using the FDs of F⁺ that hold on it. */
+export function partNormalForm(part: readonly string[], fds: readonly Fd[]): NormalForm {
+  return normalForm(norm(part), projectFds(part, fds)).form;
+}
+
+export interface DecompStep {
+  part: string[];
+  fd: Fd;
+  into: [string[], string[]];
+}
+
+/**
+ * The textbook BCNF decomposition: while some Ri has a violation X → Y (X not a superkey of Ri),
+ * replace Ri by (X ∪ Y) and (Ri − Y), with Y = X⁺ ∩ Ri − X. Always lossless; may lose dependencies.
+ */
+export function bcnfDecompose(rel: readonly string[], fds: readonly Fd[]): { parts: string[][]; steps: DecompStep[] } {
+  const parts = [norm(rel)];
+  const steps: DecompStep[] = [];
+  for (let i = 0; i < parts.length; ) {
+    const v = bcnfViolation(parts[i], fds);
+    if (!v) {
+      i++;
+      continue;
+    }
+    const into: [string[], string[]] = [norm([...v.lhs, ...v.rhs]), parts[i].filter((a) => !v.rhs.includes(a))];
+    steps.push({ part: parts[i], fd: v, into });
+    parts.splice(i, 1, ...into);
+  }
+  return { parts, steps };
+}
+
+/**
+ * 3NF synthesis: one relation per left side of a minimal cover (X with everything it determines), plus a candidate key
+ * if no relation holds one, then drop relations contained in another. Always lossless and dependency-preserving.
+ */
+export function synthesize3nf(rel: readonly string[], fds: readonly Fd[]): { parts: string[][]; cover: Fd[]; addedKey?: string[] } {
+  const cover = minimalCover(fds);
+  let parts = cover.map((f) => norm([...f.lhs, ...f.rhs]));
+  const keys = candidateKeys(rel, fds);
+  let addedKey: string[] | undefined;
+  if (!parts.some((p) => keys.some((k) => subset(k, p)))) {
+    addedKey = keys[0];
+    parts.push(addedKey);
+  }
+  parts = parts.filter((p, i) => !parts.some((q, j) => j !== i && subset(p, q) && (!sameSet(p, q) || j < i)));
+  return { parts, cover, addedKey };
+}
