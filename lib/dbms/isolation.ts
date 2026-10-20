@@ -104,7 +104,7 @@ function phantom(h: History): string | null {
     for (let j = i + 1; j < k; j++) {
       const w = h[j];
       if (w.kind === "I" && w.target === h[i].target && w.tx !== h[i].tx && endOf(h, w.tx, "C") < k)
-        return `T${h[i].tx} runs the same query on ${w.target} twice, and T${w.tx} inserts a matching row and commits in between`;
+        return `T${h[i].tx} runs select(${w.target}) twice, and T${w.tx} inserts a matching row and commits in between`;
     }
   return null;
 }
