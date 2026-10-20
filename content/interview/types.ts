@@ -29,6 +29,17 @@ interface QuestionBase {
   askedAt?: string;
   /** Small named relations shown under the prompt (relational-algebra problems). */
   tables?: Relation[];
+  /** A precedence graph drawn under the prompt (the question is about the graph itself). */
+  graph?: PrecedenceGraphSpec;
+  /** A precedence graph drawn in the explanation (the solution's graph, hidden until the player answers). */
+  explainGraph?: PrecedenceGraphSpec;
+}
+
+/** Transactions as nodes, Ti → Tj edges; `cycle` (first node repeated last) is highlighted. */
+export interface PrecedenceGraphSpec {
+  nodes: number[];
+  edges: [number, number][];
+  cycle?: number[] | null;
 }
 
 export interface McqQuestion extends QuestionBase {

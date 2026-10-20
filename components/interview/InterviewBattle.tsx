@@ -22,6 +22,7 @@ import { bossSprite, starterSprite, starterStageOf } from "@/game/sprites/roster
 import { STAR_DIM, STAR_LIT } from "@/game/sprites/ui";
 import { ATTACKS } from "@/lib/dialect/concepts";
 import { level, updateSave, useSave } from "@/lib/save";
+import { PrecedenceGraph } from "./PrecedenceGraph";
 import { PromptTables } from "./PromptTables";
 import { AnswerPanel } from "./AnswerPanel";
 
@@ -219,6 +220,7 @@ export function InterviewBattle({ topic, deck, seed, onExit, onRematch }: { topi
               {q.prompt}
             </h2>
             {q.tables && <PromptTables tables={q.tables} />}
+            {q.graph && <PrecedenceGraph graph={q.graph} />}
             <div className="mt-3">
               <AnswerPanel key={`${s.index}-${q.id}`} q={q} initialSteps={steps} locked={locked} picked={picked} onAnswer={answer} />
             </div>
@@ -233,6 +235,7 @@ export function InterviewBattle({ topic, deck, seed, onExit, onRematch }: { topi
                   </p>
                 )}
                 <p className="mt-1 text-sm leading-relaxed text-white/75">{q.explanation}</p>
+                {q.explainGraph && <PrecedenceGraph graph={q.explainGraph} />}
                 {q.askedAt && <p className="mt-1.5 text-[11px] text-white/45">▸ {q.askedAt}</p>}
                 <div className="mt-2 hidden justify-end lg:flex">
                   <Button variant="primary" onClick={next} className="px-cursor tracking-[0.15em]">

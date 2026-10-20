@@ -179,7 +179,7 @@ describe("transactions content", () => {
     expect(tx.length).toBeGreaterThanOrEqual(20);
     expect([...new Set(tx.map((q) => q.kind))].sort()).toEqual(["mcq", "multi", "numeric", "order", "short", "truefalse"]);
     expect([...new Set(tx.map((q) => q.difficulty))].sort()).toEqual([1, 2, 3]);
-    expect(GENERATORS.filter((g) => g.topic === "transactions")).toHaveLength(5);
+    expect(GENERATORS.filter((g) => g.topic === "transactions")).toHaveLength(7);
   });
 
   it("keys each fixed answer correctly", () => {

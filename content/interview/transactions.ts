@@ -1,4 +1,4 @@
-import type { Generator, Question } from "./types";
+import type { Generator, PrecedenceGraphSpec, Question } from "./types";
 import {
   blindWrites,
   conflicts,
@@ -10,13 +10,32 @@ import {
   precedenceGraph,
   recoverability,
   scheduleTable,
+  topologicalOrders,
   transactions,
   viewSerialOrders,
   type Op,
   type Recoverability,
   type Schedule,
 } from "@/lib/dbms/schedule";
-import { randInt, rng } from "@/lib/rng";
+import {
+  ANOMALIES,
+  ANOMALY_NAMES,
+  anomalies,
+  historyTable,
+  ISOLATION_LEVELS,
+  LOWEST_LEVEL,
+  type Anomaly,
+  type History,
+  type IsoOp,
+} from "@/lib/dbms/isolation";
+import { randInt, rng, shuffled } from "@/lib/rng";
+
+/** The schedule's precedence graph, ready to draw, with any cycle marked. */
+export function graphOf(s: Schedule): PrecedenceGraphSpec {
+  const nodes = transactions(s);
+  const edges = precedenceGraph(s);
+  return { nodes, edges, cycle: findCycle(nodes, edges) };
+}
 
 /** Silberschatz's schedule 3 (conflict-equivalent to T1, T2) and schedule 4 (not conflict serializable). */
 export const SCHEDULE_3 = parseSchedule("R1(A) W1(A) R2(A) W2(A) R1(B) W1(B) R2(B) W2(B)");
@@ -118,6 +137,7 @@ export const TRANSACTIONS: Question[] = [
     kind: "mcq",
     prompt: "Which serial schedule is this schedule conflict-equivalent to?",
     tables: [scheduleTable(SCHEDULE_3)],
+    explainGraph: graphOf(SCHEDULE_3),
     choices: ["T1 then T2", "T2 then T1", "Both", "Neither: it is not conflict serializable"],
     answer: 0,
     explanation:
@@ -132,6 +152,7 @@ export const TRANSACTIONS: Question[] = [
     kind: "truefalse",
     prompt: "This schedule is conflict serializable.",
     tables: [scheduleTable(SCHEDULE_4)],
+    explainGraph: graphOf(SCHEDULE_4),
     answer: false,
     explanation:
       "R1(A) comes before W2(A), giving T1 → T2, and W2(A) comes before W1(A), giving T2 → T1. The precedence graph has the cycle T1 → T2 → T1, so no serial order is conflict-equivalent. (It is the lost-update interleaving: T2's write of A is overwritten.)",
@@ -436,6 +457,7 @@ export const serialOrdersGen: Generator = {
       kind: "multi",
       prompt: "Select every serial order this schedule is conflict-equivalent to.",
       tables: [scheduleTable(s)],
+      explainGraph: graphOf(s),
       choices,
       answers,
       explanation: orders.length
@@ -463,6 +485,7 @@ export const edgeCountGen: Generator = {
       kind: "numeric",
       prompt: "How many edges does this schedule's precedence graph have? (Count each Ti → Tj once, however many conflicts cause it.)",
       tables: [scheduleTable(s)],
+      explainGraph: graphOf(s),
       answer: edges.length,
       unit: "edges",
       explanation: `${graphExplanation(s)}. That is ${plural(edges.length, "distinct edge")}: ${edges.map(([a, b]) => `T${a} → T${b}`).join(", ")}.`,
@@ -488,6 +511,7 @@ export const conflictTfGen: Generator = {
       kind: "truefalse",
       prompt: "This schedule is conflict serializable.",
       tables: [scheduleTable(s)],
+      explainGraph: graphOf(s),
       answer: cs,
       explanation: cs
         ? `${graphExplanation(s)}. The precedence graph has no cycle, so the schedule is conflict-equivalent to ${orderText(conflictSerialOrders(s)[0])}.`
@@ -560,6 +584,7 @@ export const viewTfGen: Generator = {
       kind: "truefalse",
       prompt: "This schedule is not conflict serializable, but it is view serializable.",
       tables: [scheduleTable(s)],
+      explainGraph: graphOf(s),
       answer: orders.length > 0,
       explanation: orders.length
         ? `True. The cycle ${cycleText(s)} rules out conflict serializability, but the serial order ${orderText(orders[0])} has every read reading from the same writer and the same final write of each item, so they are view-equivalent. The blind writes (${blind.join(", ")}) make the difference.`
@@ -570,5 +595,154 @@ export const viewTfGen: Generator = {
   },
 };
 
-export const TRANSACTIONS_GENERATORS: Generator[] = [serialOrdersGen, edgeCountGen, conflictTfGen, recoverabilityGen, viewTfGen];
+const PAIRS: [string, string][] = [
+  ["A", "B"],
+  ["X", "Y"],
+  ["P", "Q"],
+];
+const PREDICATES = ["P", "Q", "S"];
+
+/** Merge per-transaction op lists into one interleaving, following `order` (a list of transaction numbers, one per step). */
+function interleave(order: readonly number[], perTx: Record<number, IsoOp[]>): History {
+  const queues = Object.fromEntries(Object.entries(perTx).map(([t, ops]) => [t, [...ops]]));
+  return order.map((t) => queues[t].shift()!);
+}
+
+const op = (tx: number, kind: IsoOp["kind"], target?: string): IsoOp => (target ? { tx, kind, target } : { tx, kind });
+
+/** A two-transaction interleaving showing exactly the given anomaly, varied by the seed (items, which transaction leads, commit timing). */
+export function anomalyHistory(anomaly: Anomaly, seed: number): History {
+  const r = rng(seed);
+  const [x, y] = PAIRS[randInt(r, 0, PAIRS.length - 1)];
+  const flip = r() < 0.5;
+  // a is the transaction the anomaly happens to (it reads), b the one that interferes.
+  const a = flip ? 2 : 1;
+  const b = flip ? 1 : 2;
+  const pick = <T,>(xs: T[]): T => xs[randInt(r, 0, xs.length - 1)];
+  switch (anomaly) {
+    case "dirty-read": {
+      const bEnd = r() < 0.6 ? "A" : "C";
+      const tail = r() < 0.5;
+      const perTx = { [b]: [op(b, "R", x), op(b, "W", x), op(b, bEnd)], [a]: [op(a, "R", x), ...(tail ? [op(a, "W", y)] : []), op(a, "C")] };
+      // b reads and writes x, then a reads x before b ends.
+      const order = [b, b, a, ...(tail ? [a] : []), ...(r() < 0.5 ? [b, a] : [a, b])];
+      return interleave(order, perTx);
+    }
+    case "non-repeatable-read": {
+      const bReads = r() < 0.5;
+      const perTx = { [a]: [op(a, "R", x), op(a, "R", x), op(a, "C")], [b]: [...(bReads ? [op(b, "R", x)] : []), op(b, "W", x), op(b, "C")] };
+      const start = bReads ? pick([[a, b], [b, a]]) : [a];
+      return interleave([...start, b, b, a, a], perTx);
+    }
+    case "phantom": {
+      const pred = pick(PREDICATES);
+      const bQueries = r() < 0.5;
+      const perTx = { [a]: [op(a, "S", pred), op(a, "S", pred), op(a, "C")], [b]: [...(bQueries ? [op(b, "S", pred)] : []), op(b, "I", pred), op(b, "C")] };
+      const start = bQueries ? pick([[a, b], [b, a]]) : [a];
+      return interleave([...start, b, b, a, a], perTx);
+    }
+    case "lost-update": {
+      const perTx = { [a]: [op(a, "R", x), op(a, "W", x), op(a, "C")], [b]: [op(b, "R", x), op(b, "W", x), op(b, "C")] };
+      // Both read, b writes (and may commit) first, then a writes over it from its stale read.
+      const reads = pick([[a, b], [b, a]]);
+      const mid = pick([[b, a], [b, b, a]]);
+      const rest = mid.length === 3 ? [a] : r() < 0.5 ? [a, b] : [b, a];
+      return interleave([...reads, ...mid, ...rest], perTx);
+    }
+    case "write-skew": {
+      const bothRead = r() < 0.5;
+      // a reads x (and maybe y) then writes y; b reads y (and maybe x) then writes x.
+      const perTx = {
+        [a]: [op(a, "R", x), ...(bothRead ? [op(a, "R", y)] : []), op(a, "W", y), op(a, "C")],
+        [b]: [...(bothRead ? [op(b, "R", x)] : []), op(b, "R", y), op(b, "W", x), op(b, "C")],
+      };
+      const n = bothRead ? 2 : 1;
+      const reads = r() < 0.5 ? [...Array(n).fill(a), ...Array(n).fill(b)] : [a, b, ...(n === 2 ? [a, b] : [])];
+      const writes = pick([[a, b, a, b], [a, a, b, b], [b, a, b, a], [b, a, a, b]]);
+      return interleave([...reads, ...writes], perTx);
+    }
+  }
+}
+
+const anomalyChoice = (an: Anomaly, level: string) => `${ANOMALY_NAMES[an]} · prevented from ${level}`;
+
+/** "Which anomaly does this interleaving show, and which lowest level prevents it?", classified by `anomalies`; the seed picks the anomaly. */
+export const anomalyGen: Generator = {
+  id: "tx-gen-anomaly",
+  topic: "transactions",
+  difficulty: 2,
+  tags: ["isolation levels", "anomalies"],
+  askedAt: "Isolation anomalies per level are asked in nearly every backend interview.",
+  generate(seed) {
+    const want = ANOMALIES[seed % ANOMALIES.length];
+    const h = anomalyHistory(want, seed);
+    const [{ anomaly, reason }] = anomalies(h);
+    const level = LOWEST_LEVEL[anomaly];
+    const r = rng(seed * 7 + 3);
+    const wrongLevel = shuffled(r, ISOLATION_LEVELS.filter((l) => l !== level && l !== "READ UNCOMMITTED"))[0];
+    const others = shuffled(r, ANOMALIES.filter((x) => x !== anomaly)).slice(0, 2);
+    const right = anomalyChoice(anomaly, level);
+    const choices = shuffled(r, [right, anomalyChoice(anomaly, wrongLevel), ...others.map((o) => anomalyChoice(o, LOWEST_LEVEL[o]))]);
+    const notes: Record<Anomaly, string> = {
+      "dirty-read": "READ COMMITTED only ever shows committed data, so the read could not see the uncommitted write.",
+      "non-repeatable-read": "REPEATABLE READ keeps a read item stable for the whole transaction (a held read lock, or one snapshot in PostgreSQL and Oracle-style MVCC).",
+      phantom: "The SQL standard only rules out phantoms at SERIALIZABLE (predicate or range locks). PostgreSQL's snapshot-based REPEATABLE READ happens to prevent them too.",
+      "lost-update": "From REPEATABLE READ up, the read-then-write cannot slip through: the read lock blocks the other writer, or PostgreSQL aborts the second updater with a serialization error.",
+      "write-skew": "The two transactions write different items, so snapshot isolation (PostgreSQL's REPEATABLE READ, Oracle's SERIALIZABLE) lets both commit. Only true SERIALIZABLE (PostgreSQL's SSI, or strict 2PL with predicate locks) catches it.",
+    };
+    return {
+      id: `tx-gen-anomaly-${seed}`,
+      topic: "transactions",
+      kind: "mcq",
+      prompt:
+        "Which anomaly does this interleaving show, and what is the lowest isolation level that prevents it? (read/write act on one item; select(P) returns every row matching predicate P, insert(P) adds a matching row.)",
+      tables: [historyTable(h)],
+      choices,
+      answer: choices.indexOf(right),
+      explanation: `${ANOMALY_NAMES[anomaly]}: ${reason}. ${notes[anomaly]}`,
+      difficulty: 2,
+      tags: anomalyGen.tags,
+      askedAt: anomalyGen.askedAt,
+    };
+  },
+};
+
+/** "How many serial schedules match this precedence graph?", counted by `topologicalOrders` (0 when it has a cycle). */
+export const graphOrdersGen: Generator = {
+  id: "tx-gen-graph-orders",
+  topic: "transactions",
+  difficulty: 2,
+  tags: ["precedence graph", "conflict serializability"],
+  generate(seed) {
+    const r = rng(seed);
+    const cyclic = seed % 4 === 0;
+    const n = randInt(r, 3, 4);
+    const nodes = Array.from({ length: n }, (_, i) => i + 1);
+    const all = nodes.flatMap((a) => nodes.filter((b) => b !== a).map((b) => [a, b] as [number, number]));
+    let edges: [number, number][] = [];
+    for (let i = 0; i < 500; i++) {
+      edges = all.filter(() => r() < 0.3).sort((p, q) => p[0] - q[0] || p[1] - q[1]);
+      if (edges.length >= 2 && (findCycle(nodes, edges) !== null) === cyclic) break;
+    }
+    const orders = topologicalOrders(nodes, edges);
+    const cycle = findCycle(nodes, edges);
+    return {
+      id: `tx-gen-graph-orders-${seed}`,
+      topic: "transactions",
+      kind: "numeric",
+      prompt: "A schedule has this precedence graph. How many serial schedules is it conflict-equivalent to? (0 if none.)",
+      graph: { nodes, edges },
+      answer: orders.length,
+      unit: "serial schedules",
+      explanation: cycle
+        ? `The graph has the cycle ${cycle.map((t) => `T${t}`).join(" → ")}, so the schedule is not conflict serializable: 0.`
+        : `The graph is acyclic, and each topological order is a conflict-equivalent serial schedule: ${orders.map(orderText).join(", ")}. That is ${plural(orders.length, "order")}.`,
+      explainGraph: { nodes, edges, cycle },
+      difficulty: 2,
+      tags: graphOrdersGen.tags,
+    };
+  },
+};
+
+export const TRANSACTIONS_GENERATORS: Generator[] = [serialOrdersGen, edgeCountGen, conflictTfGen, recoverabilityGen, viewTfGen, anomalyGen, graphOrdersGen];
 
