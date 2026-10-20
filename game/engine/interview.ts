@@ -102,3 +102,12 @@ export function buildDeck(questions: readonly Question[], generators: readonly G
   const made = generators.filter((g) => g.topic === o.topic && keep(g.difficulty)).map((g) => g.generate(Math.floor(r() * 2 ** 31)));
   return shuffled(r, [...fixed, ...made]).slice(0, o.size);
 }
+
+/** Swap step `i` with its neighbour above (-1) or below (+1); out-of-range moves change nothing. */
+export function moveStep<T>(steps: readonly T[], i: number, d: -1 | 1): T[] {
+  const j = i + d;
+  const out = steps.slice();
+  if (i < 0 || i >= out.length || j < 0 || j >= out.length) return out;
+  [out[i], out[j]] = [out[j], out[i]];
+  return out;
+}

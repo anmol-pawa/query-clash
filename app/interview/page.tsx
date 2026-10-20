@@ -4,7 +4,10 @@ import { DIFFICULTY_COLOR, DIFFICULTY_FILTERS, DIFFICULTY_LABEL, DifficultyFilte
 import { SpriteCanvas } from "@/components/sprites/SpriteCanvas";
 import { Button, NavLink } from "@/components/ui/kit";
 import { GENERATORS, QUESTIONS, TOPICS } from "@/content/interview";
-import type { TopicId } from "@/content/interview/types";
+import type { Question, TopicId } from "@/content/interview/types";
+import { InterviewBattle } from "@/components/interview/InterviewBattle";
+import { buildDeck } from "@/game/engine/interview";
+import { DECK_SIZE } from "@/game/engine/interviewBattle";
 import { sfx } from "@/game/audio/synth";
 import { bossSprite } from "@/game/sprites/roster";
 import { useSave } from "@/lib/save";
@@ -17,6 +20,15 @@ export default function InterviewPage() {
   const save = useSave();
   const [diff, setDiff] = useState<DifficultyFilter>("all");
   const [sel, setSel] = useState<TopicId>("basics");
+  const [battle, setBattle] = useState<{ topic: TopicId; seed: number; deck: Question[] } | null>(null);
+
+  const startBattle = (topic: TopicId) => {
+    const seed = Math.floor(Math.random() * 2 ** 31);
+    const deck = buildDeck(QUESTIONS, GENERATORS, { topic, seed, size: DECK_SIZE, difficulties: diff === "all" ? undefined : [diff] });
+    if (!deck.length) return;
+    setBattle({ topic, seed, deck });
+    window.scrollTo(0, 0);
+  };
 
   useEffect(() => {
     document.documentElement.style.setProperty("--accent", ACCENT);
@@ -27,6 +39,23 @@ export default function InterviewPage() {
   const row = rows.find((r) => r.topic.id === sel)!;
   const kinds = kindCounts(QUESTIONS, sel);
   const asked = QUESTIONS.find((q) => q.topic === sel && q.askedAt)?.askedAt;
+
+  if (battle) {
+    const topic = TOPICS.find((t) => t.id === battle.topic)!;
+    return (
+      <InterviewBattle
+        key={battle.seed}
+        topic={topic}
+        deck={battle.deck}
+        seed={battle.seed}
+        onExit={() => {
+          setBattle(null);
+          document.documentElement.style.setProperty("--accent", ACCENT);
+        }}
+        onRematch={() => startBattle(battle.topic)}
+      />
+    );
+  }
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6">
@@ -134,8 +163,8 @@ export default function InterviewPage() {
                 )}
               </ul>
               {asked && <p className="mt-2 text-[11px] text-white/45">▸ {asked}</p>}
-              <Button variant="primary" size="lg" disabled className="mt-4 w-full" title="Interview battles arrive with the next update">
-                Battle: coming next update
+              <Button variant="primary" size="lg" className="mt-4 w-full tracking-[0.15em]" onClick={() => startBattle(sel)}>
+                ⚔ Battle {bossSprite(row.topic.foe).name}
               </Button>
             </>
           ) : (

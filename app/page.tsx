@@ -6,6 +6,7 @@ import { BOSS_GLYPH } from "@/components/menu/bossGlyph";
 import { Button, DialectToggle, Modal } from "@/components/ui/kit";
 import { CHAPTERS } from "@/content/chapters";
 import { CODEX } from "@/content/codex";
+import { QUESTIONS } from "@/content/interview";
 import { setMusic, setVolume, sfx } from "@/game/audio/synth";
 import { sqlClient } from "@/lib/db/client";
 import { caughtCount } from "@/game/engine/querydex";
@@ -21,6 +22,8 @@ const rand = (i: number) => {
   return x - Math.floor(x);
 };
 const FLOATERS = FLOATER_WORDS.map((t, i) => ({ t, x: rand(i + 1) * 100, y: rand(i + 50) * 100, d: 14 + rand(i + 99) * 16, s: i % 3 }));
+
+const INTERVIEW_IDS = new Set(QUESTIONS.map((q) => q.id));
 
 export default function Home() {
   const save = useSave();
@@ -45,6 +48,7 @@ export default function Home() {
     { href: "/codex", title: "Codex", sub: `${save.codex.length}/${CODEX.length} entries unlocked: definitions, both dialects, enterprise use, quizzes`, color: "#a78bfa", glyph: "📖", wide: true },
     { href: "/querydex", title: "Querydex", sub: `${caughtCount(save.dex)}/10 bosses captured`, color: "#e0a030", glyph: "◫" },
     { href: "/bestiary", title: "Bestiary", sub: "Meet the bosses, preview every spell", color: "#4ade80", glyph: "☠" },
+    { href: "/interview", title: "DBMS Interview", sub: `${save.interview.filter((id) => INTERVIEW_IDS.has(id)).length}/${QUESTIONS.length} solved: battle topic guardians with interview questions`, color: "#38bdf8", glyph: "◆", wide: true },
   ];
 
   return (
