@@ -1,4 +1,5 @@
 import type { BossId } from "@/content/types";
+import type { Relation } from "@/lib/dbms/algebra";
 
 /** DBMS Interview mode: the question model. Every question is graded by `grade` in `game/engine/interview.ts`. */
 
@@ -26,6 +27,8 @@ interface QuestionBase {
   tags: string[];
   /** Where this tends to come up, e.g. "Common in product-company screens". */
   askedAt?: string;
+  /** Small named relations shown under the prompt (relational-algebra problems). */
+  tables?: Relation[];
 }
 
 export interface McqQuestion extends QuestionBase {

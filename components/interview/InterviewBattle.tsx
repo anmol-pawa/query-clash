@@ -22,6 +22,7 @@ import { bossSprite, starterSprite, starterStageOf } from "@/game/sprites/roster
 import { STAR_DIM, STAR_LIT } from "@/game/sprites/ui";
 import { ATTACKS } from "@/lib/dialect/concepts";
 import { level, updateSave, useSave } from "@/lib/save";
+import { PromptTables } from "./PromptTables";
 import { AnswerPanel } from "./AnswerPanel";
 
 const FIXED_IDS = new Set(QUESTIONS.map((q) => q.id));
@@ -217,6 +218,7 @@ export function InterviewBattle({ topic, deck, seed, onExit, onRematch }: { topi
             <h2 className="mt-2 text-base leading-relaxed text-white sm:text-lg" data-testid="question-prompt">
               {q.prompt}
             </h2>
+            {q.tables && <PromptTables tables={q.tables} />}
             <div className="mt-3">
               <AnswerPanel key={`${s.index}-${q.id}`} q={q} initialSteps={steps} locked={locked} picked={picked} onAnswer={answer} />
             </div>
