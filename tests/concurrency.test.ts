@@ -226,7 +226,7 @@ describe("concurrency content", () => {
     expect(cc.length).toBeGreaterThanOrEqual(20);
     expect([...new Set(cc.map((q) => q.kind))].sort()).toEqual(["mcq", "multi", "numeric", "order", "short", "truefalse"]);
     expect([...new Set(cc.map((q) => q.difficulty))].sort()).toEqual([1, 2, 3]);
-    expect(GENERATORS.filter((g) => g.topic === "concurrency")).toHaveLength(4);
+    expect(GENERATORS.filter((g) => g.topic === "concurrency")).toHaveLength(8);
   });
 
   it("keys each fixed answer correctly", () => {
