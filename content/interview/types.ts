@@ -40,6 +40,8 @@ export interface PrecedenceGraphSpec {
   nodes: number[];
   edges: [number, number][];
   cycle?: number[] | null;
+  /** The panel title (default "Precedence graph"), e.g. "Wait-for graph". */
+  title?: string;
 }
 
 export interface McqQuestion extends QuestionBase {

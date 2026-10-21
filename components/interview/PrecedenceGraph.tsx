@@ -22,7 +22,7 @@ function exitPoint(cx: number, cy: number, dx: number, dy: number, pad: number):
 }
 
 /** A precedence graph as a pixel diagram: square transaction nodes, arrowed edges, and any cycle drawn in red. */
-export function PrecedenceGraph({ graph, title = "Precedence graph" }: { graph: PrecedenceGraphSpec; title?: string }) {
+export function PrecedenceGraph({ graph, title = graph.title ?? "Precedence graph" }: { graph: PrecedenceGraphSpec; title?: string }) {
   const pos = layout(graph.nodes.length);
   const at = new Map(graph.nodes.map((t, i) => [t, pos[i]]));
   const onCycle = new Set<string>();
