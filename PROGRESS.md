@@ -304,3 +304,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests (`tests/mvcc.test.ts`): visibility rules, snapshot levels, FCW; 300 seeds per generator re-solved from the tables the player sees, 500 random chains against an independent replay oracle. The concurrency topic now has 11 generators: 417 tests.
 - Verified: lint, typecheck, 417 tests, build, build:pages pass. Playwright (static export, desktop 1280x900 and iPhone 14) on one question per generator: tables, answer states and explanations render; no console errors, no horizontal overflow.
 - Next: B6 (storage and indexing).
+
+## 2026-10-21 (22:50 UTC): B6a B+ tree and indexing
+- Took the lock (none held; main was green). Split B6 into B6a (B+ tree, index questions) and B6b (hashing, interactive visualizer).
+- `lib/dbms/btree.ts`: Silberschatz-convention B+ tree insertion (leaf splits ceil(n/2) | rest and copies the key up; internal splits move the middle key up), levels, leaves, fan-out from block/key/pointer sizes, and the max/min height formulas in integer arithmetic.
+- `content/interview/storage.ts` (the Storage & Indexing topic is now playable): 18 fixed questions (every difficulty; MCQ, multi, numeric, true/false) and three seeded generators: leaves or levels after inserting a key list, root keys (MCQ with near-miss trees from other orders), and levels from block/key/pointer sizes.
+- Tests (`tests/btree.test.ts`, `tests/storage.test.ts`): worked splits at orders 3 and 4; 300 random trees at orders 3-7 check sorted keys, separator ranges, minimum occupancy, equal leaf depth, all keys present and the height bounds; every fixed answer pinned; 300 seeds per generator re-solved from the table the player sees. The interview tests' empty topic moved to "query": 426 tests.
+- Verified: lint, typecheck, 426 tests, build, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: Storage battles render the questions and explanations; no console errors, no horizontal overflow.
+- Next: B6b (hashing and the interactive B+ tree visualizer), then B7.
