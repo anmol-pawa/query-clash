@@ -1,5 +1,6 @@
 import type { Generator, Question } from "./types";
 import type { Relation } from "@/lib/dbms/algebra";
+import { extBuckets, extBuild, linBuild, overflowPages, showDirectory, showLinear, staticBuckets } from "@/lib/dbms/hashing";
 import { build, fanout, height, leaves, levels, maxLevels, minLevels, showLevel } from "@/lib/dbms/btree";
 import { randInt, rng, shuffled } from "@/lib/rng";
 
@@ -215,6 +216,103 @@ export const STORAGE: Question[] = [
     difficulty: 1,
     tags: ["hash index"],
   },
+  {
+    id: "sto-hash-static",
+    topic: "storage",
+    kind: "mcq",
+    prompt: "What is the main weakness of static hashing (a fixed number of buckets, h(k) = k mod B)?",
+    choices: ["When the file grows, overflow chains lengthen and lookups degrade; changing B means rehashing everything", "It cannot answer equality lookups", "It needs the keys to arrive sorted", "Every lookup costs log(B) page reads"],
+    answer: 0,
+    explanation: "B is fixed when the file is created. Too few buckets and the overflow chains grow; too many and space is wasted. Extendible and linear hashing grow the file gradually instead.",
+    difficulty: 1,
+    tags: ["static hashing", "overflow"],
+  },
+  {
+    id: "sto-hash-lookup",
+    topic: "storage",
+    kind: "mcq",
+    prompt: "In a hash index with no overflow, how many page reads does an equality lookup need on average (ignoring the row fetch)?",
+    choices: ["About one: hash the key and read that bucket", "log_n of the number of keys", "As many as there are buckets", "Two: one for the root and one for the leaf"],
+    answer: 0,
+    explanation: "The hash function jumps straight to the bucket. That O(1) behaviour is why hashing wins on pure equality lookups, and why it cannot serve ranges or ORDER BY.",
+    difficulty: 1,
+    tags: ["hash index", "i/o cost"],
+  },
+  {
+    id: "sto-hash-range",
+    topic: "storage",
+    kind: "truefalse",
+    prompt: "A hash index can speed up `WHERE price BETWEEN 10 AND 20`.",
+    answer: false,
+    explanation: "Neighbouring values land in unrelated buckets, so a range needs every bucket. Use a B+ tree for ranges.",
+    difficulty: 1,
+    tags: ["hash index", "range"],
+  },
+  {
+    id: "sto-ext-double",
+    topic: "storage",
+    kind: "mcq",
+    prompt: "In extendible hashing a bucket overflows. When must the directory double?",
+    choices: ["When the bucket's local depth equals the global depth", "Whenever any bucket overflows", "When the local depth is smaller than the global depth", "Only when the file reaches 50% load"],
+    answer: 0,
+    explanation: "If local depth < global depth, several directory entries already point to the bucket, so the split just re-points half of them. Only when local depth = global depth is there no spare bit, and the directory doubles (global depth + 1).",
+    difficulty: 2,
+    tags: ["extendible hashing", "directory"],
+    askedAt: "A standard extendible-hashing follow-up.",
+  },
+  {
+    id: "sto-ext-pointers",
+    topic: "storage",
+    kind: "numeric",
+    prompt: "In an extendible hash with global depth 4, a bucket has local depth 2. How many directory entries point to it?",
+    answer: 4,
+    explanation: "2^(global − local) = 2^(4−2) = 4 entries share the bucket's two-bit prefix.",
+    difficulty: 2,
+    tags: ["extendible hashing", "directory"],
+  },
+  {
+    id: "sto-ext-cost",
+    topic: "storage",
+    kind: "mcq",
+    prompt: "What is the cost of extendible hashing compared with static hashing?",
+    choices: ["An extra directory lookup (often kept in memory), and a directory that can double in size", "No overflow chains ever, so it is always smaller", "It needs sorted input", "It supports range scans"],
+    answer: 0,
+    explanation: "A lookup reads the directory and then one bucket, so there is no long overflow chain. In exchange the directory costs memory and doubles on a skewed split. Many keys with the same low bits make it grow quickly.",
+    difficulty: 2,
+    tags: ["extendible hashing", "directory"],
+  },
+  {
+    id: "sto-lin-nodir",
+    topic: "storage",
+    kind: "mcq",
+    prompt: "How does linear hashing grow without a directory?",
+    choices: ["It splits buckets one at a time in order, using a split pointer and two hash functions", "It rehashes the whole file at 70% load", "It splits whichever bucket overflowed", "It keeps a B+ tree over the buckets"],
+    answer: 0,
+    explanation: "A pointer `next` marks the next bucket to split, in round-robin order, and the buckets before it are addressed by the finer function h_(i+1). The bucket that overflowed may differ from the one that splits, so overflow chains appear temporarily.",
+    difficulty: 3,
+    tags: ["linear hashing", "split pointer"],
+    askedAt: "Asked to contrast with extendible hashing.",
+  },
+  {
+    id: "sto-lin-addr",
+    topic: "storage",
+    kind: "numeric",
+    prompt: "A linear hash file starts with 4 buckets (h_0(k) = k mod 4, h_1(k) = k mod 8). Level 0, split pointer next = 2. Which bucket holds key 14?",
+    answer: 6,
+    explanation: "h_0(14) = 14 mod 4 = 2, which is not above `next`: bucket 2 has already split this round, so use h_1(14) = 14 mod 8 = 6.",
+    difficulty: 3,
+    tags: ["linear hashing", "split pointer"],
+  },
+  {
+    id: "sto-hash-load",
+    topic: "storage",
+    kind: "numeric",
+    prompt: "A static hash file has 5 buckets and each page holds 3 keys. Bucket 0 receives 8 keys. How many overflow pages does bucket 0 chain?",
+    answer: 2,
+    explanation: "8 keys need ceil(8/3) = 3 pages, one primary plus 2 overflow pages. The others fit in their primary page.",
+    difficulty: 2,
+    tags: ["static hashing", "overflow"],
+  },
 ];
 
 
@@ -332,4 +430,97 @@ export const btreeHeightGen: Generator = {
   },
 };
 
-export const STORAGE_GENERATORS: Generator[] = [btreeCountGen, btreeRootGen, btreeHeightGen];
+const hashKeys = (r: () => number, count: number): number[] => shuffled(r, Array.from({ length: 60 }, (_, i) => i + 1)).slice(0, count);
+
+function hashTable(title: string, keys: number[]): Relation {
+  return { name: title, columns: ["Step", "Key"], rows: keys.map((k, i) => [i + 1, k]) };
+}
+
+/** Extendible hashing: global depth or number of distinct buckets after the inserts. */
+export const extendibleGen: Generator = {
+  id: "sto-gen-ext",
+  topic: "storage",
+  difficulty: 3,
+  tags: ["extendible hashing", "directory", "split"],
+  askedAt: "Whiteboard hashing exercise.",
+  generate(seed) {
+    const r = rng(seed);
+    const cap = randInt(r, 2, 3);
+    const keys = hashKeys(r, randInt(r, cap + 2, cap * 3 + 2));
+    const h = extBuild(cap, keys);
+    const askDepth = seed % 2 === 0;
+    const answer = askDepth ? h.globalDepth : extBuckets(h).length;
+    return {
+      id: `sto-gen-ext-${seed}`,
+      topic: "storage",
+      kind: "numeric",
+      prompt: `Insert these keys in order into an empty extendible hash file. A bucket holds ${cap} keys, h(k) = k, and the directory uses the low-order bits of the key (start: global depth 0, one bucket). A full bucket splits, and the directory doubles first if the bucket's local depth equals the global depth. ${askDepth ? "What is the final global depth?" : "How many distinct buckets exist at the end (empty ones count)?"}`,
+      tables: [hashTable(`Insert in this order (bucket size ${cap})`, keys)],
+      answer,
+      explanation: `Final directory — ${showDirectory(h)}. Global depth ${h.globalDepth}, ${extBuckets(h).length} distinct buckets.`,
+      difficulty: 3,
+      tags: extendibleGen.tags,
+      askedAt: extendibleGen.askedAt,
+    };
+  },
+};
+
+/** Linear hashing: the split pointer or the bucket count after the inserts. */
+export const linearGen: Generator = {
+  id: "sto-gen-linear",
+  topic: "storage",
+  difficulty: 3,
+  tags: ["linear hashing", "split pointer"],
+  askedAt: "Contrast with extendible hashing.",
+  generate(seed) {
+    const r = rng(seed);
+    const initial = [2, 3, 4][randInt(r, 0, 2)];
+    const cap = randInt(r, 2, 3);
+    const keys = hashKeys(r, randInt(r, cap * initial, cap * initial + 6));
+    const h = linBuild(initial, cap, keys);
+    const askNext = seed % 2 === 0;
+    const answer = askNext ? h.next : h.buckets.length;
+    return {
+      id: `sto-gen-linear-${seed}`,
+      topic: "storage",
+      kind: "numeric",
+      prompt: `A linear hash file starts with ${initial} empty buckets (level 0, split pointer next = 0), h_i(k) = k mod (${initial}·2^i). A page holds ${cap} keys. Whenever an insert makes its bucket exceed ${cap} keys, the bucket at the split pointer splits (using h_(i+1)) and the pointer advances; after the last bucket of the round splits, the level goes up and the pointer returns to 0. Insert the keys in order. ${askNext ? "What is the split pointer at the end?" : "How many buckets are there at the end?"}`,
+      tables: [hashTable(`Insert in this order (${initial} buckets, page size ${cap})`, keys)],
+      answer,
+      explanation: `Final file (level ${h.level}, next = ${h.next}) — ${showLinear(h)}.`,
+      difficulty: 3,
+      tags: linearGen.tags,
+      askedAt: linearGen.askedAt,
+    };
+  },
+};
+
+/** Static hashing: how many overflow pages the keys need. */
+export const staticOverflowGen: Generator = {
+  id: "sto-gen-static",
+  topic: "storage",
+  difficulty: 2,
+  tags: ["static hashing", "overflow"],
+  askedAt: "Hash file sizing.",
+  generate(seed) {
+    const r = rng(seed);
+    const buckets = randInt(r, 3, 6);
+    const cap = randInt(r, 2, 3);
+    const keys = hashKeys(r, randInt(r, buckets * cap, buckets * cap + 8));
+    const b = staticBuckets(buckets, keys);
+    return {
+      id: `sto-gen-static-${seed}`,
+      topic: "storage",
+      kind: "numeric",
+      prompt: `A static hash file has ${buckets} primary buckets with h(k) = k mod ${buckets}, and each page holds ${cap} keys; a full bucket chains overflow pages. After inserting these keys, how many overflow pages exist in total?`,
+      tables: [hashTable(`Keys (${buckets} buckets, page size ${cap})`, keys)],
+      answer: overflowPages(b, cap),
+      explanation: `Bucket contents — ${b.map((x, i) => `${i}: ${x.length}`).join(", ")} keys. A bucket with m keys needs ceil(m/${cap}) pages, so m ≤ ${cap} needs none and each further ${cap} keys add one page: ${overflowPages(b, cap)} overflow pages.`,
+      difficulty: 2,
+      tags: staticOverflowGen.tags,
+      askedAt: staticOverflowGen.askedAt,
+    };
+  },
+};
+
+export const STORAGE_GENERATORS: Generator[] = [btreeCountGen, btreeRootGen, btreeHeightGen, extendibleGen, linearGen, staticOverflowGen];
