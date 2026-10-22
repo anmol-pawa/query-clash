@@ -74,6 +74,10 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
 ## C. Polish
 
 - [ ] C1. Two more SQL chapters: indexing deep-dive and SQL anti-patterns (N+1, implicit conversions, `SELECT *`, `OR` defeating indexes).
+  - [x] C1a. Chapter 11 "indexing deep-dive" missions (`content/chapters/part3.ts`: composite, expression, sorted, covering, redundant-index defense) and three codex entries, tested; not yet in `CHAPTERS`.
+  - [ ] C1b. Boss for chapter 11 (original 96×96 pixel monster with idle/attack/hurt/faint, type, biome, map node), then wire `INDEXING_MISSIONS` into a `Chapter`.
+  - [ ] C1c. Chapter 12 "SQL anti-patterns" missions (N+1 as a join, implicit conversions, `SELECT *`, `OR` defeating indexes) and codex entries, tested.
+  - [ ] C1d. Boss art and wiring for chapter 12.
 - [ ] C2. Daily challenge seeded by date, plus a streak counter.
 - [ ] C3. Accessibility: keyboard navigation for every screen, ARIA live region for battle text, colour-blind-safe type colours.
 - [ ] C4. Performance pass on mobile GPUs (texture atlases, fewer redraws), and a lighter first load (lazy-load PGlite after the menu).

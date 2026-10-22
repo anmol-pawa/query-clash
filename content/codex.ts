@@ -672,6 +672,57 @@ export const CODEX: CodexEntry[] = [
     quiz: { q: "Which predicate can use an index on order_date?", options: ["TO_CHAR(order_date,'YYYY') = '2024'", "order_date >= DATE '2024-01-01'", "order_date + 1 > SYSDATE", "TRUNC(order_date) = …"], answer: 1, why: "Only a bare column compared with a value is sargable." },
   },
   {
+    id: "composite-index",
+    title: "Composite indexes",
+    category: "Performance",
+    definition:
+      "A composite (multi-column) index is sorted by its first column, then by the second within equal first values, and so on. It serves any query that filters on a leftmost prefix of its columns, and can return rows already sorted by the following columns.",
+    syntax: {
+      postgres: "CREATE INDEX idx_orders_cust_date ON orders (customer_id, order_date);\n-- mixed order: ON orders (status, order_date DESC)",
+      oracle: "CREATE INDEX idx_orders_cust_date ON orders (customer_id, order_date);\n-- Oracle can also skip-scan a leading column with few distinct values",
+    },
+    enterprise:
+      "Put equality columns first, then the range or sort column. One well-chosen composite index usually replaces several single-column ones, and drops the redundant prefix index that would only slow down writes.",
+    pitfalls: [
+      "(a, b) helps WHERE a = … and WHERE a = … AND b > …, but not WHERE b = … on its own.",
+      "An index on (a) is redundant next to (a, b): drop it to speed up INSERT and UPDATE.",
+    ],
+  },
+  {
+    id: "expression-index",
+    title: "Expression / function-based indexes",
+    category: "Performance",
+    definition:
+      "An expression index stores the result of an expression (UPPER(email), a date truncation, a JSON field) instead of the raw column, so predicates that use exactly that expression become sargable.",
+    syntax: {
+      postgres: "CREATE INDEX idx_cust_email_upper ON customers (UPPER(email));\n-- query must use the same expression:\nWHERE UPPER(email) = 'A@B.COM'",
+      oracle: "CREATE INDEX idx_cust_email_upper ON customers (UPPER(email));\n-- function-based index; the function must be deterministic",
+    },
+    enterprise:
+      "Case-insensitive logins, normalised phone numbers and extracted JSON keys are the classic uses. Often a generated column or a case-insensitive collation is the cleaner long-term fix.",
+    pitfalls: [
+      "The query must repeat the indexed expression exactly; LOWER(email) does not match an index on UPPER(email).",
+      "The expression must be immutable / deterministic, or the index could go stale.",
+    ],
+  },
+  {
+    id: "covering-index",
+    title: "Covering indexes & index-only scans",
+    category: "Performance",
+    definition:
+      "A covering index contains every column a query needs, so the database answers from the index without visiting the table. The plan shows an Index Only Scan (PostgreSQL) or INDEX RANGE SCAN without TABLE ACCESS BY ROWID (Oracle).",
+    syntax: {
+      postgres: "CREATE INDEX idx_orders_cover ON orders (customer_id, status) INCLUDE (order_id);\nEXPLAIN SELECT order_id FROM orders WHERE customer_id = 7 AND status = 'SHIPPED';",
+      oracle: "CREATE INDEX idx_orders_cover ON orders (customer_id, status, order_id);\n-- Oracle has no INCLUDE: add the extra columns to the key",
+    },
+    enterprise:
+      "Hot read paths (lists, lookups behind an API) are often covered on purpose. The price is a bigger index and slower writes, so cover only the queries that matter.",
+    pitfalls: [
+      "SELECT * defeats covering: one extra column forces a table visit.",
+      "PostgreSQL index-only scans also need an up-to-date visibility map, so VACUUM matters.",
+    ],
+  },
+  {
     id: "sargable",
     title: "Sargable predicates",
     category: "Performance",

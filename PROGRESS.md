@@ -368,3 +368,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests (`tests/mock.test.ts`): 20 distinct non-SQL questions over 40 seeds, determinism, even topic spread, scorecard maths and grade boundaries, history cap. 500 tests.
 - Verified: lint, typecheck, 500 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: panel, intro, a question, and the scorecard render; saved history shows on the menu; no console errors, no horizontal overflow.
 - Next: C1 (indexing deep-dive and SQL anti-patterns chapters).
+
+## 2026-10-22 (06:50 UTC): C1a indexing chapter missions
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-anhcpl`, same commit as main). Split C1 into C1a-d, because each new chapter needs a boss with 96×96 art, a type, a biome and a map node, and tests tie chapters one-to-one to sprites.
+- `content/chapters/part3.ts`: five Chapter 11 missions (composite index, expression index, mixed ASC/DESC index, covering index, drop a redundant prefix index as a defense round), checked against the PostgreSQL catalog so a correct index passes in either dialect. Three new codex entries: composite, expression / function-based, covering indexes.
+- Tests (`tests/indexing.test.ts`): ids and codex references, both dialects agree and the check is non-empty, no-index answers fail, wrong column order fails, dropping the wrong index fails.
+- Not yet in `CHAPTERS` (that waits for the boss art in C1b), so the campaign is unchanged.
+- Next: C1b (chapter 11 boss art and wiring).
