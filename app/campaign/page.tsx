@@ -19,7 +19,7 @@ export default function CampaignPage() {
   const starter = starterSprite("front", starterStageOf(save.dex));
 
   useEffect(() => {
-    sqlClient().warmup();
+    return sqlClient().warmupWhenIdle();
   }, []);
   useEffect(() => {
     document.documentElement.style.setProperty("--accent", ch.color);

@@ -435,3 +435,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - A global `:focus-visible` ring for anything without bespoke focus styling; `Modal` closes on Esc and is `role="dialog" aria-modal`; interview answers take 1-9 / A-H (choices) and T / F (true-false) keys, ignored while typing in a field or the SQL editor.
 - Verified: lint, typecheck, 545 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: `/interview` renders, Tab shows the focus ring, no console errors, no horizontal overflow. The spell-deck shortcuts were not added.
 - Next: C4 (performance pass, lazy-load PGlite).
+
+## 2026-10-22 (15:55 UTC): C4a idle-time engine boot
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-5fugr6`, same commit as main). Split C4 into C4a (this) and C4b (Pixi rendering pass). The worker was already off the main thread; the menu/campaign pages now call `sqlClient().warmupWhenIdle()` (`requestIdleCallback`, 1.5 s timeout, `setTimeout` fallback, cancelled on unmount) so the PGlite download and WASM compile don't compete with first paint.
+- Verified: lint, typecheck, 545 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: menu and campaign render, no console errors, no horizontal overflow.
+- Noted: menu copy still says "ten bosses" (there are 12).
+- Next: C4b (Pixi rendering pass).

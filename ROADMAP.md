@@ -87,3 +87,5 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
   - [x] C3a. ARIA live region for battle text (`BattleTextBox`, whole message announced at once) and a distinct shape symbol on every type tag (`TYPE_INFO.symbol`, tested).
   - [x] C3b. Keyboard navigation: a global visible focus ring, Esc closes dialogs (`Modal` is now `role=dialog`), number / letter / T-F shortcuts for interview answer choices (map nodes and menu tiles were already focusable).
 - [ ] C4. Performance pass on mobile GPUs (texture atlases, fewer redraws), and a lighter first load (lazy-load PGlite after the menu).
+  - [x] C4a. PGlite worker boots on browser idle (`warmupWhenIdle`) instead of during first paint, on the menu and campaign pages.
+  - [ ] C4b. Pixi: profile a battle on a throttled CPU, cache static layers (backgrounds, platforms) as textures, avoid per-frame Graphics redraws, consider `antialias: false` for pixel art.

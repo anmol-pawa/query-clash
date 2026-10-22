@@ -31,7 +31,8 @@ export default function Home() {
 
   useEffect(() => {
     document.documentElement.style.setProperty("--accent", "#5eead4");
-    sqlClient().warmup(); // boot Postgres while the player reads the menu
+    // boot Postgres while the player reads the menu, once the page is idle
+    return sqlClient().warmupWhenIdle();
   }, []);
 
   const starter = starterSprite("front", starterStageOf(save.dex));

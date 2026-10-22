@@ -57,6 +57,25 @@ class SqlClient {
     this.ensure();
   }
 
+  /**
+   * Boot once the page has painted and the main thread is idle, so the worker
+   * download and WASM compile never compete with the first render on a phone.
+   * Returns a cancel function for effect cleanup.
+   */
+  warmupWhenIdle(): () => void {
+    if (this.worker) return () => {};
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+      cancelIdleCallback?: (h: number) => void;
+    };
+    if (w.requestIdleCallback) {
+      const h = w.requestIdleCallback(() => this.warmup(), { timeout: 1500 });
+      return () => w.cancelIdleCallback?.(h);
+    }
+    const t = setTimeout(() => this.warmup(), 300);
+    return () => clearTimeout(t);
+  }
+
   private setStatus(s: DbStatus) {
     this.status = s;
     this.listeners.forEach((l) => l(s));
