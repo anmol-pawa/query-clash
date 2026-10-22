@@ -15,9 +15,10 @@ import { SCHEMAFORGE } from "./creatures/schemaforge";
 import { GALEFRAME } from "./creatures/galeframe";
 import { RECURSA } from "./creatures/recursa";
 import { OPTICORE } from "./creatures/opticore";
+import { ARBORIX } from "./creatures/arborix";
 
 /** Every pixel sprite in the game, shown in /dev/sprites and checked by tests. */
-export const SPRITES: readonly SpriteDef[] = [BYTEBAT, BYTEBAT_BACK, KILOBAT, KILOBAT_BACK, GIGAVERN, GIGAVERN_BACK, NULLOTH, JOINMASTER, AGGREGON, FROSTNEST, ROWREAPER, TRANSACTOR, SCHEMAFORGE, GALEFRAME, RECURSA, OPTICORE];
+export const SPRITES: readonly SpriteDef[] = [BYTEBAT, BYTEBAT_BACK, KILOBAT, KILOBAT_BACK, GIGAVERN, GIGAVERN_BACK, NULLOTH, JOINMASTER, AGGREGON, FROSTNEST, ROWREAPER, TRANSACTOR, SCHEMAFORGE, GALEFRAME, RECURSA, OPTICORE, ARBORIX];
 
 export function spriteById(id: string): SpriteDef | undefined {
   return SPRITES.find((s) => s.id === id);

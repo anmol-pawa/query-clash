@@ -375,3 +375,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests (`tests/indexing.test.ts`): ids and codex references, both dialects agree and the check is non-empty, no-index answers fail, wrong column order fails, dropping the wrong index fails.
 - Not yet in `CHAPTERS` (that waits for the boss art in C1b), so the campaign is unchanged.
 - Next: C1b (chapter 11 boss art and wiring).
+
+## 2026-10-22 (07:55 UTC): C1b1 chapter 11 boss art
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-db0tcg`, same commit as main). Split C1b into art (C1b1, this) and wiring (C1b2): a new boss touches `BossId`, the overworld, the attack styles, Querydex and many "10 chapters" assertions.
+- ARBORIX: an original 96×96 bark golem with moss, glowing eyes and a brass belly plaque, crowned with a B+ tree (root node, two branch nodes, four chained leaf nodes; the keys glow one at a time while idle). Idle 4 frames (key scan), attack 3 (angry, arms raised, every key flares with sparkles), hurt 2 (X eyes, recoil), faint 4 (sag and dither dissolve). 18 colours, drawn by `scripts/art/arborix.mjs`.
+- `/dev/sprites`: Pixi previews are created only while on screen. With 17 sprites the page passed the ~16 WebGL contexts a browser allows and logged "Could not retrieve shader source" errors.
+- Tests: ARBORIX added to the "bosses are 96×96" roster test; the generic sprite checks (palette, animations, faint) cover it automatically. 514 tests.
+- Verified: lint, typecheck, 514 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: ARBORIX sheet and live preview render, no console errors, no horizontal overflow.
+- Next: C1b2 (wire ARBORIX in as chapter 11).
