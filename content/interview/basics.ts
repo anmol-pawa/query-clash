@@ -1,4 +1,5 @@
 import type { Generator, Question } from "./types";
+import { BASICS_MORE } from "./basicsMore";
 import { countSuperkeys } from "@/lib/dbms/keys";
 import { randInt, rng, shuffled } from "@/lib/rng";
 
@@ -165,6 +166,7 @@ export const BASICS: Question[] = [
     difficulty: 2,
     tags: ["relational model"],
   },
+  ...BASICS_MORE,
 ];
 
 /** "How many superkeys?" for a random relation with one or two disjoint candidate keys, answered by brute-force enumeration. */

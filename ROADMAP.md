@@ -95,4 +95,6 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
 - [x] D1. Spell-deck keyboard shortcuts in the campaign battle (1-4 to pick a spell), the item C3b skipped.
 - [x] D2. Refresh `docs/bosses.png` (README screenshot) so it shows all twelve bosses.
 - [ ] D3. More interview questions per topic (aim for 30+ each), each with a test for its answer.
+  - [x] D3a. Fundamentals (`basics`): 12 → 34 questions (`content/interview/basicsMore.ts`, keyed in `tests/interviewBasicsMore.test.ts`).
+  - [ ] D3b. Recovery (16), MVCC (19), ER (20), Query (22), Transactions/Distributed (24), Storage (26), SQL (14): top each up to 30+.
 - [ ] D4. A third dialect note set (MySQL differences) as codex-only entries.

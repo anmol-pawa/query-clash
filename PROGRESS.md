@@ -465,3 +465,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `docs/bosses.png` is now a 3x4 contact sheet of all twelve chapter battles (Playwright at 1280x720 on the static export, FIGHT clicked, 6 s after the slide-in), replacing the old ten-boss sheet taken before the art rewrite. README alt text says "twelve bosses".
 - Verified: lint, typecheck, 545 tests, build:pages pass; all 12 `/battle/N/` pages render the boss sprite, platforms and HUD with no console errors. Docs-only change, no app code touched.
 - Next: D3 (more interview questions per topic, 30+ each, each with an answer test).
+
+## 2026-10-22 (21:5x UTC): D3a fundamentals questions
+- Took the free lock (main was green). Worked in the existing clone (branch `claude/focused-cerf-ng8h88`, same commit as main). Split D3 into D3a (this) and D3b (the other topics). Fundamentals went from 12 to 34 questions: keys and FK actions, NULL three-valued logic (`NULL = NULL`, COUNT/AVG with NULLs, NOT IN with NULL), WHERE vs HAVING, SELECT logical order, views, catalog, DCL/TCL, UNION vs UNION ALL, OLTP vs OLAP, outer joins. Every answer is keyed in `tests/interviewBasicsMore.test.ts`.
+- Verified: lint, typecheck, 548 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: `/interview` renders, no console errors, no horizontal overflow.
+- CI and the Pages deploy were not checked: the GitHub Actions quota is used up until 2026-11-01.
+- Next: D3b (top up the other topics to 30+).
