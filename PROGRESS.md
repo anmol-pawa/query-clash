@@ -336,3 +336,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests (`tests/joins.test.ts`): Silberschatz's customer/depositor numbers (2,000,100 / 40,100 / 1,520), sort passes, 300 seeds per generator re-solved from the table the player sees, all variants and answer positions exercised, every fixed answer pinned. The empty-topic tests in `interview.test.ts` moved to "distributed". 441 tests.
 - Verified: lint, typecheck, 441 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: Query Processing battle intro and first question render, no console errors, no horizontal overflow.
 - Next: B8 (distributed and NoSQL).
+
+## 2026-10-22 (03:05 UTC): B8 distributed and NoSQL
+- Took the free lock (main was green). No `add_repo` tool again; worked in the existing clone.
+- `lib/dbms/distributed.ts`: quorum overlap (R + W > N), write-conflict safety (2W > N), majority and tolerated failures, mod and range shard placement, keys moved by a reshard, consistent-hash ring owner with wrap-around, two-phase commit outcome (commit / abort / blocked) and message count.
+- `content/interview/distributed.ts` (the Distributed & NoSQL topic is now playable): 24 fixed questions (CAP, PACELC, replication lag, read-your-writes, quorums, sharding vs replication, hotspots, mod resharding, virtual nodes, 2PC steps / blocking / NO vote, sagas, eventual consistency, LWW, four NoSQL families, SQL vs NoSQL, BASE, split brain) and three seeded generators: quorum arithmetic, shard placement / resharding movement, and the 2PC outcome from a vote table.
+- Tests (`tests/distributed.test.ts`): helper checks (including that removing a ring node moves only its own keys), every fixed answer pinned, 300 seeds per generator re-solved from the table the player sees with every variant exercised. The empty-topic tests in `interview.test.ts` moved to "sql". 448 tests.
+- Verified: lint, typecheck, 448 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: Distributed battle intro and first question render, no console errors, no horizontal overflow.
+- Next: B9 (classic interview SQL on PGlite).
