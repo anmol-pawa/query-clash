@@ -429,3 +429,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests: `tests/types.test.ts` checks symbols and colours are unique per type. 545 tests.
 - Verified: lint, typecheck, tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: the live region reads "Wild NULLOTH appeared! Go! BYTEBAT! ...", tags show symbols, no console errors, no horizontal overflow.
 - Next: C3b (keyboard navigation), then C4.
+
+## 2026-10-22 (14:55 UTC): C3b keyboard navigation
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-skohol`, same commit as main).
+- A global `:focus-visible` ring for anything without bespoke focus styling; `Modal` closes on Esc and is `role="dialog" aria-modal`; interview answers take 1-9 / A-H (choices) and T / F (true-false) keys, ignored while typing in a field or the SQL editor.
+- Verified: lint, typecheck, 545 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: `/interview` renders, Tab shows the focus ring, no console errors, no horizontal overflow. The spell-deck shortcuts were not added.
+- Next: C4 (performance pass, lazy-load PGlite).

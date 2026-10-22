@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { CSSProperties, ReactNode } from "react";
+import { CSSProperties, ReactNode, useEffect } from "react";
 import { sfx } from "@/game/audio/synth";
 import type { Dialect } from "@/lib/dialect/lint";
 
@@ -155,10 +155,18 @@ export function DialectToggle({ value, onChange, disabled }: { value: Dialect; o
 }
 
 export function Modal({ open, children, onClose, wide }: { open: boolean; children: ReactNode; onClose?: () => void; wide?: boolean }) {
+  useEffect(() => {
+    if (!open || !onClose) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
   return (
     <AnimatePresence>
       {open && (
-        <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <motion.div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <div className="absolute inset-0 bg-[#05030d]/80" onClick={onClose} />
           <motion.div
             className={`px-window relative max-h-[90vh] w-full overflow-y-auto scroll-thin p-6 ${wide ? "max-w-4xl" : "max-w-xl"}`}

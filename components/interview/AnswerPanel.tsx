@@ -1,5 +1,5 @@
 "use client";
-import { type CSSProperties, useState } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 import { ResultGrid } from "@/components/battle/ResultGrid";
 import { SqlEditor } from "@/components/battle/SqlEditor";
 import { Button, DialectToggle } from "@/components/ui/kit";
@@ -13,6 +13,21 @@ import { updateSave, useSave } from "@/lib/save";
 const LETTERS = "ABCDEFGH";
 const RIGHT = "#4ade80";
 const WRONG = "#f87171";
+
+/** Answer shortcuts: ignored while typing in a field or with a modifier held. */
+function useKeys(enabled: boolean, onKey: (key: string) => void) {
+  useEffect(() => {
+    if (!enabled) return;
+    const handler = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (e.ctrlKey || e.metaKey || e.altKey || t?.closest("input, textarea, select, [contenteditable], .cm-editor")) return;
+      onKey(e.key.toLowerCase());
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [enabled, onKey]);
+}
+
 const tone = (c: string) => ({ "--tone": c }) as CSSProperties;
 
 /**
@@ -33,7 +48,25 @@ export function AnswerPanel({ q, initialSteps, locked, picked, onAnswer }: { q: 
         />
       );
     case "truefalse":
-      return (
+      return <TrueFalse q={q} locked={locked} picked={picked} onAnswer={onAnswer} />;
+    case "multi":
+      return <MultiPanel q={q} locked={locked} picked={picked} onAnswer={onAnswer} />;
+    case "order":
+      return <OrderPanel initial={initialSteps} answer={q.steps} locked={locked} onAnswer={onAnswer} />;
+    case "numeric":
+    case "short":
+      return <TextPanel q={q} locked={locked} onAnswer={onAnswer} />;
+    case "sql":
+      return <SqlPanel q={q} locked={locked} onAnswer={onAnswer} />;
+  }
+}
+
+function TrueFalse({ q, locked, picked, onAnswer }: { q: Extract<Question, { kind: "truefalse" }>; locked: boolean; picked: Response | null; onAnswer: (r: Response) => void }) {
+  useKeys(!locked, (k) => {
+    if (k === "t") onAnswer({ kind: "truefalse", value: true });
+    else if (k === "f") onAnswer({ kind: "truefalse", value: false });
+  });
+  return (
         <div className="grid grid-cols-2 gap-2" data-answer="truefalse">
           {[true, false].map((v) => {
             const right = locked && v === q.answer;
@@ -54,17 +87,7 @@ export function AnswerPanel({ q, initialSteps, locked, picked, onAnswer }: { q: 
             );
           })}
         </div>
-      );
-    case "multi":
-      return <MultiPanel q={q} locked={locked} picked={picked} onAnswer={onAnswer} />;
-    case "order":
-      return <OrderPanel initial={initialSteps} answer={q.steps} locked={locked} onAnswer={onAnswer} />;
-    case "numeric":
-    case "short":
-      return <TextPanel q={q} locked={locked} onAnswer={onAnswer} />;
-    case "sql":
-      return <SqlPanel q={q} locked={locked} onAnswer={onAnswer} />;
-  }
+  );
 }
 
 /** Write the query: Run previews the result, Submit grades it on the database against the reference answer. */
@@ -139,6 +162,11 @@ function SqlPanel({ q, locked, onAnswer }: { q: Extract<Question, { kind: "sql" 
 }
 
 function ChoiceList({ choices, locked, isRight, isPicked, onPick, multi = false }: { choices: string[]; locked: boolean; isRight: (i: number) => boolean; isPicked: (i: number) => boolean; onPick: (i: number) => void; multi?: boolean }) {
+  // 1-9 or A-H pick a choice
+  useKeys(!locked, (k) => {
+    const i = /^[1-9]$/.test(k) ? Number(k) - 1 : LETTERS.toLowerCase().indexOf(k);
+    if (k.length === 1 && i >= 0 && i < choices.length) onPick(i);
+  });
   return (
     <div className="grid gap-1.5 sm:grid-cols-2" data-answer={multi ? "multi" : "mcq"}>
       {choices.map((c, i) => {

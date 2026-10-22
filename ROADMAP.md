@@ -83,7 +83,7 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
     - [x] C1d1. Boss art: HYDRAX (`scripts/art/hydrax.mjs` → `game/sprites/creatures/hydrax.ts`), the N+1 hydra, registered in `SPRITES` and tested.
     - [x] C1d2. Wiring (checklist above).
 - [x] C2. Daily challenge seeded by date, plus a streak counter (`lib/daily.ts`, panel on `/interview`; five questions from five topics, same for everyone each UTC day; a win extends the streak).
-- [ ] C3. Accessibility: keyboard navigation for every screen, ARIA live region for battle text, colour-blind-safe type colours.
+- [x] C3. Accessibility: keyboard navigation for every screen, ARIA live region for battle text, colour-blind-safe type colours.
   - [x] C3a. ARIA live region for battle text (`BattleTextBox`, whole message announced at once) and a distinct shape symbol on every type tag (`TYPE_INFO.symbol`, tested).
-  - [ ] C3b. Keyboard navigation: visible focus rings, focusable map nodes / menu tiles, Esc closes dialogs, battle shortcuts for the spell deck and answer choices.
+  - [x] C3b. Keyboard navigation: a global visible focus ring, Esc closes dialogs (`Modal` is now `role=dialog`), number / letter / T-F shortcuts for interview answer choices (map nodes and menu tiles were already focusable).
 - [ ] C4. Performance pass on mobile GPUs (texture atlases, fewer redraws), and a lighter first load (lazy-load PGlite after the menu).
