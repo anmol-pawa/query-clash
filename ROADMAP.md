@@ -89,3 +89,10 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
 - [x] C4. Performance pass on mobile GPUs (texture atlases, fewer redraws), and a lighter first load (lazy-load PGlite after the menu).
   - [x] C4a. PGlite worker boots on browser idle (`warmupWhenIdle`) instead of during first paint, on the menu and campaign pages.
   - [x] C4b. Pixi battle stage: `antialias: false` for pixel art; moon + skyline rasterised once with `cacheAsTexture` (resolution 1); the scrolling floor lines are 12 pre-drawn Graphics whose y moves per frame, instead of clearing and re-stroking a Graphics every frame.
+
+## D. Next ideas (added when A-C were all done)
+
+- [ ] D1. Spell-deck keyboard shortcuts in the campaign battle (1-4 to pick a spell), the item C3b skipped.
+- [ ] D2. Refresh `docs/bosses.png` (README screenshot) so it shows all twelve bosses.
+- [ ] D3. More interview questions per topic (aim for 30+ each), each with a test for its answer.
+- [ ] D4. A third dialect note set (MySQL differences) as codex-only entries.

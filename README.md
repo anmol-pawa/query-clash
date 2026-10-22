@@ -20,7 +20,7 @@ Queries run on **real PostgreSQL 18** compiled to WebAssembly ([PGlite](https://
 
 | | |
 |---|---|
-| **Campaign** | 10 bosses, 61 missions, basics to advanced. Each boss owns a chapter of the curriculum. Earn up to 3 stars per chapter. |
+| **Campaign** | 12 bosses, 71 missions, basics to advanced. Each boss owns a chapter of the curriculum. Earn up to 3 stars per chapter. |
 | **Endless Arena** | Waves of bosses with random missions from every chapter you've unlocked. You heal between waves. |
 | **Versus (hot-seat)** | Two players, one keyboard, each in their own dialect. A correct query hits your rival; a wrong one passes the turn. |
 | **Sandbox** | A free SQL playground on the same database, with examples and a live Oracle→PostgreSQL translation. |
@@ -89,10 +89,10 @@ The database is a small, realistic enterprise schema: **HR** (locations, departm
 app/                    routes: title, campaign, battle/[chapter], arena, versus, sandbox, codex, bestiary
 components/battle/      BattleScreen (round flow), SqlEditor (CodeMirror), SpellDeck, SchemaExplorer,
                         ResultPanel (Result · Target · Tutor · Lens · Plan), StageView (Pixi host)
-content/                schema + deterministic seed, 10 chapters of missions, Codex, spell cards
+content/                schema + deterministic seed, 12 chapters of missions, Codex, spell cards
 game/engine/            pure battle reducer and damage model (no rendering code)
 game/render/            PixiJS stage: tween engine, pooled particles, camera (shake, hit-stop,
-                        zoom punch, flash), rigged characters, 10 bosses, 14 spells + boss attacks
+                        zoom punch, flash), rigged characters, 12 bosses, 14 spells + boss attacks
 game/audio/             Web Audio synth: SFX and a step-sequenced music loop (no audio files)
 lib/db/                 engine (reset/run/evaluate/EXPLAIN), Web Worker host, client with watchdog,
                         error tutor (SQLSTATE → plain English + ORA- code)

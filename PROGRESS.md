@@ -448,3 +448,8 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Not measured on a throttled CPU (headless software GL gives no useful numbers); the change removes the per-frame rebuild by construction.
 - Verified: lint, typecheck, 545 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: chapter 1 battle renders (skyline, moon, floor lines, platforms), no console errors, no horizontal overflow.
 - Next: ROADMAP C (remaining items) — check the next unchecked box; menu copy still says "ten bosses" (there are 12).
+
+## 2026-10-22 (18:0x UTC): copy fixes, ROADMAP D
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-7h77dh`, same commit as main). Every box in ROADMAP A-C was ticked, so this run fixed the stale "ten bosses" copy (menu, README: 12 bosses, 71 missions, 12 chapters) and added section D with four follow-up tasks.
+- Verified: lint, typecheck, 545 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: the menu says "twelve bosses", no console errors, no horizontal overflow.
+- Next: D1 (spell-deck keyboard shortcuts).

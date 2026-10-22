@@ -102,7 +102,7 @@ export default function Home() {
             <span className="text-[var(--accent)]">CLASH</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/65 sm:text-lg">
-            A 1v1 battle game where <span className="text-white">SQL is your spellbook</span>. Defeat ten bosses, from the NULL-haunted intern to the all-seeing Optimizer, by writing real queries that run on a real Postgres engine in your browser. Every spell is taught in <span className="text-sky-300">PostgreSQL</span> and{" "}
+            A 1v1 battle game where <span className="text-white">SQL is your spellbook</span>. Defeat twelve bosses, from the NULL-haunted intern to the all-seeing Optimizer, by writing real queries that run on a real Postgres engine in your browser. Every spell is taught in <span className="text-sky-300">PostgreSQL</span> and{" "}
             <span className="text-rose-300">Oracle</span>.
           </motion.p>
         </section>
