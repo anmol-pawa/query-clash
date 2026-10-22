@@ -453,3 +453,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-7h77dh`, same commit as main). Every box in ROADMAP A-C was ticked, so this run fixed the stale "ten bosses" copy (menu, README: 12 bosses, 71 missions, 12 chapters) and added section D with four follow-up tasks.
 - Verified: lint, typecheck, 545 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: the menu says "twelve bosses", no console errors, no horizontal overflow.
 - Next: D1 (spell-deck keyboard shortcuts).
+
+## 2026-10-22 (19:0x UTC): D1 spell-deck keyboard shortcuts
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-w5nekm`, same commit as main).
+- `SpellDeck`: keys 1-4 cast the first four cards of the open tab (ignored while typing in a field/the editor or with modifiers); the cards show a small number badge (hidden on touch) and `aria-keyshortcuts`. Applies to campaign/arena/versus battles and the sandbox.
+- Verified: lint, typecheck, 545 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: pressing 2 inserted the EXPLAIN card in the sandbox, badges render, no console errors, no horizontal overflow.
+- Next: D2 (refresh `docs/bosses.png`).

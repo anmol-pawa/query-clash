@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "motion/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SPELLS, Spell, plainTemplate } from "@/content/spells";
 import { sfx } from "@/game/audio/synth";
 import type { Dialect } from "@/lib/dialect/lint";
@@ -19,12 +19,31 @@ const GROUP_COLOR: Record<Spell["group"], string> = {
   Pro: "#e879f9",
 };
 
+const SPELL_KEYS = 4;
+
 /** Clause cards: click to insert as a snippet, or drag onto the editor. */
 export function SpellDeck({ dialect, maxChapter, onCast }: { dialect: Dialect; maxChapter: number; onCast: (tpl: string) => void }) {
   const groups = useMemo(() => [...new Set(SPELLS.filter((s) => s.chapter <= maxChapter).map((s) => s.group))], [maxChapter]);
   const [group, setGroup] = useState<Spell["group"]>(groups[groups.length - 1] ?? "Core");
   const active = groups.includes(group) ? group : groups[0];
-  const cards = SPELLS.filter((s) => s.group === active && s.chapter <= maxChapter);
+  const cards = useMemo(() => SPELLS.filter((s) => s.group === active && s.chapter <= maxChapter), [active, maxChapter]);
+
+  // 1-4 cast the first four cards of the open tab, unless typing in a field or the editor.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || t?.closest("input, textarea, select, [contenteditable], .cm-editor")) return;
+      const n = Number(e.key);
+      if (!Number.isInteger(n) || n < 1 || n > SPELL_KEYS) return;
+      const card = cards[n - 1];
+      if (!card) return;
+      e.preventDefault();
+      sfx.card();
+      onCast(card.tpl[dialect]);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [cards, dialect, onCast]);
 
   return (
     <div className="flex flex-col gap-2" data-testid="spell-deck">
@@ -64,10 +83,16 @@ export function SpellDeck({ dialect, maxChapter, onCast }: { dialect: Dialect; m
               sfx.card();
               onCast(c.tpl[dialect]);
             }}
+            aria-keyshortcuts={i < SPELL_KEYS ? String(i + 1) : undefined}
             title={`${c.desc}\n\n${plainTemplate(c.tpl[dialect])}`}
             className="px-card relative flex w-[104px] shrink-0 cursor-grab flex-col items-start gap-1 overflow-hidden p-2.5 pt-3 text-left active:cursor-grabbing"
             style={{ "--card": GROUP_COLOR[c.group] } as React.CSSProperties}
           >
+            {i < SPELL_KEYS && (
+              <span aria-hidden className="hide-on-touch absolute right-1 top-0.5 font-display text-[10px] text-white/40">
+                {i + 1}
+              </span>
+            )}
             <span className="font-mono text-[12px] font-bold leading-tight" style={{ color: GROUP_COLOR[c.group] }}>
               {c.label}
             </span>
