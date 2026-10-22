@@ -24,6 +24,7 @@ export function Button({
   title,
   size = "md",
   type = "button",
+  "data-testid": testId,
 }: {
   children: ReactNode;
   onClick?: () => void;
@@ -33,12 +34,14 @@ export function Button({
   title?: string;
   size?: "sm" | "md" | "lg";
   type?: "button" | "submit";
+  "data-testid"?: string;
 }) {
   const sz = size === "sm" ? "px-3 py-1.5 text-xs" : size === "lg" ? "px-7 py-3.5 text-base" : "px-4 py-2 text-sm";
   return (
     <motion.button
       type={type}
       title={title}
+      data-testid={testId}
             onHoverStart={() => !disabled && sfx.hover()}
       onClick={() => {
         if (disabled) return;

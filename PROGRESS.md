@@ -360,3 +360,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests (`tests/leitner.test.ts`): box transitions and cap, intervals, UTC days, due counting, weak-topic ordering, drill size / distinctness / topic cap / determinism / due-first / top-up. 490 tests.
 - Verified: lint, typecheck, 490 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: drill panel and a drill battle intro render, no console errors, no horizontal overflow.
 - Next: B10b (mock interview), then C1.
+
+## 2026-10-22 (06:00 UTC): B10b mock interview (B10 complete)
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-udert0`, same commit as main).
+- `lib/mock.ts`: `buildMock` (20 questions spread 2-3 per topic over the 8 topics, fixed questions plus one generated problem per generator, seeded; SQL-writing questions are left out because submitting one reveals the verdict), `scorecard` (per-topic breakdown, skipped = wrong, grade A-F from 90/75/60/40%), and `addResult` (last 10 scorecards).
+- `components/interview/MockInterview.tsx`: intro rules, a 30-minute clock computed from the start time, one question at a time with no feedback (answer advances, Skip, End now), then the scorecard: grade, verdict, time, weakest-first topic bars and every question with its answer and explanation. Finishing updates XP, Leitner boxes, topic stats and `mockResults` in the save. `/interview` has a Mock interview panel with the last result and best score. `Button` now accepts `data-testid`.
+- Tests (`tests/mock.test.ts`): 20 distinct non-SQL questions over 40 seeds, determinism, even topic spread, scorecard maths and grade boundaries, history cap. 500 tests.
+- Verified: lint, typecheck, 500 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: panel, intro, a question, and the scorecard render; saved history shows on the menu; no console errors, no horizontal overflow.
+- Next: C1 (indexing deep-dive and SQL anti-patterns chapters).

@@ -7,6 +7,7 @@ import { useSyncExternalStore } from "react";
 import type { Dialect } from "./dialect/lint";
 import { Dex, migrateDex } from "@/game/engine/querydex";
 import type { LeitnerState, TopicStats } from "./leitner";
+import type { MockResult } from "./mock";
 
 export interface Settings {
   volume: number;
@@ -30,6 +31,7 @@ export interface SaveData {
   interview: string[]; // DBMS Interview question ids answered correctly at least once
   leitner: LeitnerState; // spaced-repetition box and due day per fixed interview question
   topicStats: TopicStats; // right / wrong answers per interview topic (weak-topic report)
+  mockResults: MockResult[]; // scorecards of the last mock interviews, newest first
 }
 
 const KEY = "query-clash-save-v1";
@@ -49,6 +51,7 @@ const DEFAULT: SaveData = {
   interview: [],
   leitner: {},
   topicStats: {},
+  mockResults: [],
 };
 
 let cache: SaveData | null = null;
