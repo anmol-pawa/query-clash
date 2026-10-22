@@ -81,7 +81,7 @@ Features that only make sense inside Oracle, such as PL/SQL packages and `UNPIVO
 
 The database is a small, realistic enterprise schema: **HR** (locations, departments, employees as a tree), **Retail** (customers, a category tree, products, orders, order lines), **Banking** (accounts, transactions) and **Logistics** (shipments with JSON details). The data comes from a fixed seed, so every player and the test suite see identical rows. It deliberately includes edge cases: NULL commissions, an employee without a department, a department without employees, customers who never ordered, and salary ties.
 
-![The ten bosses](docs/bosses.png)
+![The twelve bosses](docs/bosses.png)
 
 ## Architecture
 

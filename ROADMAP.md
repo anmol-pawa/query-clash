@@ -93,6 +93,6 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
 ## D. Next ideas (added when A-C were all done)
 
 - [x] D1. Spell-deck keyboard shortcuts in the campaign battle (1-4 to pick a spell), the item C3b skipped.
-- [ ] D2. Refresh `docs/bosses.png` (README screenshot) so it shows all twelve bosses.
+- [x] D2. Refresh `docs/bosses.png` (README screenshot) so it shows all twelve bosses.
 - [ ] D3. More interview questions per topic (aim for 30+ each), each with a test for its answer.
 - [ ] D4. A third dialect note set (MySQL differences) as codex-only entries.

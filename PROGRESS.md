@@ -459,3 +459,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `SpellDeck`: keys 1-4 cast the first four cards of the open tab (ignored while typing in a field/the editor or with modifiers); the cards show a small number badge (hidden on touch) and `aria-keyshortcuts`. Applies to campaign/arena/versus battles and the sandbox.
 - Verified: lint, typecheck, 545 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: pressing 2 inserted the EXPLAIN card in the sandbox, badges render, no console errors, no horizontal overflow.
 - Next: D2 (refresh `docs/bosses.png`).
+
+## 2026-10-22 (19:5x UTC): D2 refresh bosses.png
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-vijd66`, same commit as main).
+- `docs/bosses.png` is now a 3x4 contact sheet of all twelve chapter battles (Playwright at 1280x720 on the static export, FIGHT clicked, 6 s after the slide-in), replacing the old ten-boss sheet taken before the art rewrite. README alt text says "twelve bosses".
+- Verified: lint, typecheck, 545 tests, build:pages pass; all 12 `/battle/N/` pages render the boss sprite, platforms and HUD with no console errors. Docs-only change, no app code touched.
+- Next: D3 (more interview questions per topic, 30+ each, each with an answer test).
