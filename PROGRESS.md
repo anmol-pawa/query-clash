@@ -399,3 +399,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests (`tests/antipatterns.test.ts`): ids and codex references, both dialects agree and are non-empty, the canonical solution passes, inner join drops zero-order customers, `SELECT *` fails, `NOT IN` returns nothing with NULL managers, cast and plain forms return the same row. 530 passed.
 - Verified: lint, typecheck, tests, build:pages pass. No visual change, so no screenshots.
 - Next: C1d (chapter 12 boss art and wiring).
+
+## 2026-10-22 (10:50 UTC): C1d1 chapter 12 boss art
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-7aboh7`, same commit as main). Split C1d into art (C1d1, this) and wiring (C1d2).
+- HYDRAX: an original 96×96 N+1 hydra: one big head (the first query) and four small heads (the N queries) on curving necks from a scaly coiled body with a belly plate. Idle 4 frames (small heads strike in turn), attack 3 (every head lunges, fangs and sparkles), hurt 2 (X eyes, recoil), faint 4 (heads drop, dither dissolve). 15 colours, drawn by `scripts/art/hydrax.mjs`. Fixed a first draft where the open mouth looked like a grille and the faint pose clipped at the bottom.
+- Registered in `SPRITES`; the generic sprite tests and the "bosses are 96×96" roster test cover it.
+- Verified: lint, typecheck, tests, build:pages pass. Judged the 13 frames from a rendered sheet; no UI changed, so no Playwright run.
+- Next: C1d2 (wire HYDRAX in as chapter 12).
