@@ -86,6 +86,7 @@ export function TypeTag({ type, className = "" }: { type: SqlType; className?: s
       className={`inline-block shrink-0 rounded-[2px] px-[3px] font-mono text-[7px] font-black uppercase leading-[10px] tracking-wide text-white sm:text-[8px] ${className}`}
       style={{ background: t.color, boxShadow: "inset 0 -1px 0 rgba(0,0,0,0.35), 0 0 0 1px #2a2c3a" }}
     >
+      <span aria-hidden>{t.symbol} </span>
       {t.name}
     </span>
   );

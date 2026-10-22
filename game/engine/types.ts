@@ -12,17 +12,17 @@ export type SqlType = "filter" | "join" | "aggregate" | "subquery" | "write" | "
 
 export const SQL_TYPES: SqlType[] = ["filter", "join", "aggregate", "subquery", "write", "txn", "schema", "window", "recursive", "index"];
 
-export const TYPE_INFO: Record<SqlType, { name: string; color: string }> = {
-  filter: { name: "FILTER", color: "#2fb8a8" },
-  join: { name: "JOIN", color: "#d89a18" },
-  aggregate: { name: "AGGREG", color: "#e0682a" },
-  subquery: { name: "SUBQRY", color: "#8a6ae0" },
-  write: { name: "WRITE", color: "#3a7ee0" },
-  txn: { name: "TXN", color: "#28a070" },
-  schema: { name: "SCHEMA", color: "#a8742a" },
-  window: { name: "WINDOW", color: "#2a9ad0" },
-  recursive: { name: "RECURS", color: "#4aa83a" },
-  index: { name: "INDEX", color: "#c03a6a" },
+export const TYPE_INFO: Record<SqlType, { name: string; color: string; /** a distinct shape so the type never relies on colour alone */ symbol: string }> = {
+  filter: { name: "FILTER", color: "#2fb8a8", symbol: "▼" },
+  join: { name: "JOIN", color: "#d89a18", symbol: "⧓" },
+  aggregate: { name: "AGGREG", color: "#e0682a", symbol: "Σ" },
+  subquery: { name: "SUBQRY", color: "#8a6ae0", symbol: "◎" },
+  write: { name: "WRITE", color: "#3a7ee0", symbol: "✎" },
+  txn: { name: "TXN", color: "#28a070", symbol: "⇄" },
+  schema: { name: "SCHEMA", color: "#a8742a", symbol: "▦" },
+  window: { name: "WINDOW", color: "#2a9ad0", symbol: "▤" },
+  recursive: { name: "RECURS", color: "#4aa83a", symbol: "∞" },
+  index: { name: "INDEX", color: "#c03a6a", symbol: "✦" },
 };
 
 /** The type of each attack (the concept that picked it). */

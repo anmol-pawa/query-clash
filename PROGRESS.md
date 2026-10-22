@@ -422,3 +422,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests (`tests/daily.test.ts`): same deck per day, different across days, five distinct topics over 40 days, streak increments / resets / repeat-win no-op, live-streak window. 544 tests.
 - Verified: lint, typecheck, tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: panel and daily battle intro render, no console errors, no horizontal overflow.
 - Next: C3 (accessibility: keyboard navigation, ARIA live region for battle text, colour-blind-safe type colours).
+
+## 2026-10-22 (13:55 UTC): C3a live region and colour-blind-safe types
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-qr06zu`, same commit as main). Split C3 into C3a (this) and C3b (keyboard navigation).
+- `BattleTextBox` now renders a visually hidden `role="status"` live region holding the whole message (the typewriter text is visual only), and the button's label is a stable "Next line". Every type now has a distinct symbol in `TYPE_INFO` shown inside `TypeTag` (▼ FILTER, ⧓ JOIN, Σ AGGREG...), so type is not conveyed by colour alone.
+- Tests: `tests/types.test.ts` checks symbols and colours are unique per type. 545 tests.
+- Verified: lint, typecheck, tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: the live region reads "Wild NULLOTH appeared! Go! BYTEBAT! ...", tags show symbols, no console errors, no horizontal overflow.
+- Next: C3b (keyboard navigation), then C4.

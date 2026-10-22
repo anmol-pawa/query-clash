@@ -51,11 +51,16 @@ export function BattleTextBox({ message, instant = false, className = "" }: { me
   };
 
   return (
+    <>
+    {/* screen readers get the whole message at once; the typewriter below is visual only */}
+    <p className="sr-only" role="status" aria-live="polite" data-testid="battle-live">
+      {lines.join(" ")}
+    </p>
     <button
       type="button"
       onClick={advance}
       data-testid="battle-text"
-      aria-label={line}
+      aria-label="Next line"
       className={`relative block w-full select-none border-[3px] border-[#2a2c3a] bg-[#2f3a64] p-[3px] text-left font-mono ${className}`}
       style={{ borderRadius: 6, boxShadow: "0 3px 0 rgba(0,0,0,0.45)" }}
     >
@@ -70,5 +75,6 @@ export function BattleTextBox({ message, instant = false, className = "" }: { me
         {done && more && <span className="absolute bottom-1 right-2 animate-bounce text-[10px] leading-none text-[#e05030]">▼</span>}
       </div>
     </button>
+    </>
   );
 }

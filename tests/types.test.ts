@@ -3,7 +3,7 @@ import { CHAPTERS } from "@/content/chapters";
 import { ATTACKS, attackFor, detectConcepts } from "@/lib/dialect/concepts";
 import { computeDamage } from "@/game/engine/damage";
 import { castLines } from "@/game/engine/battleText";
-import { ATTACK_TYPE, BOSS_TYPE, RESISTED, SQL_TYPES, SUPER, TYPE_CHART, effectiveness } from "@/game/engine/types";
+import { ATTACK_TYPE, BOSS_TYPE, RESISTED, SQL_TYPES, SUPER, TYPE_CHART, TYPE_INFO, effectiveness } from "@/game/engine/types";
 
 const dialects = ["postgres", "oracle"] as const;
 
@@ -80,5 +80,14 @@ describe("type multiplier in damage", () => {
     ]);
     expect(castLines({ user: "BYTEBAT", target: "RECURSA", attack: "Join Chain", damage: 20, crit: true, effect: "resisted" }).slice(1, 3)).toEqual(["A critical hit!", "It's not very effective…"]);
     expect(castLines({ user: "BYTEBAT", target: "RECURSA", attack: "Join Chain", damage: 20, effect: "normal" })).toHaveLength(2);
+  });
+});
+
+describe("colour-blind-safe types", () => {
+  it("every type has its own symbol and its own colour", () => {
+    const symbols = SQL_TYPES.map((t) => TYPE_INFO[t].symbol);
+    expect(new Set(symbols).size).toBe(SQL_TYPES.length);
+    expect(new Set(SQL_TYPES.map((t) => TYPE_INFO[t].color)).size).toBe(SQL_TYPES.length);
+    for (const s of symbols) expect(s.length).toBeGreaterThan(0);
   });
 });

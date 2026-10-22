@@ -84,4 +84,6 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
     - [x] C1d2. Wiring (checklist above).
 - [x] C2. Daily challenge seeded by date, plus a streak counter (`lib/daily.ts`, panel on `/interview`; five questions from five topics, same for everyone each UTC day; a win extends the streak).
 - [ ] C3. Accessibility: keyboard navigation for every screen, ARIA live region for battle text, colour-blind-safe type colours.
+  - [x] C3a. ARIA live region for battle text (`BattleTextBox`, whole message announced at once) and a distinct shape symbol on every type tag (`TYPE_INFO.symbol`, tested).
+  - [ ] C3b. Keyboard navigation: visible focus rings, focusable map nodes / menu tiles, Esc closes dialogs, battle shortcuts for the spell deck and answer choices.
 - [ ] C4. Performance pass on mobile GPUs (texture atlases, fewer redraws), and a lighter first load (lazy-load PGlite after the menu).
