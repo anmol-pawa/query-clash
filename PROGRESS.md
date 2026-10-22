@@ -471,3 +471,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Verified: lint, typecheck, 548 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: `/interview` renders, no console errors, no horizontal overflow.
 - CI and the Pages deploy were not checked: the GitHub Actions quota is used up until 2026-11-01.
 - Next: D3b (top up the other topics to 30+).
+
+## 2026-10-22 (23:5x UTC): D3b1 ER and query-processing questions
+- Took the free lock. `origin/main` is an older, unrelated history (last commit 2026-10-20); the real line of work lives on the `claude/` branch, so, like earlier runs, worked and pushed there. No `add_repo` tool; used the existing clone.
+- Split D3b: ER went from 20 to 31 questions (specialization constraints, ISA mapping, ternary vs binary, derived attributes, M:N keys, table counts, natural-join size, union compatibility, algebra equivalences, sets vs bags) and Query from 22 to 31 (nested-loop / block-nested-loop / all-in-memory cost, external sort passes, sargable predicates, LIKE prefixes, optimizer heuristics, pipelining, estimate-vs-actual gaps).
+- Every answer is keyed in `tests/interviewTopicsMore.test.ts`; the numeric ones are cross-checked against `lib/dbms/joins` and `lib/dbms/algebra`.
+- Verified: lint, typecheck, 553 tests, build, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: `/interview` renders, no console errors, no horizontal overflow.
+- CI and the Pages deploy were not checked: the GitHub Actions quota is used up until 2026-11-01.
+- Next: D3b2 (SQL, Transactions, Distributed, Storage to 30+).
