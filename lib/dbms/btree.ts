@@ -21,7 +21,15 @@ interface Split {
   right: BNode;
 }
 
-function insertInto(node: BNode, key: number, n: number): Split | null {
+/** One node split during an insert: the key that moved (internal) or was copied (leaf) up, and the two halves. */
+export interface SplitEvent {
+  leaf: boolean;
+  up: number;
+  left: number[];
+  right: number[];
+}
+
+function insertInto(node: BNode, key: number, n: number, log?: SplitEvent[]): Split | null {
   if (node.leaf) {
     if (node.keys.includes(key)) return null;
     node.keys.push(key);
@@ -30,11 +38,12 @@ function insertInto(node: BNode, key: number, n: number): Split | null {
     const cut = Math.ceil(n / 2);
     const right: BNode = { leaf: true, keys: node.keys.slice(cut), children: [] };
     node.keys = node.keys.slice(0, cut);
+    log?.push({ leaf: true, up: right.keys[0], left: [...node.keys], right: [...right.keys] });
     return { key: right.keys[0], right };
   }
   let i = 0;
   while (i < node.keys.length && key >= node.keys[i]) i++;
-  const s = insertInto(node.children[i], key, n);
+  const s = insertInto(node.children[i], key, n, log);
   if (!s) return null;
   node.keys.splice(i, 0, s.key);
   node.children.splice(i + 1, 0, s.right);
@@ -44,13 +53,38 @@ function insertInto(node: BNode, key: number, n: number): Split | null {
   const right: BNode = { leaf: false, keys: node.keys.slice(leftChildren), children: node.children.slice(leftChildren) };
   node.keys = node.keys.slice(0, leftChildren - 1);
   node.children = node.children.slice(0, leftChildren);
+  log?.push({ leaf: false, up, left: [...node.keys], right: [...right.keys] });
   return { key: up, right };
 }
 
-/** Insert in place (duplicates are ignored). */
-export function insert(t: BTree, key: number): void {
-  const s = insertInto(t.root, key, t.order);
+/** Insert in place (duplicates are ignored). Splits, bottom-up, are appended to `log` when given. */
+export function insert(t: BTree, key: number, log?: SplitEvent[]): void {
+  const s = insertInto(t.root, key, t.order, log);
   if (s) t.root = { leaf: false, keys: [s.key], children: [t.root, s.right] };
+}
+
+/** Is `key` already stored in a leaf? */
+export function has(t: BTree, key: number): boolean {
+  let node = t.root;
+  while (!node.leaf) {
+    let i = 0;
+    while (i < node.keys.length && key >= node.keys[i]) i++;
+    node = node.children[i];
+  }
+  return node.keys.includes(key);
+}
+
+/** The root-to-leaf nodes an exact-match search for `key` reads. */
+export function searchPath(t: BTree, key: number): BNode[] {
+  const path = [t.root];
+  let node = t.root;
+  while (!node.leaf) {
+    let i = 0;
+    while (i < node.keys.length && key >= node.keys[i]) i++;
+    node = node.children[i];
+    path.push(node);
+  }
+  return path;
 }
 
 export function build(order: number, keys: readonly number[]): BTree {

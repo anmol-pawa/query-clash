@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { DIFFICULTY_COLOR, DIFFICULTY_FILTERS, DIFFICULTY_LABEL, DifficultyFilter, KIND_LABEL, kindCounts, overallProgress, topicRows } from "@/components/menu/interviewList";
 import { SpriteCanvas } from "@/components/sprites/SpriteCanvas";
-import { Button, NavLink } from "@/components/ui/kit";
+import { Button, LinkButton, NavLink } from "@/components/ui/kit";
 import { GENERATORS, QUESTIONS, TOPICS } from "@/content/interview";
 import type { Question, TopicId } from "@/content/interview/types";
 import { InterviewBattle } from "@/components/interview/InterviewBattle";
@@ -162,6 +162,11 @@ export default function InterviewPage() {
                   </li>
                 )}
               </ul>
+              {sel === "storage" && (
+                <LinkButton href="/interview/btree" variant="ghost" size="md" className="mt-3 w-full">
+                  🌲 B+ tree lab
+                </LinkButton>
+              )}
               {asked && <p className="mt-2 text-[11px] text-white/45">▸ {asked}</p>}
               <Button variant="primary" size="lg" className="mt-4 w-full tracking-[0.15em]" onClick={() => startBattle(sel)}>
                 ⚔ Battle {bossSprite(row.topic.foe).name}

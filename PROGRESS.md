@@ -320,3 +320,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests (`tests/hashing.test.ts`): worked extendible and linear examples; 400 random extendible files check every key is findable, buckets are within capacity, local depth <= global depth, and each bucket has exactly 2^(global-local) directory entries with matching prefixes; 400 random linear files check bucket count = initial*2^level + next and key addressing; every fixed answer pinned; 300 seeds per generator re-solved from the table the player sees. 433 tests.
 - Verified: lint, typecheck, 433 tests, build and build:pages pass. Playwright on the static export at 1280x900 and iPhone 14 played Storage battles opening with extendible and static hashing questions (prompt, key table, numeric input): no console errors, no horizontal overflow.
 - Next: B6b2 (interactive B+ tree visualizer), then B7.
+
+## 2026-10-22 (00:45 UTC): B6b2 B+ tree visualizer (B6 complete)
+- Took the free lock (main was green). The routine had no `add_repo` tool this run; the repo was already cloned, so I worked in place.
+- `lib/dbms/btree.ts`: `insert` takes an optional split log (`SplitEvent`: leaf or internal, key moved/copied up, both halves), plus `has` and `searchPath`.
+- `components/interview/BTreeVisualizer.tsx` and the `/interview/btree` page ("B+ Tree Lab"): choose order 3-5, type a key, see the tree redrawn (leaf chain, search path in yellow, split steps listed under it, root growth noted). Linked from the Storage topic panel.
+- Tests: traced insert matches untraced on 100 random key sets, split count matches node count, `has`/`searchPath`. 435 tests.
+- Verified: lint, typecheck, 435 tests, build and build:pages pass. Playwright (static export) at 1280x900 and iPhone 14: tree renders, no page overflow (the diagram scrolls inside its box on phones), no console errors (apart from the missing sw.js in my non-pages test build).
+- Next: B7 (query processing and optimization).

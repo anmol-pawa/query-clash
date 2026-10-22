@@ -72,3 +72,35 @@ describe("height and fan-out formulas", () => {
     expect(minLevels(4, 4)).toBe(2);
   });
 });
+
+describe("traced insert", () => {
+  it("logs bottom-up splits for Silberschatz's order-4 example", async () => {
+    const { build, insert, has, searchPath } = await import("@/lib/dbms/btree");
+    const t = build(4, [10, 20, 30]);
+    const log: import("@/lib/dbms/btree").SplitEvent[] = [];
+    insert(t, 40, log);
+    expect(log).toEqual([{ leaf: true, up: 30, left: [10, 20], right: [30, 40] }]);
+    expect(has(t, 30)).toBe(true);
+    expect(has(t, 35)).toBe(false);
+    expect(searchPath(t, 40)).toHaveLength(2);
+    expect(searchPath(t, 40)[1].keys).toEqual([30, 40]);
+  });
+
+  it("matches untraced inserts and logs every split on random keys", async () => {
+    const { build, insert, levels } = await import("@/lib/dbms/btree");
+    for (let seed = 1; seed <= 100; seed++) {
+      const keys = Array.from({ length: 25 }, (_, i) => ((seed * 37 + i * 53) % 97) + 1);
+      const a = build(3 + (seed % 3), keys);
+      const b = build(3 + (seed % 3), []);
+      let splits = 0;
+      for (const k of keys) {
+        const log: import("@/lib/dbms/btree").SplitEvent[] = [];
+        insert(b, k, log);
+        splits += log.length;
+      }
+      expect(levels(b).map((l) => l.map((n) => n.keys))).toEqual(levels(a).map((l) => l.map((n) => n.keys)));
+      // each split adds a sibling; each root split also adds a new root (height - 1 of them)
+      expect(levels(b).flat().length - 1 - (levels(b).length - 1)).toBe(splits);
+    }
+  });
+});

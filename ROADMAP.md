@@ -59,11 +59,11 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
   - [x] B5b. Recovery and MVCC: WAL, undo/redo logging, checkpoints, ARIES (analysis/redo/undo, LSNs, CLRs), MVCC snapshots and visibility, with generated "which transactions are redone/undone after this crash?" log problems.
     - [x] B5b1. Recovery: WAL, steal/force, immediate (undo/redo) and deferred (redo-only) logging, checkpoints, ARIES (analysis/redo/undo, LSNs, pageLSN, CLRs, fuzzy checkpoints), shadow paging; generated "which transactions are redone/undone?", "value after recovery", ARIES "where does redo start?" and "which transactions are losers?" problems.
     - [x] B5b2. MVCC: snapshots and visibility rules (PostgreSQL xmin/xmax, Oracle undo-based read consistency), snapshot isolation vs serializable, with generated "which row version does this transaction see?" problems.
-- [ ] B6. Storage and indexing: file organization, B-tree vs B+ tree (an interactive insert/split visualizer with generated "tree after inserting…" questions), hashing (static/extendible/linear), clustered vs non-clustered, covering indexes, cost of index lookups.
+- [x] B6. Storage and indexing: file organization, B-tree vs B+ tree (an interactive insert/split visualizer with generated "tree after inserting…" questions), hashing (static/extendible/linear), clustered vs non-clustered, covering indexes, cost of index lookups.
   - [x] B6a. B+ tree insert simulator (`lib/dbms/btree.ts`), 18 fixed storage and indexing questions (pages, B vs B+, splits, fan-out, clustered, covering, composite prefix, selectivity), generated "leaves / levels after inserting", "which keys are in the root?" and "levels from block/key/pointer sizes" problems.
-  - [ ] B6b. Hashing and the visualizer.
+  - [x] B6b. Hashing and the visualizer.
     - [x] B6b1. Hashing (static, extendible, linear) solvers, 9 fixed questions and generated problems.
-    - [ ] B6b2. An interactive insert/split B+ tree visualizer (type a key, watch the split), shown in the Storage battle's explanations or on a topic page.
+    - [x] B6b2. An interactive insert/split B+ tree visualizer (type a key, watch the split), shown in the Storage battle's explanations or on a topic page.
 - [ ] B7. Query processing and optimization: join algorithms (nested loop, block nested loop, sort-merge, hash) with I/O-cost problems, selectivity, join ordering, reading EXPLAIN plans (linked to the SQL battles).
 - [ ] B8. Distributed and NoSQL: CAP/PACELC, replication, sharding/partitioning, consistency models, 2PC, document/key-value/column/graph stores, when to pick SQL vs NoSQL.
 - [ ] B9. Classic interview SQL: the standard question bank (Nth highest salary, duplicates, running totals, gaps and islands, top-N per group, self-joins, pivots, date bucketing) as SQL battles running on PGlite, in both dialects.
