@@ -4,23 +4,27 @@ import { DIFFICULTY_COLOR, DIFFICULTY_FILTERS, DIFFICULTY_LABEL, DifficultyFilte
 import { SpriteCanvas } from "@/components/sprites/SpriteCanvas";
 import { Button, LinkButton, NavLink } from "@/components/ui/kit";
 import { GENERATORS, QUESTIONS, TOPICS } from "@/content/interview";
-import type { Question, TopicId } from "@/content/interview/types";
+import type { Question, Topic, TopicId } from "@/content/interview/types";
 import { InterviewBattle } from "@/components/interview/InterviewBattle";
 import { buildDeck } from "@/game/engine/interview";
 import { DECK_SIZE } from "@/game/engine/interviewBattle";
 import { sfx } from "@/game/audio/synth";
 import { bossSprite } from "@/game/sprites/roster";
+import { MAX_BOX, boxCounts, buildDrill, dayNumber, dueCount, weakTopics } from "@/lib/leitner";
 import { useSave } from "@/lib/save";
 
 const ACCENT = "#60a5fa";
 const SILHOUETTE = "#2a2f4f";
+/** The guardian and title shared by every daily drill battle. */
+const DRILL_TOPIC: Topic = { id: "basics", foe: "optimizer", title: "Daily Drill", blurb: "Ten mixed questions, due reviews first.", color: "#f59e0b" };
+const FIXED_IDS = new Set(QUESTIONS.map((q) => q.id));
 const tone = (c: string) => ({ "--tone": c }) as React.CSSProperties;
 
 export default function InterviewPage() {
   const save = useSave();
   const [diff, setDiff] = useState<DifficultyFilter>("all");
   const [sel, setSel] = useState<TopicId>("basics");
-  const [battle, setBattle] = useState<{ topic: TopicId; seed: number; deck: Question[] } | null>(null);
+  const [battle, setBattle] = useState<{ topic: TopicId | "drill"; seed: number; deck: Question[] } | null>(null);
 
   const startBattle = (topic: TopicId) => {
     const seed = Math.floor(Math.random() * 2 ** 31);
@@ -30,18 +34,29 @@ export default function InterviewPage() {
     window.scrollTo(0, 0);
   };
 
+  const startDrill = () => {
+    const seed = Math.floor(Math.random() * 2 ** 31);
+    const deck = buildDrill(QUESTIONS, GENERATORS, save.leitner, save.topicStats, dayNumber(), seed);
+    setBattle({ topic: "drill", seed, deck });
+    window.scrollTo(0, 0);
+  };
+
   useEffect(() => {
     document.documentElement.style.setProperty("--accent", ACCENT);
   }, []);
 
   const rows = useMemo(() => topicRows(TOPICS, QUESTIONS, GENERATORS, save.interview, diff), [save.interview, diff]);
   const overall = useMemo(() => overallProgress(QUESTIONS, save.interview), [save.interview]);
+  const today = dayNumber();
+  const due = useMemo(() => dueCount(save.leitner, FIXED_IDS, today), [save.leitner, today]);
+  const boxes = useMemo(() => boxCounts(save.leitner, FIXED_IDS), [save.leitner]);
+  const weak = useMemo(() => weakTopics(save.topicStats).slice(0, 3), [save.topicStats]);
   const row = rows.find((r) => r.topic.id === sel)!;
   const kinds = kindCounts(QUESTIONS, sel);
   const asked = QUESTIONS.find((q) => q.topic === sel && q.askedAt)?.askedAt;
 
   if (battle) {
-    const topic = TOPICS.find((t) => t.id === battle.topic)!;
+    const topic = battle.topic === "drill" ? DRILL_TOPIC : TOPICS.find((t) => t.id === battle.topic)!;
     return (
       <InterviewBattle
         key={battle.seed}
@@ -52,7 +67,7 @@ export default function InterviewPage() {
           setBattle(null);
           document.documentElement.style.setProperty("--accent", ACCENT);
         }}
-        onRematch={() => startBattle(battle.topic)}
+        onRematch={() => (battle.topic === "drill" ? startDrill() : startBattle(battle.topic))}
       />
     );
   }
@@ -67,6 +82,52 @@ export default function InterviewPage() {
         </span>
       </header>
       <p className="mt-2 max-w-2xl text-sm text-white/60">Pick a topic and battle its guardian. A right answer is your attack; a wrong one lets the foe strike, and you get the explanation.</p>
+
+      <section className="px-window mt-4 p-4" data-testid="drill-panel" style={{ "--accent": DRILL_TOPIC.color } as React.CSSProperties}>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+          <div className="min-w-0 flex-1">
+            <div className="font-display text-[11px] tracking-[0.15em] uppercase" style={{ color: DRILL_TOPIC.color }}>
+              Daily interview drill
+            </div>
+            <p className="mt-1 text-sm text-white/70">
+              10 mixed questions: reviews that are due first, then new ones. <span data-testid="drill-due">{due} due today.</span>
+            </p>
+            <div className="mt-2 flex items-end gap-1.5" aria-label="Leitner boxes" data-testid="leitner-boxes">
+              {boxes.map((n, i) => (
+                <span key={i} className="text-center font-mono text-[10px] text-white/60">
+                  <span className="mx-auto block w-6 border-2 border-[#0e0f1a]" style={{ height: 4 + Math.min(n, 40), background: DRILL_TOPIC.color, opacity: 0.4 + 0.12 * (i + 1) }} />
+                  {i + 1}:{n}
+                </span>
+              ))}
+              <span className="pb-0.5 pl-1 text-[10px] text-white/40">box 1–{MAX_BOX}</span>
+            </div>
+          </div>
+          <div data-testid="start-drill">
+            <Button variant="primary" size="lg" className="tracking-[0.15em]" onClick={startDrill}>
+              ▶ Start drill
+            </Button>
+          </div>
+        </div>
+        <div className="mt-3 border-t border-dotted border-white/15 pt-2 text-xs text-white/70" data-testid="weak-report">
+          {weak.length ? (
+            <>
+              <span className="font-display text-[10px] tracking-[0.15em] uppercase text-white/50">Weakest topics</span>
+              <ul className="mt-1 space-y-0.5">
+                {weak.map((w) => (
+                  <li key={w.topic} className="flex justify-between gap-2">
+                    <span>{TOPICS.find((t) => t.id === w.topic)?.title}</span>
+                    <span className="font-mono" style={{ color: w.accuracy < 0.5 ? "#f87171" : w.accuracy < 0.75 ? "#facc15" : "#4ade80" }}>
+                      {Math.round(w.accuracy * 100)}% · {w.right + w.wrong} answers
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <span>Answer a few questions in a topic and your weak spots show up here.</span>
+          )}
+        </div>
+      </section>
 
       <div role="tablist" aria-label="Difficulty" className="px-tray mt-4 flex gap-1.5 overflow-x-auto p-2 scroll-thin">
         {DIFFICULTY_FILTERS.map((d) => (

@@ -21,6 +21,7 @@ import { CRIT_STREAK, type InterviewStats, KIND_ATTACK, answerLines, askLine, cu
 import { bossSprite, starterSprite, starterStageOf } from "@/game/sprites/roster";
 import { STAR_DIM, STAR_LIT } from "@/game/sprites/ui";
 import { ATTACKS } from "@/lib/dialect/concepts";
+import { dayNumber, recordAnswer, tally } from "@/lib/leitner";
 import { level, updateSave, useSave } from "@/lib/save";
 import { PrecedenceGraph } from "./PrecedenceGraph";
 import { PromptTables } from "./PromptTables";
@@ -87,6 +88,11 @@ export function InterviewBattle({ topic, deck, seed, onExit, onRematch }: { topi
     busy.current = true;
     const correct = grade(q, r);
     setPicked(r);
+    updateSave((x) => ({
+      ...x,
+      topicStats: tally(x.topicStats, q.topic, correct),
+      leitner: FIXED_IDS.has(q.id) ? recordAnswer(x.leitner, q.id, correct, dayNumber()) : x.leitner,
+    }));
     const action = { type: "answer", correct } as const;
     const next = interviewReducer(s, action);
     dispatch(action);

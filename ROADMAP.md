@@ -68,6 +68,8 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
 - [x] B8. Distributed and NoSQL: CAP/PACELC, replication, sharding/partitioning, consistency models, 2PC, document/key-value/column/graph stores, when to pick SQL vs NoSQL.
 - [x] B9. (first slice: 14 questions, new "write the SQL" question kind graded on PGlite in both dialects; more questions can be added to `content/interview/sql.ts`) Classic interview SQL: the standard question bank (Nth highest salary, duplicates, running totals, gaps and islands, top-N per group, self-joins, pivots, date bucketing) as SQL battles running on PGlite, in both dialects.
 - [ ] B10. Spaced repetition: a Leitner box per question, a "daily interview drill" (10 mixed questions), a weak-topic report, and a mock interview (timed, 20 questions, scorecard).
+  - [x] B10a. Leitner engine (`lib/leitner.ts`: five boxes, due days, daily drill builder, weak-topic stats), answers recorded from every interview battle, and a Daily drill + weak-topic panel on `/interview`.
+  - [ ] B10b. Mock interview: timed, 20 questions mixed across topics, no explanations until the end, a scorecard (per-topic breakdown, time, grade) saved to the save file.
 
 ## C. Polish
 

@@ -352,3 +352,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests (`tests/interviewSql.test.ts`): every solution runs in both dialects with equal non-empty results, reference passes and `SELECT 1` fails, known answers cross-checked, grading. 479 tests.
 - Verified: lint, typecheck, 479 tests, build and build:pages pass. Playwright at 1280x900 and iPhone 14: SQL battle, Run, wrong submit message and give-up explanation render; no console errors, no horizontal overflow.
 - Next: B10 (spaced repetition, daily drill, mock interview). More SQL bank questions can follow later.
+
+## 2026-10-22 (05:10 UTC): B10a spaced repetition and daily drill
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone. Split B10 into B10a (this) and B10b (mock interview).
+- `lib/leitner.ts`: five Leitner boxes (reviews after 0/1/3/7/21 days), right = up a box, wrong = back to box 1, `buildDrill` (due cards first by lowest box and most overdue, then unseen, then not-yet-due; at most 4 per topic; tops up with generated problems from the weakest topics), `weakTopics`, `boxCounts`, `dueCount`.
+- Save: `leitner` and `topicStats`, updated on every answer in an interview battle (fixed questions get cards; generated ones only count toward topic stats). `/interview` has a Daily drill panel (due count, box chart, Start drill) and a weakest-topics list; the drill reuses the battle screen.
+- Tests (`tests/leitner.test.ts`): box transitions and cap, intervals, UTC days, due counting, weak-topic ordering, drill size / distinctness / topic cap / determinism / due-first / top-up. 490 tests.
+- Verified: lint, typecheck, 490 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: drill panel and a drill battle intro render, no console errors, no horizontal overflow.
+- Next: B10b (mock interview), then C1.
