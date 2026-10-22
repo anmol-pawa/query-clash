@@ -56,6 +56,7 @@ export const BOSS_TYPE: Record<BossId, SqlType> = {
   hydra: "recursive",
   optimizer: "index",
   arborix: "index",
+  hydrax: "subquery",
 };
 
 export interface Matchup {

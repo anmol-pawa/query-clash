@@ -11,7 +11,7 @@ describe("type chart", () => {
   it("types every attack and every boss", () => {
     for (const k of Object.keys(ATTACKS)) expect(SQL_TYPES).toContain(ATTACK_TYPE[k as keyof typeof ATTACK_TYPE]);
     for (const c of CHAPTERS) expect(SQL_TYPES).toContain(BOSS_TYPE[c.boss]);
-    // ten types, each guarded by a boss (ARBORIX shares INDEX with the Optimizer)
+    // ten types, each guarded by a boss (ARBORIX shares INDEX with the Optimizer, HYDRAX SUBQRY with Subzero)
     expect(new Set(CHAPTERS.map((c) => BOSS_TYPE[c.boss])).size).toBe(SQL_TYPES.length);
   });
 

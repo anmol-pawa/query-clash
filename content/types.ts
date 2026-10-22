@@ -42,7 +42,8 @@ export type BossId =
   | "windwraith"
   | "hydra"
   | "optimizer"
-  | "arborix";
+  | "arborix"
+  | "hydrax";
 
 export interface Chapter {
   n: number;

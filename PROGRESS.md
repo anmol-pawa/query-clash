@@ -406,3 +406,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Registered in `SPRITES`; the generic sprite tests and the "bosses are 96×96" roster test cover it.
 - Verified: lint, typecheck, tests, build:pages pass. Judged the 13 frames from a rendered sheet; no UI changed, so no Playwright run.
 - Next: C1d2 (wire HYDRAX in as chapter 12).
+
+## 2026-10-22 (11:55 UTC): C1d2 chapter 12 wired in
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-wvl19c`, same commit as main).
+- HYDRAX is now chapter 12 "The Anti-Pattern Marsh" (`CHAPTERS_12` in `content/chapters/part3.ts`, appended to `CHAPTERS`). New `BossId` `hydrax` in `BOSS_SPRITE`, `BOSS_TYPE`, `BOSS_GLYPH`, `BOSS_STYLE` and the vector-rig `REGISTRY`.
+- Boss type is SUBQRY (not JOIN): the chapter's `SELECT *` and cast solutions are filter spells, which a JOIN type resists, and the "never resists a reference solution" test caught it.
+- New 12th counter-attack style `heads`: five projectile-and-slash strikes from the big head and four small ones. 12th overworld node `[82, 80]` and a "marsh" biome. Caps of 11 became 12 in `lib/save.ts` and the sandbox spell deck; test counts updated.
+- Verified: lint, typecheck, 540 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: map shows node 12 on the marsh, chapter 12 intro and the HYDRAX battle render, no console errors, no horizontal overflow.
+- Next: C2 (daily challenge seeded by date, plus a streak counter).

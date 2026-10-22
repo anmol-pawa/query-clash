@@ -25,6 +25,7 @@ export const MAP_NODES: readonly (readonly [number, number])[] = [
   [62, 26],
   [86, 22],
   [92, 52],
+  [82, 80],
 ];
 
 /** A node's centre in map pixels. */
@@ -57,6 +58,7 @@ export const BIOMES: readonly Biome[] = [
   { name: "swamp", ground: ["#2c4a3c", "#3c6150", "#4f7a62"], speck: "#a3e635", decor: [{ kind: "tree", colors: ["#1e3a33", "#2c5446", "#41725c"] }, { kind: "pine", colors: ["#213c30", "#30553f", "#4a7656"] }] },
   { name: "crystal", ground: ["#3a2c5e", "#4c3a7a", "#634c9a"], speck: "#67e8f9", decor: [{ kind: "crystal", colors: ["#3b82c4", "#67c8f0", "#d6f6ff"] }, { kind: "crystal", colors: ["#8b4fc4", "#b77df0", "#f0d6ff"] }] },
   { name: "grove", ground: ["#2a4a2a", "#3f6a36", "#5a8c46"], speck: "#d9f99d", decor: [{ kind: "tree", colors: ["#24471f", "#3a7a2c", "#6fb04a"] }, { kind: "pine", colors: ["#1c3a22", "#2c5c34", "#4a8a48"] }] },
+  { name: "marsh", ground: ["#1f3d44", "#2f5a5c", "#427a74"], speck: "#5eead4", decor: [{ kind: "pine", colors: ["#173a3a", "#25605a", "#3f8c7c"] }, { kind: "rock", colors: ["#4b6068", "#6f8a90", "#a3bcc0"] }] },
 ];
 
 // decoration stamps: o outline, a dark, b mid, c light, t trunk, u trunk light
@@ -174,7 +176,7 @@ export function onPlatform(x: number, y: number): number {
 export const isRiver = (x: number, y: number) => Math.abs(x - riverX(y)) <= RIVER_HALF;
 
 /**
- * Paint the overworld. `unlocked` is the highest unlocked chapter (1–11);
+ * Paint the overworld. `unlocked` is the highest unlocked chapter (1–12);
  * biomes of later chapters are fogged.
  */
 export function paintOverworld(unlocked: number): Uint8ClampedArray {

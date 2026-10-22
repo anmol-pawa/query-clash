@@ -630,6 +630,17 @@ export async function bossAttack(c: FxContext, boss: Character & { style: BossAt
       await b;
       break;
     }
+    case "heads": {
+      // the big head and four small ones strike in turn, each with a fang slash
+      for (let i = 0; i < 5; i++) {
+        const dy = (i - 2) * 28;
+        await projectile(c, { x: from.x, y: from.y + dy }, { x: to.x, y: to.y + dy * 0.6 }, { color, size: i === 0 ? 30 : 18, dur: 0.16, arc: -20 });
+        onImpact(i, 5);
+        await slash(c, { x: to.x, y: to.y + dy * 0.6 }, { color: 0xe6fffa, angle: i % 2 ? -0.9 : 0.5, size: 110 });
+        fx.burst(to.x, to.y + dy * 0.6, { color, count: 8, speed: 260 });
+      }
+      break;
+    }
     case "roots": {
       const ground = { x: from.x, y: to.y + 120 };
       const bark = 0x92643a;

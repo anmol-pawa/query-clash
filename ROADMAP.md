@@ -73,15 +73,15 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
 
 ## C. Polish
 
-- [ ] C1. Two more SQL chapters: indexing deep-dive and SQL anti-patterns (N+1, implicit conversions, `SELECT *`, `OR` defeating indexes).
+- [x] C1. Two more SQL chapters: indexing deep-dive and SQL anti-patterns (N+1, implicit conversions, `SELECT *`, `OR` defeating indexes).
   - [x] C1a. Chapter 11 "indexing deep-dive" missions (`content/chapters/part3.ts`: composite, expression, sorted, covering, redundant-index defense) and three codex entries, tested; not yet in `CHAPTERS`.
   - [x] C1b. Boss for chapter 11 (original 96×96 pixel monster with idle/attack/hurt/faint, type, biome, map node), then wire `INDEXING_MISSIONS` into a `Chapter`.
     - [x] C1b1. Boss art: ARBORIX (`scripts/art/arborix.mjs` → `game/sprites/creatures/arborix.ts`), a bark golem crowned with a B+ tree; registered in `SPRITES` and tested; the `/dev/sprites` Pixi previews now mount lazily (17 sprites exceeded the browser's WebGL context limit).
     - [x] C1b2. Wiring: add a `BossId` for it (`BOSS_SPRITE`, `BOSS_TYPE` = index, `BOSS_GLYPH`, the unused vector-rig `REGISTRY`), an 11th `BossAttackStyle` (new case in `game/render/attacks.ts`, since tests need distinct styles), an 11th overworld `MAP_NODES` / `BIOMES` entry, `Chapter` 11 in `CHAPTERS`, and fix the "10 bosses/chapters" assumptions in tests, Querydex, campaign page and save.
   - [x] C1c. Chapter 12 "SQL anti-patterns" missions (N+1 as a join, `SELECT *`, `OR` as `UNION`, implicit conversions, `NOT IN` with NULL), three new codex entries, tested, not yet in `CHAPTERS`.
-  - [ ] C1d. Boss for chapter 12 and its wiring (same checklist as C1b2: `BossId`, `BOSS_SPRITE`, `BOSS_TYPE`, `BOSS_GLYPH`, `REGISTRY`, a 12th attack style, `MAP_NODES`/`BIOMES`, `CHAPTERS`, the hard-coded `11` in `lib/save.ts` and `app/sandbox/page.tsx`, test counts).
+  - [x] C1d. Boss for chapter 12 and its wiring (same checklist as C1b2: `BossId`, `BOSS_SPRITE`, `BOSS_TYPE`, `BOSS_GLYPH`, `REGISTRY`, a 12th attack style, `MAP_NODES`/`BIOMES`, `CHAPTERS`, the hard-coded `11` in `lib/save.ts` and `app/sandbox/page.tsx`, test counts).
     - [x] C1d1. Boss art: HYDRAX (`scripts/art/hydrax.mjs` → `game/sprites/creatures/hydrax.ts`), the N+1 hydra, registered in `SPRITES` and tested.
-    - [ ] C1d2. Wiring (checklist above).
+    - [x] C1d2. Wiring (checklist above).
 - [ ] C2. Daily challenge seeded by date, plus a streak counter.
 - [ ] C3. Accessibility: keyboard navigation for every screen, ARIA live region for battle text, colour-blind-safe type colours.
 - [ ] C4. Performance pass on mobile GPUs (texture atlases, fewer redraws), and a lighter first load (lazy-load PGlite after the menu).

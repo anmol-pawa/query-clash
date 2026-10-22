@@ -183,3 +183,19 @@ export const CHAPTERS_11: Chapter[] = [
     missions: INDEXING_MISSIONS,
   },
 ];
+
+export const CHAPTERS_12: Chapter[] = [
+  {
+    n: 12,
+    boss: "hydrax",
+    bossName: "HYDRAX",
+    bossTitle: "Hydra of a Thousand Round Trips",
+    title: "The Anti-Pattern Marsh",
+    topics: ["N+1 queries", "SELECT *", "OR vs UNION", "Implicit conversions", "NOT IN and NULL"],
+    intro:
+      "In the marsh lives a hydra that answers every question with one big head and a swarm of small ones. HYDRAX fires one query for the list and one more per row, drags every column across the wire and blinds the planner with casts. Rewrite each query the way a database wants to be asked.",
+    defeat: "HYDRAX's small heads fall silent: one round trip, named columns, sargable predicates. You have outgrown the anti-patterns.",
+    color: "#14b8a6",
+    missions: ANTIPATTERN_MISSIONS,
+  },
+];
