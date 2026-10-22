@@ -13,12 +13,14 @@ import { sfx } from "@/game/audio/synth";
 import { bossSprite } from "@/game/sprites/roster";
 import { buildMock, clock, MOCK_MINUTES, MOCK_SIZE } from "@/lib/mock";
 import { MAX_BOX, boxCounts, buildDrill, dayNumber, dueCount, weakTopics } from "@/lib/leitner";
-import { useSave } from "@/lib/save";
+import { DAILY_SIZE, buildDaily, dailySeed, liveStreak, recordDailyWin, wonToday } from "@/lib/daily";
+import { updateSave, useSave } from "@/lib/save";
 
 const ACCENT = "#60a5fa";
 const SILHOUETTE = "#2a2f4f";
 /** The guardian and title shared by every daily drill battle. */
 const DRILL_TOPIC: Topic = { id: "basics", foe: "optimizer", title: "Daily Drill", blurb: "Ten mixed questions, due reviews first.", color: "#f59e0b" };
+const DAILY_TOPIC: Topic = { id: "basics", foe: "reaper", title: "Daily Challenge", blurb: "Five questions, the same for everyone today.", color: "#f43f5e" };
 const FIXED_IDS = new Set(QUESTIONS.map((q) => q.id));
 const tone = (c: string) => ({ "--tone": c }) as React.CSSProperties;
 
@@ -26,7 +28,7 @@ export default function InterviewPage() {
   const save = useSave();
   const [diff, setDiff] = useState<DifficultyFilter>("all");
   const [sel, setSel] = useState<TopicId>("basics");
-  const [battle, setBattle] = useState<{ topic: TopicId | "drill"; seed: number; deck: Question[] } | null>(null);
+  const [battle, setBattle] = useState<{ topic: TopicId | "drill" | "daily"; seed: number; deck: Question[] } | null>(null);
 
   const startBattle = (topic: TopicId) => {
     const seed = Math.floor(Math.random() * 2 ** 31);
@@ -50,6 +52,12 @@ export default function InterviewPage() {
     window.scrollTo(0, 0);
   };
 
+  const startDaily = () => {
+    const day = dayNumber();
+    setBattle({ topic: "daily", seed: dailySeed(day), deck: buildDaily(QUESTIONS, GENERATORS, day) });
+    window.scrollTo(0, 0);
+  };
+
   useEffect(() => {
     document.documentElement.style.setProperty("--accent", ACCENT);
   }, []);
@@ -67,7 +75,7 @@ export default function InterviewPage() {
   if (mock) return <MockInterview key={mock.seed} deck={mock.deck} seed={mock.seed} onExit={() => setMock(null)} onRetry={startMock} />;
 
   if (battle) {
-    const topic = battle.topic === "drill" ? DRILL_TOPIC : TOPICS.find((t) => t.id === battle.topic)!;
+    const topic = battle.topic === "drill" ? DRILL_TOPIC : battle.topic === "daily" ? DAILY_TOPIC : TOPICS.find((t) => t.id === battle.topic)!;
     return (
       <InterviewBattle
         key={battle.seed}
@@ -78,7 +86,8 @@ export default function InterviewPage() {
           setBattle(null);
           document.documentElement.style.setProperty("--accent", ACCENT);
         }}
-        onRematch={() => (battle.topic === "drill" ? startDrill() : startBattle(battle.topic))}
+        onVictory={battle.topic === "daily" ? () => updateSave((x) => ({ ...x, daily: recordDailyWin(x.daily, dayNumber()) })) : undefined}
+        onRematch={() => (battle.topic === "drill" ? startDrill() : battle.topic === "daily" ? startDaily() : startBattle(battle.topic))}
       />
     );
   }
@@ -93,6 +102,30 @@ export default function InterviewPage() {
         </span>
       </header>
       <p className="mt-2 max-w-2xl text-sm text-white/60">Pick a topic and battle its guardian. A right answer is your attack; a wrong one lets the foe strike, and you get the explanation.</p>
+
+      <section className="px-window mt-4 p-4" data-testid="daily-panel" style={{ "--accent": DAILY_TOPIC.color } as React.CSSProperties}>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+          <div className="min-w-0 flex-1">
+            <div className="font-display text-[11px] tracking-[0.15em] uppercase" style={{ color: DAILY_TOPIC.color }}>
+              Daily challenge
+            </div>
+            <p className="mt-1 text-sm text-white/70">
+              {DAILY_SIZE} questions from {DAILY_SIZE} topics, the same for everyone today. Win to keep your streak.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-white/70" data-testid="daily-stats">
+              <span data-testid="daily-streak">🔥 {liveStreak(save.daily, today)}-day streak</span>
+              <span>best {save.daily.best}</span>
+              <span>{save.daily.total} won</span>
+              <span style={{ color: wonToday(save.daily, today) ? "#4ade80" : "#facc15" }}>{wonToday(save.daily, today) ? "✔ done today" : "not done today"}</span>
+            </div>
+          </div>
+          <div data-testid="start-daily">
+            <Button variant="primary" size="lg" className="tracking-[0.15em]" onClick={startDaily}>
+              {wonToday(save.daily, today) ? "▶ Play again" : "▶ Play daily"}
+            </Button>
+          </div>
+        </div>
+      </section>
 
       <section className="px-window mt-4 p-4" data-testid="drill-panel" style={{ "--accent": DRILL_TOPIC.color } as React.CSSProperties}>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-3">

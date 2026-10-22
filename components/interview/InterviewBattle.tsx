@@ -36,7 +36,7 @@ const tone = (c: string) => ({ "--tone": c }) as CSSProperties;
  * answer panel for the current question. A right answer is the player's
  * attack, a wrong one the guardian's, and every answer shows its explanation.
  */
-export function InterviewBattle({ topic, deck, seed, onExit, onRematch }: { topic: Topic; deck: Question[]; seed: number; onExit: () => void; onRematch: () => void }) {
+export function InterviewBattle({ topic, deck, seed, onExit, onRematch, onVictory }: { topic: Topic; deck: Question[]; seed: number; onExit: () => void; onRematch: () => void; onVictory?: () => void }) {
   const save = useSave();
   const starter = useMemo(() => starterStageOf(save.dex), [save.dex]);
   const playerName = starterSprite("front", starter).name;
@@ -69,10 +69,15 @@ export function InterviewBattle({ topic, deck, seed, onExit, onRematch }: { topi
 
   // a finished battle pays out once: XP for the answers and stars
   const recorded = useRef(false);
+  const victoryCb = useRef(onVictory);
+  useEffect(() => {
+    victoryCb.current = onVictory;
+  });
   useEffect(() => {
     if ((s.phase === "victory" || s.phase === "defeat") && !recorded.current) {
       recorded.current = true;
       updateSave((x) => ({ ...x, xp: x.xp + interviewXp(s) }));
+      if (s.phase === "victory") victoryCb.current?.();
     }
   }, [s]);
 

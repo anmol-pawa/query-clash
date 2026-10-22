@@ -82,6 +82,6 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
   - [x] C1d. Boss for chapter 12 and its wiring (same checklist as C1b2: `BossId`, `BOSS_SPRITE`, `BOSS_TYPE`, `BOSS_GLYPH`, `REGISTRY`, a 12th attack style, `MAP_NODES`/`BIOMES`, `CHAPTERS`, the hard-coded `11` in `lib/save.ts` and `app/sandbox/page.tsx`, test counts).
     - [x] C1d1. Boss art: HYDRAX (`scripts/art/hydrax.mjs` → `game/sprites/creatures/hydrax.ts`), the N+1 hydra, registered in `SPRITES` and tested.
     - [x] C1d2. Wiring (checklist above).
-- [ ] C2. Daily challenge seeded by date, plus a streak counter.
+- [x] C2. Daily challenge seeded by date, plus a streak counter (`lib/daily.ts`, panel on `/interview`; five questions from five topics, same for everyone each UTC day; a win extends the streak).
 - [ ] C3. Accessibility: keyboard navigation for every screen, ARIA live region for battle text, colour-blind-safe type colours.
 - [ ] C4. Performance pass on mobile GPUs (texture atlases, fewer redraws), and a lighter first load (lazy-load PGlite after the menu).
