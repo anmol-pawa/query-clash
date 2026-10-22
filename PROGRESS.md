@@ -441,3 +441,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Verified: lint, typecheck, 545 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: menu and campaign render, no console errors, no horizontal overflow.
 - Noted: menu copy still says "ten bosses" (there are 12).
 - Next: C4b (Pixi rendering pass).
+
+## 2026-10-22 (16:50 UTC): C4b Pixi stage performance
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-fe1t8h`, same commit as main).
+- `game/render/stage.ts`: `antialias: false`; moon and skyline go into one `scenery` container cached as a texture once (`cacheAsTexture`, resolution 1 to stay under mobile texture limits); the floor's scrolling lines were a Graphics cleared and re-stroked every frame, now 12 pre-drawn line Graphics whose `y` is updated per frame (no geometry rebuild). Other `clear()` calls are in short-lived effects, left alone.
+- Not measured on a throttled CPU (headless software GL gives no useful numbers); the change removes the per-frame rebuild by construction.
+- Verified: lint, typecheck, 545 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: chapter 1 battle renders (skyline, moon, floor lines, platforms), no console errors, no horizontal overflow.
+- Next: ROADMAP C (remaining items) — check the next unchecked box; menu copy still says "ten bosses" (there are 12).

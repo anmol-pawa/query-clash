@@ -21,6 +21,7 @@ import { Tweener, ease } from "./tween";
 export const W = 1280;
 export const H = 720;
 const HORIZON = 440;
+const FLOOR_LINES = 12;
 /** GBA layout: the foe stands top-right near the horizon, the player's creature bottom-left, seen from behind. */
 const FOE = { x: 905, y: 400, scale: 3 };
 const PLAYER = { x: 330, y: 680, scale: 5 };
@@ -60,7 +61,10 @@ export class BattleStage {
   private bg = new Container();
   private floor = new Graphics();
   private stars: Graphics[] = [new Graphics(), new Graphics(), new Graphics()];
-  private floorLines = new Graphics();
+  /** Pre-drawn scrolling floor lines; only their y changes per frame (no Graphics rebuild). */
+  private floorLines: Graphics[] = [];
+  /** Moon + skyline: static, rasterised once into a single texture. */
+  private scenery = new Container();
   private glyphs: Text[] = [];
   private fighters = new Container();
   private fxLayer = new Container();
@@ -89,7 +93,7 @@ export class BattleStage {
     await s.app.init({
       resizeTo: host,
       backgroundAlpha: 0,
-      antialias: true,
+      antialias: false, // pixel art: crisp edges, and cheaper fill on mobile GPUs
       autoDensity: true,
       resolution: Math.min(2, window.devicePixelRatio || 1),
       preference: "webgl",
@@ -124,7 +128,7 @@ export class BattleStage {
     const moon = new Graphics();
     moon.circle(W * 0.5, 200, 120).fill({ color: mix(0x0b0718, accent, 0.5), alpha: 0.5 });
     for (let i = 0; i < 7; i++) moon.rect(W * 0.5 - 120, 110 + i * 26, 240, 8).fill({ color: mix(0x05030d, accent, 0.15), alpha: 0.9 });
-    this.bg.addChild(moon);
+    this.scenery.addChild(moon);
 
     // skyline silhouettes (two parallax bands)
     for (let band = 0; band < 2; band++) {
@@ -139,8 +143,10 @@ export class BattleStage {
         x += w + 4;
       }
       city.alpha = band ? 1 : 0.8;
-      this.bg.addChild(city);
+      this.scenery.addChild(city);
     }
+    this.bg.addChild(this.scenery);
+    this.scenery.cacheAsTexture({ resolution: 1, antialias: false });
 
     for (let i = 0; i < 14; i++) {
       const t = new Text({ text: KEYWORDS[i % KEYWORDS.length], style: { fontFamily: "monospace", fontSize: 14 + Math.random() * 14, fill: accent, fontWeight: "700" } });
@@ -154,7 +160,12 @@ export class BattleStage {
     for (let i = -30; i <= 30; i++) this.floor.moveTo(W / 2 + i * 12, HORIZON).lineTo(W / 2 + i * 150, H + 60);
     this.floor.stroke({ width: 1.5, color: accent, alpha: 0.28 });
     this.floor.moveTo(-1300, HORIZON).lineTo(W + 1300, HORIZON).stroke({ width: 3, color: accent, alpha: 0.7 });
-    this.bg.addChild(this.floor, this.floorLines);
+    for (let i = 0; i < FLOOR_LINES; i++) {
+      const line = new Graphics();
+      line.moveTo(-1300, 0).lineTo(W + 1300, 0).stroke({ width: 1.5, color: accent, alpha: 0.22 });
+      this.floorLines.push(line);
+    }
+    this.bg.addChild(this.floor, ...this.floorLines);
 
     this.rig = { tw: this.tw, fx: this.fx, reduced: reducedMotion, space: this.camera };
 
@@ -219,7 +230,6 @@ export class BattleStage {
   }
 
   private drawBackground(dt: number) {
-    const { accent } = this.opts;
     this.stars.forEach((g, i) => (g.alpha = 0.35 + 0.3 * Math.sin(this.t * (0.7 + i * 0.35) + i * 2)));
 
     for (const g of this.glyphs) {
@@ -230,15 +240,10 @@ export class BattleStage {
       }
     }
 
-    const f = this.floorLines;
-    f.clear();
     const scroll = (this.t * 0.35) % 1;
-    for (let i = 0; i < 12; i++) {
-      const k = (i + scroll) / 12;
-      const y = HORIZON + Math.pow(k, 2.2) * (H - HORIZON + 60);
-      f.moveTo(-1300, y).lineTo(W + 1300, y);
-    }
-    f.stroke({ width: 1.5, color: accent, alpha: 0.22 });
+    this.floorLines.forEach((line, i) => {
+      line.y = HORIZON + Math.pow((i + scroll) / FLOOR_LINES, 2.2) * (H - HORIZON + 60);
+    });
   }
 
   /* --------------------------------------------------------------- API */
