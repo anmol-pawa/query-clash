@@ -88,6 +88,86 @@ export const INDEXING_MISSIONS: Mission[] = [
   },
 ];
 
+/**
+ * Chapter 12 material, "SQL anti-patterns". Not yet in `CHAPTERS`: the boss and its wiring come in C1d.
+ * Each answer is compared by result with the canonical rewrite, so both dialects agree.
+ */
+export const ANTIPATTERN_MISSIONS: Mission[] = [
+  {
+    id: "c12-n-plus-one",
+    title: "One Query, Not N+1",
+    taunt: "I fire one query for the list, then one more per customer. Thousands of round trips. Beautiful.",
+    task: "The app loads every customer, then runs `SELECT COUNT(*) FROM orders WHERE customer_id = ?` once per row (N+1 queries). Replace it with a single query returning `name` and `order_count` for every customer, including customers with no orders, sorted by `name`.",
+    solution: same("SELECT c.name, COUNT(o.order_id) AS order_count FROM customers c LEFT JOIN orders o ON o.customer_id = c.customer_id GROUP BY c.customer_id, c.name ORDER BY c.name"),
+    ordered: true,
+    hints: [
+      "N+1 means one query for the parent rows and one per row for the children. Let the database do the loop: join once.",
+      "LEFT JOIN keeps customers without orders; COUNT(o.order_id) counts only real orders, so those get 0.",
+      "SELECT c.name, COUNT(o.order_id) AS order_count FROM customers c LEFT JOIN orders o ON o.customer_id = c.customer_id GROUP BY c.customer_id, c.name ORDER BY c.name",
+    ],
+    codex: ["n-plus-one", "outer-join"],
+    tables: ["customers", "orders"],
+  },
+  {
+    id: "c12-select-star",
+    title: "Star Power Drain",
+    taunt: "SELECT * drags every column over the wire and ruins every covering index. Why choose?",
+    task: "The customer list page only shows each customer's name and where they live, but the code runs `SELECT * FROM customers`. Return just `name` and a column `location` formatted like `Berlin, Germany` (`city`, a comma and space, `country`) for customers in `country = 'Germany'`, sorted by `name`.",
+    solution: same("SELECT name, city || ', ' || country AS location FROM customers WHERE country = 'Germany' ORDER BY name"),
+    ordered: true,
+    hints: [
+      "Name the columns you need. Less data crosses the network, and a covering index becomes possible.",
+      "Also, SELECT * breaks silently when someone adds or reorders columns.",
+      "SELECT name, city || ', ' || country AS location FROM customers WHERE country = 'Germany' ORDER BY name",
+    ],
+    codex: ["select-star"],
+    tables: ["customers"],
+  },
+  {
+    id: "c12-or",
+    title: "Either-Or Trap",
+    taunt: "WHERE a OR b across two different indexes? The planner gives up and scans it all.",
+    task: "`SELECT order_id FROM orders WHERE status = 'PENDING' OR customer_id = 5` can force a full scan. Rewrite it as two index-friendly queries combined with `UNION`, returning `order_id`.",
+    solution: same("SELECT order_id FROM orders WHERE status = 'PENDING' UNION SELECT order_id FROM orders WHERE customer_id = 5"),
+    hints: [
+      "Each branch of an OR may need a different index. Splitting the query lets each branch use its own.",
+      "UNION removes rows that match both conditions, so the result equals the OR version. UNION ALL would keep duplicates.",
+      "SELECT order_id FROM orders WHERE status = 'PENDING' UNION SELECT order_id FROM orders WHERE customer_id = 5",
+    ],
+    codex: ["set-operators", "indexes"],
+    tables: ["orders"],
+  },
+  {
+    id: "c12-implicit-conversion",
+    title: "Silent Cast",
+    taunt: "I wrapped your key in a CAST. Now no index can match it. Mwahaha.",
+    task: "A query filters `WHERE CAST(customer_id AS VARCHAR(10)) = '5'`. Rewrite it so the column is compared as a number without a cast: return `customer_id` and `name` of the customer with id 5.",
+    solution: same("SELECT customer_id, name FROM customers WHERE customer_id = 5"),
+    hints: [
+      "Casting the column, or comparing mismatched types so the database converts the column, makes the predicate non-sargable.",
+      "Convert the constant, never the column: compare customer_id with the number 5.",
+      "SELECT customer_id, name FROM customers WHERE customer_id = 5",
+    ],
+    codex: ["implicit-conversion", "sargable"],
+    tables: ["customers"],
+  },
+  {
+    id: "c12-not-in-null",
+    title: "The NULL Poison",
+    taunt: "NOT IN with one NULL in the list matches nothing. Nothing! Did you test that?",
+    task: "`SELECT first_name FROM employees WHERE emp_id NOT IN (SELECT manager_id FROM employees)` returns no rows, because `manager_id` contains NULL. Return `first_name` and `last_name` of employees who manage nobody, using `NOT EXISTS`, sorted by `last_name`, `first_name`.",
+    solution: same("SELECT e.first_name, e.last_name FROM employees e WHERE NOT EXISTS (SELECT 1 FROM employees m WHERE m.manager_id = e.emp_id) ORDER BY e.last_name, e.first_name"),
+    ordered: true,
+    hints: [
+      "x NOT IN (…, NULL) is never true: comparing with NULL gives UNKNOWN, and a WHERE keeps only TRUE.",
+      "NOT EXISTS tests whether a matching row exists and is not confused by NULLs.",
+      "SELECT e.first_name, e.last_name FROM employees e WHERE NOT EXISTS (SELECT 1 FROM employees m WHERE m.manager_id = e.emp_id) ORDER BY e.last_name, e.first_name",
+    ],
+    codex: ["not-in-null", "null"],
+    tables: ["employees"],
+  },
+];
+
 export const CHAPTERS_11: Chapter[] = [
   {
     n: 11,

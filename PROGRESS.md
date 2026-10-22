@@ -391,3 +391,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Removed "10 chapters" assumptions: `unlockedChapters` cap, the arena wave modulo, menu counters, sandbox spell deck, and tests (sprites, querydex, overworld fog, type chart now says ten types each guarded by a boss).
 - Verified: lint, typecheck, 519 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: map shows node 11, battle intro and a fight with ARBORIX render (Lv55, INDEX type); no console errors, no horizontal overflow.
 - Next: C1c (anti-patterns chapter missions), then C1d (its boss and wiring).
+
+## 2026-10-22 (09:50 UTC): C1c anti-pattern chapter missions
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-d83qtm`, same commit as main).
+- `ANTIPATTERN_MISSIONS` in `content/chapters/part3.ts` (chapter 12, not yet in `CHAPTERS`): N+1 rewritten as one LEFT JOIN, `SELECT *` replaced by named columns (the task needs a computed `location` column, because the result checker accepts extra columns), `OR` rewritten as `UNION`, a cast on the column replaced by a plain comparison, and `NOT IN` with a NULL replaced by `NOT EXISTS`. Codex entries added: N+1, SELECT *, implicit conversions (`not-in-null` already existed).
+- Limits: the checker compares results only, so the OR and cast missions cannot force the rewrite; the hints and codex teach it.
+- Tests (`tests/antipatterns.test.ts`): ids and codex references, both dialects agree and are non-empty, the canonical solution passes, inner join drops zero-order customers, `SELECT *` fails, `NOT IN` returns nothing with NULL managers, cast and plain forms return the same row. 530 passed.
+- Verified: lint, typecheck, tests, build:pages pass. No visual change, so no screenshots.
+- Next: C1d (chapter 12 boss art and wiring).

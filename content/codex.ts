@@ -822,6 +822,58 @@ export const CODEX: CodexEntry[] = [
     enterprise: "Large Oracle shops keep critical business logic in PL/SQL packages. Migrating to PostgreSQL means converting packages into schemas of functions, which is the most expensive part of most migrations.",
     pitfalls: ["Row-by-row loops ('slow-by-slow') are much slower than one set-based SQL statement."],
   },
+  {
+    id: "n-plus-one",
+    title: "The N+1 query problem",
+    category: "Performance",
+    definition:
+      "N+1 happens when code runs one query to fetch N parent rows and then one more query per row to fetch its children: N+1 round trips instead of one. Fix it with a join (or one query using IN) so the database does the looping.",
+    syntax: {
+      postgres: "-- N+1: SELECT * FROM customers;  then per row:\n--   SELECT COUNT(*) FROM orders WHERE customer_id = ?\n-- one query instead:\nSELECT c.name, COUNT(o.order_id)\nFROM customers c LEFT JOIN orders o ON o.customer_id = c.customer_id\nGROUP BY c.customer_id, c.name;",
+      oracle: "-- N+1: SELECT * FROM customers;  then per row:\n--   SELECT COUNT(*) FROM orders WHERE customer_id = :1\n-- one query instead:\nSELECT c.name, COUNT(o.order_id)\nFROM customers c LEFT JOIN orders o ON o.customer_id = c.customer_id\nGROUP BY c.customer_id, c.name;",
+    },
+    enterprise:
+      "ORMs create N+1 by accident when they lazy-load a relation inside a loop. Each query is fast, so it only shows up under load; look for it in query logs as the same statement repeated with different parameters.",
+    pitfalls: [
+      "Use LEFT JOIN when parents without children must still appear; an inner join drops them.",
+      "Joining two child tables at once multiplies rows; aggregate each child separately first.",
+    ],
+  },
+  {
+    id: "select-star",
+    title: "SELECT * and why to avoid it",
+    category: "Performance",
+    definition:
+      "SELECT * returns every column, including ones the caller never uses. That moves more data, defeats covering indexes (index-only scans), and breaks code when columns are added, dropped or reordered.",
+    syntax: {
+      postgres: "-- avoid\nSELECT * FROM customers WHERE country = 'Germany';\n-- prefer\nSELECT name, city FROM customers WHERE country = 'Germany';",
+      oracle: "-- avoid\nSELECT * FROM customers WHERE country = 'Germany';\n-- prefer\nSELECT name, city FROM customers WHERE country = 'Germany';",
+    },
+    enterprise:
+      "Production queries name their columns. SELECT * is fine for ad-hoc exploration and inside EXISTS subqueries, where the column list is ignored.",
+    pitfalls: [
+      "In INSERT ... SELECT *, a new column silently shifts or breaks the mapping.",
+      "Large text or LOB columns make SELECT * especially expensive.",
+    ],
+  },
+  {
+    id: "implicit-conversion",
+    title: "Implicit conversions and casts on columns",
+    category: "Performance",
+    definition:
+      "If a predicate compares columns and values of different types, or wraps the column in CAST or a function, the database converts the column for every row and cannot use a plain index on it. Convert the constant, not the column.",
+    syntax: {
+      postgres: "-- not sargable\nWHERE CAST(customer_id AS VARCHAR(10)) = '5'\n-- sargable\nWHERE customer_id = 5",
+      oracle: "-- Oracle also converts the VARCHAR2 column when compared with a number:\nWHERE phone = 5551234  -- implicit TO_NUMBER(phone)\n-- sargable\nWHERE phone = '5551234'",
+    },
+    enterprise:
+      "Mismatched parameter types from application drivers (a number bound as text, or the other way round) are a common cause of sudden full scans after a deploy.",
+    pitfalls: [
+      "Oracle converts the VARCHAR2 side to a number when the other side is numeric, and can raise ORA-01722 on rows that do not convert.",
+      "PostgreSQL rejects many mismatches outright instead of converting silently, but explicit casts on the column still block indexes.",
+    ],
+    dialectNotes: "Oracle's implicit conversions are far more permissive than PostgreSQL's, so type mismatches hide longer there.",
+  },
 ];
 
 export function codexById(id: string): CodexEntry | undefined {
