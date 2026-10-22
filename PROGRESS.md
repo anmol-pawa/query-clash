@@ -419,6 +419,6 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-dn7313`, same commit as main).
 - `lib/daily.ts`: `buildDaily` picks five questions from five different topics by a seed derived from the UTC day (one slot is a generated problem), so everyone gets the same deck; `recordDailyWin` / `liveStreak` keep a streak of consecutive days (alive until a day is missed). New `daily` field in the save (`EMPTY_DAILY` default, so old saves load).
 - UI: a "Daily challenge" panel at the top of `/interview` (streak, best, days won, done today) that starts a 5-question battle against ROWREAPER; a victory records the win via a new `onVictory` prop on `InterviewBattle`. Retrying is allowed and a second win on the same day changes nothing.
-- Tests (`tests/daily.test.ts`): same deck per day, different across days, five distinct topics over 40 days, streak increments / resets / repeat-win no-op, live-streak window. 549 tests.
+- Tests (`tests/daily.test.ts`): same deck per day, different across days, five distinct topics over 40 days, streak increments / resets / repeat-win no-op, live-streak window. 544 tests.
 - Verified: lint, typecheck, tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: panel and daily battle intro render, no console errors, no horizontal overflow.
 - Next: C3 (accessibility: keyboard navigation, ARIA live region for battle text, colour-blind-safe type colours).
