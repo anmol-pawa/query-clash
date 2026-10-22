@@ -465,3 +465,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `docs/bosses.png` is now a 3x4 contact sheet of all twelve chapter battles (Playwright at 1280x720 on the static export, FIGHT clicked, 6 s after the slide-in), replacing the old ten-boss sheet taken before the art rewrite. README alt text says "twelve bosses".
 - Verified: lint, typecheck, 545 tests, build:pages pass; all 12 `/battle/N/` pages render the boss sprite, platforms and HUD with no console errors. Docs-only change, no app code touched.
 - Next: D3 (more interview questions per topic, 30+ each, each with an answer test).
+
+## 2026-10-22 — D3a: fundamentals question bank
+
+- Added 18 questions to `content/interview/basics.ts` (`BASICS_MORE`): keys and integrity, DDL/DML/DCL/TCL, views, NULL behaviour, relational-algebra basics, OLTP vs OLAP, SELECT clause order. Fundamentals now has 30 static questions plus the superkey generator.
+- Verified: `tests/interviewBasics.test.ts` keys every new answer; lint, typecheck, 551 tests and `build:pages` pass. No visual change, so no screenshots.
+- Developed on branch `claude/focused-cerf-bpe39j` as the session required, not directly on `main`.
+- Next: D3b (more SQL, ER questions), then D4.
