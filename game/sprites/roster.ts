@@ -30,6 +30,7 @@ export const BOSS_SPRITE: Readonly<Record<BossId, string>> = {
   windwraith: "galeframe",
   hydra: "recursa",
   optimizer: "opticore",
+  arborix: "arborix",
 };
 
 export function bossSprite(id: BossId): SpriteDef {
@@ -60,4 +61,5 @@ export const BOSS_STYLE: Readonly<Record<BossId, { style: BossAttackStyle; color
   windwraith: { style: "wind", color: 0x38bdf8 },
   hydra: { style: "breath", color: 0x4ade80 },
   optimizer: { style: "laser", color: 0xe879f9 },
+  arborix: { style: "roots", color: 0x84cc16 },
 };

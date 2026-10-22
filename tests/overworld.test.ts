@@ -63,7 +63,7 @@ describe("campaign overworld", () => {
   });
 
   it("fogs exactly the chapters still locked", () => {
-    const open = paintOverworld(10);
+    const open = paintOverworld(MAP_NODES.length);
     const fogged = paintOverworld(4);
     for (let i = 0; i < MAP_NODES.length; i++) {
       const [x, y] = nodePx(i);

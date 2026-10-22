@@ -11,4 +11,5 @@ export const BOSS_GLYPH: Record<BossId, string> = {
   windwraith: "❖",
   hydra: "⟲",
   optimizer: "◉",
+  arborix: "♣",
 };

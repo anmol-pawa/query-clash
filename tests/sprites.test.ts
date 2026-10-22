@@ -57,7 +57,7 @@ describe("sprite lookup", () => {
   it("maps the bosses whose sprite is renamed", () => {
     expect(BOSS_SPRITE.subzero).toBe("frostnest");
     expect(bossSprite("windwraith").name).toBe("GALEFRAME");
-    expect(Object.keys(BOSS_SPRITE)).toHaveLength(10);
+    expect(Object.keys(BOSS_SPRITE)).toHaveLength(11);
   });
   it("the starter is BYTEBAT with front and back sprites", () => {
     expect(STARTER).toEqual({ front: "bytebat", back: "bytebat-back" });

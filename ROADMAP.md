@@ -75,9 +75,11 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
 
 - [ ] C1. Two more SQL chapters: indexing deep-dive and SQL anti-patterns (N+1, implicit conversions, `SELECT *`, `OR` defeating indexes).
   - [x] C1a. Chapter 11 "indexing deep-dive" missions (`content/chapters/part3.ts`: composite, expression, sorted, covering, redundant-index defense) and three codex entries, tested; not yet in `CHAPTERS`.
-  - [ ] C1b. Boss for chapter 11 (original 96×96 pixel monster with idle/attack/hurt/faint, type, biome, map node), then wire `INDEXING_MISSIONS` into a `Chapter`.
+  - [x] C1b. Boss for chapter 11 (original 96×96 pixel monster with idle/attack/hurt/faint, type, biome, map node), then wire `INDEXING_MISSIONS` into a `Chapter`.
     - [x] C1b1. Boss art: ARBORIX (`scripts/art/arborix.mjs` → `game/sprites/creatures/arborix.ts`), a bark golem crowned with a B+ tree; registered in `SPRITES` and tested; the `/dev/sprites` Pixi previews now mount lazily (17 sprites exceeded the browser's WebGL context limit).
-    - [ ] C1b2. Wiring: add a `BossId` for it (`BOSS_SPRITE`, `BOSS_TYPE` = index, `BOSS_GLYPH`, the unused vector-rig `REGISTRY`), an 11th `BossAttackStyle` (new case in `game/render/attacks.ts`, since tests need distinct styles), an 11th overworld `MAP_NODES` / `BIOMES` entry, `Chapter` 11 in `CHAPTERS`, and fix the "10 bosses/chapters" assumptions in tests, Querydex, campaign page and save.
+    - [x] C1b2. Wiring: add a `BossId` for it (`BOSS_SPRITE`, `BOSS_TYPE` = index, `BOSS_GLYPH`, the unused vector-rig `REGISTRY`), an 11th `BossAttackStyle` (new case in `game/render/attacks.ts`, since tests need distinct styles), an 11th overworld `MAP_NODES` / `BIOMES` entry, `Chapter` 11 in `CHAPTERS`, and fix the "10 bosses/chapters" assumptions in tests, Querydex, campaign page and save.
+  - [ ] C1c. Chapter 12 "SQL anti-patterns" missions (N+1, implicit conversions, `SELECT *`, `OR` defeating indexes), tested, not yet in `CHAPTERS`.
+  - [ ] C1d. Boss for chapter 12 (96×96 art via `scripts/art/`) and its wiring (same checklist as C1b2: `BossId`, `BOSS_SPRITE`, `BOSS_TYPE`, `BOSS_GLYPH`, `REGISTRY`, a 12th attack style, `MAP_NODES`/`BIOMES`, `CHAPTERS`, the hard-coded `11` in `lib/save.ts` and `app/sandbox/page.tsx`, test counts).
   - [ ] C1c. Chapter 12 "SQL anti-patterns" missions (N+1 as a join, implicit conversions, `SELECT *`, `OR` defeating indexes) and codex entries, tested.
   - [ ] C1d. Boss art and wiring for chapter 12.
 - [ ] C2. Daily challenge seeded by date, plus a streak counter.

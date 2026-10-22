@@ -45,7 +45,7 @@ describe("Querydex", () => {
       expect(st.weak.some((m) => m.type === st.type)).toBe(true);
       expect(bossSprite(c.boss).anims.idle.length).toBeGreaterThanOrEqual(2);
     }
-    expect(caughtCount(Object.fromEntries(CHAPTERS.map((c) => [c.boss, { caught: "", wins: 1 }])))).toBe(10);
+    expect(caughtCount(Object.fromEntries(CHAPTERS.map((c) => [c.boss, { caught: "", wins: 1 }])))).toBe(11);
   });
 });
 

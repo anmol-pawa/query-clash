@@ -331,7 +331,7 @@ export default function BattleScreen({ mode, chapter: chapterNo = 1, versusChapt
       const w = wave + 1;
       setWave(w);
       setStageReady(false);
-      dispatch({ type: "wave", foe: { name: CHAPTERS.find((c) => c.boss === BOSS_ORDER[(w - 1) % 10])!.bossName, hp: 320 + w * 40, maxHp: 320 + w * 40 }, heal: 25 });
+      dispatch({ type: "wave", foe: { name: CHAPTERS.find((c) => c.boss === BOSS_ORDER[(w - 1) % BOSS_ORDER.length])!.bossName, hp: 320 + w * 40, maxHp: 320 + w * 40 }, heal: 25 });
       updateSave((x) => ({ ...x, arenaBest: Math.max(x.arenaBest, w - 1) }));
       return;
     }

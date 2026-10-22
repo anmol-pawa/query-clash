@@ -108,7 +108,7 @@ export default function SandboxPage() {
           <SchemaExplorer dialect={dialect} highlight={["employees"]} onInsert={(t) => editor.current?.insert(t)} />
         </section>
         <section className="panel flex min-h-[420px] flex-col gap-3 p-4">
-          <SpellDeck dialect={dialect} maxChapter={10} onCast={(t) => editor.current?.insert(t)} />
+          <SpellDeck dialect={dialect} maxChapter={11} onCast={(t) => editor.current?.insert(t)} />
           <div className="relative min-h-[200px] flex-1">
             <SqlEditor ref={editor} value={sql} onChange={setSql} dialect={dialect} onRun={run} onPreview={run} />
           </div>

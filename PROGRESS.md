@@ -383,3 +383,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests: ARBORIX added to the "bosses are 96×96" roster test; the generic sprite checks (palette, animations, faint) cover it automatically. 514 tests.
 - Verified: lint, typecheck, 514 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: ARBORIX sheet and live preview render, no console errors, no horizontal overflow.
 - Next: C1b2 (wire ARBORIX in as chapter 11).
+
+## 2026-10-22 (08:45 UTC): C1b2 chapter 11 wired in
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-qfw2ja`, same commit as main).
+- ARBORIX is now chapter 11 "The Index Vault" (`CHAPTERS_11` in `content/chapters/part3.ts`, appended to `CHAPTERS`). New `BossId` `arborix` in `BOSS_SPRITE`, `BOSS_TYPE` (INDEX, shared with the Optimizer), `BOSS_GLYPH`, `BOSS_STYLE` and the unused vector-rig `REGISTRY`.
+- New 11th boss counter-attack style `roots`: bark spikes burst from the ground toward the player, then leaves and a ground ring. 11th overworld node `[92, 52]` and a "grove" biome.
+- Removed "10 chapters" assumptions: `unlockedChapters` cap, the arena wave modulo, menu counters, sandbox spell deck, and tests (sprites, querydex, overworld fog, type chart now says ten types each guarded by a boss).
+- Verified: lint, typecheck, 519 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: map shows node 11, battle intro and a fight with ARBORIX render (Lv55, INDEX type); no console errors, no horizontal overflow.
+- Next: C1c (anti-patterns chapter missions), then C1d (its boss and wiring).

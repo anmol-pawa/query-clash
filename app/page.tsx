@@ -37,16 +37,16 @@ export default function Home() {
   const starter = starterSprite("front", starterStageOf(save.dex));
   const cleared = Object.keys(save.stars).length;
   const totalStars = Object.values(save.stars).reduce((a, b) => a + b, 0);
-  const next = CHAPTERS[Math.min(unlockedChapters(save), 10) - 1];
+  const next = CHAPTERS[Math.min(unlockedChapters(save), CHAPTERS.length) - 1];
 
   const modes = [
     { href: `/battle/${next.n}`, title: cleared ? "Continue" : "Start campaign", sub: `Chapter ${next.n}: ${next.bossName}`, color: next.color, glyph: BOSS_GLYPH[next.boss], big: true },
-    { href: "/campaign", title: "Campaign map", sub: `${cleared}/10 bosses · ${totalStars}★`, color: "#fbbf24", glyph: "⌖" },
+    { href: "/campaign", title: "Campaign map", sub: `${cleared}/${CHAPTERS.length} bosses · ${totalStars}★`, color: "#fbbf24", glyph: "⌖" },
     { href: "/arena", title: "Endless Arena", sub: `Best: ${save.arenaBest} waves`, color: "#f97316", glyph: "∞" },
     { href: "/versus", title: "Versus (hot-seat)", sub: "Two mages, one keyboard", color: "#f472b6", glyph: "⚔" },
     { href: "/sandbox", title: "Sandbox", sub: "Free SQL playground", color: "#60a5fa", glyph: "⌨" },
     { href: "/codex", title: "Codex", sub: `${save.codex.length}/${CODEX.length} entries unlocked: definitions, both dialects, enterprise use, quizzes`, color: "#a78bfa", glyph: "📖", wide: true },
-    { href: "/querydex", title: "Querydex", sub: `${caughtCount(save.dex)}/10 bosses captured`, color: "#e0a030", glyph: "◫" },
+    { href: "/querydex", title: "Querydex", sub: `${caughtCount(save.dex)}/${CHAPTERS.length} bosses captured`, color: "#e0a030", glyph: "◫" },
     { href: "/bestiary", title: "Bestiary", sub: "Meet the bosses, preview every spell", color: "#4ade80", glyph: "☠" },
     { href: "/interview", title: "DBMS Interview", sub: `${save.interview.filter((id) => INTERVIEW_IDS.has(id)).length}/${QUESTIONS.length} solved: battle topic guardians with interview questions`, color: "#38bdf8", glyph: "◆", wide: true },
   ];

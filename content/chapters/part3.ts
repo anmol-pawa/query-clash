@@ -1,10 +1,9 @@
-import type { Mission } from "../types";
+import type { Chapter, Mission } from "../types";
 
 const same = (sql: string) => ({ postgres: sql, oracle: sql });
 
 /**
- * Chapter 11, "The Index Vault" (indexing deep-dive). The missions are written and tested here;
- * the boss, map node and chapter metadata arrive with the boss art (ROADMAP C1b).
+ * Chapter 11, "The Index Vault" (indexing deep-dive).
  * Checks read the PostgreSQL catalog, so a correct index passes in either dialect.
  */
 export const INDEXING_MISSIONS: Mission[] = [
@@ -86,5 +85,21 @@ export const INDEXING_MISSIONS: Mission[] = [
     ],
     codex: ["indexes", "composite-index"],
     tables: ["orders"],
+  },
+];
+
+export const CHAPTERS_11: Chapter[] = [
+  {
+    n: 11,
+    boss: "arborix",
+    bossName: "ARBORIX",
+    bossTitle: "Warden of the Index Vault",
+    title: "The Index Vault",
+    topics: ["Composite indexes", "Expression indexes", "Sort order", "Covering indexes", "Redundant indexes"],
+    intro:
+      "Deep under the planner's eye grows a bark golem crowned with a B+ tree. ARBORIX guards every lookup in the vault, and it punishes careless keys: wrong column order, computed predicates, indexes that cost writes and buy nothing. Build the right index for each query.",
+    defeat: "ARBORIX's keys flicker out one by one. Every lookup now takes three page reads. You have mastered the index.",
+    color: "#84cc16",
+    missions: INDEXING_MISSIONS,
   },
 ];

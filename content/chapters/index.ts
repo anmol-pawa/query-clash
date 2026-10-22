@@ -1,8 +1,9 @@
 import type { Chapter, Mission } from "../types";
 import { CHAPTERS_1_5 } from "./part1";
 import { CHAPTERS_6_10 } from "./part2";
+import { CHAPTERS_11 } from "./part3";
 
-export const CHAPTERS: Chapter[] = [...CHAPTERS_1_5, ...CHAPTERS_6_10];
+export const CHAPTERS: Chapter[] = [...CHAPTERS_1_5, ...CHAPTERS_6_10, ...CHAPTERS_11];
 
 export const ALL_MISSIONS: (Mission & { chapter: number })[] = CHAPTERS.flatMap((c) => c.missions.map((m) => ({ ...m, chapter: c.n })));
 

@@ -630,5 +630,39 @@ export async function bossAttack(c: FxContext, boss: Character & { style: BossAt
       await b;
       break;
     }
+    case "roots": {
+      const ground = { x: from.x, y: to.y + 120 };
+      const bark = 0x92643a;
+      c.camera.shake(8, 3);
+      // bark spikes burst out of the ground, marching from the boss toward the target
+      const spikes = [0, 1, 2, 3].map((i) => {
+        const k0 = (i + 1) / 4;
+        const sp = fxSpriteOf(c, "spike", bark, { x: ground.x + (to.x - ground.x) * k0, y: ground.y }, i === 3 ? 6 : 4);
+        sp.anchor.set(0.5, 1);
+        if (i % 2) sp.scale.x *= -1;
+        return sp;
+      });
+      for (const [i, sp] of spikes.entries()) {
+        const x = sp.position.x;
+        fx.burst(x, ground.y, { color: 0x4d7c0f, count: 8, speed: 260, gravity: 900 });
+        c.camera.shake(5, 3);
+        void tw.run(0.18, (k) => setFxFrame(sp, "spike", bark, k * 0.75));
+        if (i === spikes.length - 1) onImpact(0, 1);
+        await tw.wait(0.1);
+      }
+      impactSpark(c, to, color, 5);
+      ring(c, { x: to.x, y: ground.y }, { color, radius: 170, squash: 0.3, width: 14 });
+      for (let i = 0; i < 12; i++) fx.emit({ x: to.x, y: to.y, vx: (Math.random() - 0.5) * 500, vy: -200 - Math.random() * 300, gravity: 700, life: 0.7, size: 8, color: i % 2 ? 0x84cc16 : 0x4d7c0f, spark: true });
+      await tw.wait(0.2);
+      spikes.forEach((sp) => setFxFrame(sp, "spike", bark, 0.99));
+      await tw.run(0.25, (k) =>
+        spikes.forEach((sp) => {
+          sp.alpha = 1 - k;
+          sp.position.y = Math.round(ground.y + k * 30);
+        }),
+      );
+      spikes.forEach((sp) => sp.destroy());
+      break;
+    }
   }
 }

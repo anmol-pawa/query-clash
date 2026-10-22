@@ -55,6 +55,7 @@ export const BOSS_TYPE: Record<BossId, SqlType> = {
   windwraith: "window",
   hydra: "recursive",
   optimizer: "index",
+  arborix: "index",
 };
 
 export interface Matchup {

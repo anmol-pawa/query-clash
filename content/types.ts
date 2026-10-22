@@ -41,7 +41,8 @@ export type BossId =
   | "schemaforge"
   | "windwraith"
   | "hydra"
-  | "optimizer";
+  | "optimizer"
+  | "arborix";
 
 export interface Chapter {
   n: number;
