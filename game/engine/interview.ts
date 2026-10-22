@@ -33,6 +33,8 @@ export function grade(q: Question, r: Response): boolean {
       const t = normalizeText(r.text);
       return t !== "" && q.accept.some((a) => normalizeText(a) === t);
     }
+    case "sql":
+      return r.kind === "sql" && r.correct;
   }
 }
 
@@ -51,6 +53,8 @@ export function correctResponse(q: Question): Response {
       return { kind: "numeric", value: q.answer };
     case "short":
       return { kind: "short", text: q.accept[0] };
+    case "sql":
+      return { kind: "sql", correct: true };
   }
 }
 
@@ -69,6 +73,8 @@ export function answerText(q: Question): string {
       return q.unit ? `${q.answer} ${q.unit}` : String(q.answer);
     case "short":
       return q.accept[0];
+    case "sql":
+      return q.solution;
   }
 }
 

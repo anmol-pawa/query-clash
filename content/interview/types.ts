@@ -83,7 +83,15 @@ export interface ShortQuestion extends QuestionBase {
   accept: string[];
 }
 
-export type Question = McqQuestion | MultiQuestion | TrueFalseQuestion | OrderQuestion | NumericQuestion | ShortQuestion;
+/** Write the query: graded by running it on PGlite against the mission with this id (see `sqlbank.ts`). */
+export interface SqlQuestion extends QuestionBase {
+  kind: "sql";
+  missionId: string;
+  /** The reference query in PostgreSQL syntax, shown after the answer. */
+  solution: string;
+}
+
+export type Question = McqQuestion | MultiQuestion | TrueFalseQuestion | OrderQuestion | NumericQuestion | ShortQuestion | SqlQuestion;
 export type QuestionKind = Question["kind"];
 
 /** A seeded problem generator: the same seed always builds the same, solver-answered question. */
@@ -103,7 +111,9 @@ export type Response =
   /** The steps as the player arranged them. */
   | { kind: "order"; steps: string[] }
   | { kind: "numeric"; value: number }
-  | { kind: "short"; text: string };
+  | { kind: "short"; text: string }
+  /** The verdict from running the player's query on the database. */
+  | { kind: "sql"; correct: boolean };
 
 export interface Topic {
   id: TopicId;

@@ -50,4 +50,5 @@ export const KIND_LABEL: Record<Question["kind"], string> = {
   order: "Order the steps",
   numeric: "Numeric",
   short: "Short answer",
+  sql: "Write the SQL",
 };

@@ -1,9 +1,14 @@
 "use client";
 import { type CSSProperties, useState } from "react";
-import { Button } from "@/components/ui/kit";
+import { ResultGrid } from "@/components/battle/ResultGrid";
+import { SqlEditor } from "@/components/battle/SqlEditor";
+import { Button, DialectToggle } from "@/components/ui/kit";
 import type { Question, Response } from "@/content/interview/types";
 import { sfx } from "@/game/audio/synth";
 import { moveStep } from "@/game/engine/interview";
+import { sqlClient, useDbStatus } from "@/lib/db/client";
+import type { ResultSet, RunResult } from "@/lib/db/engine";
+import { updateSave, useSave } from "@/lib/save";
 
 const LETTERS = "ABCDEFGH";
 const RIGHT = "#4ade80";
@@ -57,7 +62,80 @@ export function AnswerPanel({ q, initialSteps, locked, picked, onAnswer }: { q: 
     case "numeric":
     case "short":
       return <TextPanel q={q} locked={locked} onAnswer={onAnswer} />;
+    case "sql":
+      return <SqlPanel q={q} locked={locked} onAnswer={onAnswer} />;
   }
+}
+
+/** Write the query: Run previews the result, Submit grades it on the database against the reference answer. */
+function SqlPanel({ q, locked, onAnswer }: { q: Extract<Question, { kind: "sql" }>; locked: boolean; onAnswer: (r: Response) => void }) {
+  const save = useSave();
+  const status = useDbStatus();
+  const [sql, setSql] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [run, setRun] = useState<RunResult | null>(null);
+  const [miss, setMiss] = useState<string | null>(null);
+  const dialect = save.dialect;
+  const ready = status === "ready" && !busy && !locked;
+
+  async function preview() {
+    if (!ready || !sql.trim()) return;
+    setBusy(true);
+    setMiss(null);
+    setRun(await sqlClient().run(sql, dialect));
+    setBusy(false);
+  }
+
+  async function submit() {
+    if (!ready || !sql.trim()) return;
+    setBusy(true);
+    const v = await sqlClient().evaluate(q.missionId, sql, dialect);
+    setBusy(false);
+    setRun(v.run);
+    if (v.correct) onAnswer({ kind: "sql", correct: true });
+    else setMiss(v.run.ok ? (v.reason ?? "The result does not match.") : v.run.error.title);
+  }
+
+  const result: ResultSet | null = run && run.ok ? run.result : null;
+  return (
+    <div data-answer="sql">
+      <div className="mb-2 flex items-center gap-2">
+        <DialectToggle value={dialect} onChange={(d) => updateSave((x) => ({ ...x, dialect: d }))} disabled={locked} />
+        <span className="text-[11px] text-white/45">{status === "ready" ? "Database ready" : status === "error" ? "Database failed to start" : "Booting the database…"}</span>
+      </div>
+      <div className="overflow-hidden rounded-xl border border-white/10" style={{ minHeight: 120 }}>
+        <SqlEditor value={sql} onChange={setSql} dialect={dialect} onRun={submit} readOnly={locked} />
+      </div>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Button onClick={preview} disabled={!ready || !sql.trim()}>
+          ▶ Run
+        </Button>
+        <Button variant="primary" onClick={submit} disabled={!ready || !sql.trim()}>
+          {busy ? "Checking…" : "✔ Submit answer"}
+        </Button>
+        {!locked && (
+          <button className="ml-auto text-xs text-white/45 hover:text-white" onClick={() => onAnswer({ kind: "sql", correct: false })}>
+            Give up
+          </button>
+        )}
+      </div>
+      {!locked && miss && (
+        <p className="mt-2 text-sm text-rose-300" data-testid="sql-miss">
+          Not yet: {miss.replace(/\.+$/, "")}. Fix it and submit again.
+        </p>
+      )}
+      {run && !run.ok && (
+        <p className="mt-2 text-sm text-amber-200" data-testid="sql-error">
+          {run.error.title}: {run.error.message}
+        </p>
+      )}
+      {result && (
+        <div className="mt-2" data-testid="sql-result">
+          <ResultGrid result={result} max={12} />
+        </div>
+      )}
+    </div>
+  );
 }
 
 function ChoiceList({ choices, locked, isRight, isPicked, onPick, multi = false }: { choices: string[]; locked: boolean; isRight: (i: number) => boolean; isPicked: (i: number) => boolean; onPick: (i: number) => void; multi?: boolean }) {

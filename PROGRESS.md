@@ -344,3 +344,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests (`tests/distributed.test.ts`): helper checks (including that removing a ring node moves only its own keys), every fixed answer pinned, 300 seeds per generator re-solved from the table the player sees with every variant exercised. The empty-topic tests in `interview.test.ts` moved to "sql". 448 tests.
 - Verified: lint, typecheck, 448 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: Distributed battle intro and first question render, no console errors, no horizontal overflow.
 - Next: B9 (classic interview SQL on PGlite).
+
+## 2026-10-22 (03:45 UTC): B9 classic interview SQL
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone.
+- New interview question kind `sql` ("Write the SQL"): the Interview SQL topic (Frostnest) is now playable. The answer panel has the SQL editor, a PostgreSQL/Oracle toggle, Run (preview) and Submit (graded on PGlite against the reference result, in the player's dialect), plus Give up. A wrong submit shows the reason and allows retries.
+- `content/interview/sql.ts`: 14 questions (Nth highest salary with and without windows, duplicates, anti-join / NOT IN trap, empty departments, self-join manager counts, top-2 per department with RANK, above department average, running balance, month-over-month with LAG, CASE pivot, latest order per customer, gaps and islands, departments above company average), each with 3 hints, explanation and Oracle/PostgreSQL solutions. The DB worker resolves these missions too.
+- Tests (`tests/interviewSql.test.ts`): every solution runs in both dialects with equal non-empty results, reference passes and `SELECT 1` fails, known answers cross-checked, grading. 479 tests.
+- Verified: lint, typecheck, 479 tests, build and build:pages pass. Playwright at 1280x900 and iPhone 14: SQL battle, Run, wrong submit message and give-up explanation render; no console errors, no horizontal overflow.
+- Next: B10 (spaced repetition, daily drill, mock interview). More SQL bank questions can follow later.

@@ -7,6 +7,7 @@
  */
 import type { PGlite } from "@electric-sql/pglite";
 import { ALL_MISSIONS } from "@/content/chapters";
+import { SQL_MISSIONS } from "@/content/interview/sql";
 import { evaluate, expectedFor, resetDatabase, runScript } from "./engine";
 import type { Envelope, Reply, Response } from "./protocol";
 
@@ -35,7 +36,7 @@ ready.then(
 );
 
 function mission(id: string) {
-  const m = ALL_MISSIONS.find((x) => x.id === id);
+  const m = ALL_MISSIONS.find((x) => x.id === id) ?? SQL_MISSIONS.find((x) => x.id === id);
   if (!m) throw new Error(`Unknown mission ${id}`);
   return m;
 }

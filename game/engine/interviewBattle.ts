@@ -79,6 +79,7 @@ export const KIND_ATTACK: Record<QuestionKind, AttackKind> = {
   order: "summon",
   numeric: "haste",
   short: "blade",
+  sql: "mirror",
 };
 
 export function initialInterview(deck: Question[], player: string, foe: string): InterviewState {
