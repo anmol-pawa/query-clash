@@ -2,6 +2,7 @@ import { BASICS, BASICS_GENERATORS } from "./basics";
 import { CONCURRENCY, CONCURRENCY_GENERATORS } from "./concurrency";
 import { ER, ER_GENERATORS } from "./er";
 import { MVCC, MVCC_GENERATORS } from "./mvcc";
+import { QUERY, QUERY_GENERATORS } from "./query";
 import { RECOVERY, RECOVERY_GENERATORS } from "./recovery";
 import { STORAGE, STORAGE_GENERATORS } from "./storage";
 import { NORMALIZATION, NORMALIZATION_GENERATORS } from "./normalization";
@@ -23,6 +24,6 @@ export const TOPICS: Topic[] = [
   { id: "sql", foe: "subzero", title: "Interview SQL", blurb: "Nth highest salary, gaps and islands, top-N per group…", color: "#4ade80" },
 ];
 
-export const QUESTIONS: Question[] = [...BASICS, ...ER, ...NORMALIZATION, ...TRANSACTIONS, ...CONCURRENCY, ...RECOVERY, ...MVCC, ...STORAGE];
-export const GENERATORS: Generator[] = [...BASICS_GENERATORS, ...ER_GENERATORS, ...NORMALIZATION_GENERATORS, ...TRANSACTIONS_GENERATORS, ...CONCURRENCY_GENERATORS, ...RECOVERY_GENERATORS, ...MVCC_GENERATORS, ...STORAGE_GENERATORS];
+export const QUESTIONS: Question[] = [...BASICS, ...ER, ...NORMALIZATION, ...TRANSACTIONS, ...CONCURRENCY, ...RECOVERY, ...MVCC, ...STORAGE, ...QUERY];
+export const GENERATORS: Generator[] = [...BASICS_GENERATORS, ...ER_GENERATORS, ...NORMALIZATION_GENERATORS, ...TRANSACTIONS_GENERATORS, ...CONCURRENCY_GENERATORS, ...RECOVERY_GENERATORS, ...MVCC_GENERATORS, ...STORAGE_GENERATORS, ...QUERY_GENERATORS];
 export type { TopicId };

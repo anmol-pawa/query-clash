@@ -328,3 +328,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Tests: traced insert matches untraced on 100 random key sets, split count matches node count, `has`/`searchPath`. 435 tests.
 - Verified: lint, typecheck, 435 tests, build and build:pages pass. Playwright (static export) at 1280x900 and iPhone 14: tree renders, no page overflow (the diagram scrolls inside its box on phones), no console errors (apart from the missing sw.js in my non-pages test build).
 - Next: B7 (query processing and optimization).
+
+## 2026-10-22 (01:55 UTC): B7 query processing and optimization
+- Took the free lock (main was green). No `add_repo` tool again; worked in the existing clone.
+- `lib/dbms/joins.ts`: textbook cost model: tuple nested loop, block nested loop (worst, best, M buffers), external sort passes and cost, merge join (sorted / unsorted), grace hash join (3(b_r+b_s)+4n_h, recursion check), equality and join size estimates, left-deep and bushy join-order counts.
+- `content/interview/query.ts` (the Query Processing topic, guarded by OPTICORE, is now playable): 22 fixed questions (pipeline order, cost units, selection pushdown, each join algorithm and when to pick it, hash-join phases and build side, selectivity, stale statistics, PostgreSQL EXPLAIN / EXPLAIN ANALYZE / Oracle EXPLAIN PLAN, seq scan vs index, join ordering, index-only scans) and four seeded generators: join cost by algorithm (6 variants), which relation should be outer, selection/join size estimate, number of join orders.
+- Tests (`tests/joins.test.ts`): Silberschatz's customer/depositor numbers (2,000,100 / 40,100 / 1,520), sort passes, 300 seeds per generator re-solved from the table the player sees, all variants and answer positions exercised, every fixed answer pinned. The empty-topic tests in `interview.test.ts` moved to "distributed". 441 tests.
+- Verified: lint, typecheck, 441 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: Query Processing battle intro and first question render, no console errors, no horizontal overflow.
+- Next: B8 (distributed and NoSQL).
