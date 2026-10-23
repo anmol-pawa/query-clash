@@ -103,3 +103,4 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
     - [x] D3b3b. Storage 26 → 36 (`content/interview/storageMore.ts`, keyed in `tests/interviewStorageMore.test.ts`).
     - [x] D3b3c. SQL bank: 14 → 30 (new entries in `content/interview/sql.ts`; the SQL test checks both dialects, plus known answers).
 - [x] D4. A third dialect note set (MySQL differences) as codex-only entries (`content/codexMysql.ts`, keyed in `tests/codexMysql.test.ts`).
+- [x] D5. Four more MySQL codex entries (`<=>`, GROUP_CONCAT, INSERT IGNORE, window functions need 8.0), keyed in `tests/codexMysql.test.ts`.

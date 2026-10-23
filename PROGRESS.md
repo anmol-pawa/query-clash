@@ -508,3 +508,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Verified: lint, typecheck, 599 tests, `build:pages` pass. Playwright on the static export at 1280x900 and iPhone 14: `/codex` shows the MySQL tab and entries, no console errors, no horizontal overflow.
 - CI and the Pages deploy were not checked: the GitHub Actions quota is used up until 2026-11-01.
 - Next: ROADMAP has no unchecked tasks left; add new ideas (e.g. MySQL playground dialect, more art polish) before the next run.
+
+## 2026-10-23 — D5: four more MySQL codex entries
+
+- ROADMAP had no unchecked tasks, so added D5: MySQL entries for the NULL-safe `<=>` operator, GROUP_CONCAT vs STRING_AGG vs LISTAGG (truncation at group_concat_max_len), INSERT IGNORE vs ON CONFLICT, and window functions/CTEs needing MySQL 8.0. Each has MySQL/PostgreSQL/Oracle forms and a quiz keyed in `tests/codexMysql.test.ts`.
+- Verified: lint, typecheck, 599 tests, `build:pages` pass. Playwright on the static export at 1280x900 and iPhone 14: `/codex` shows the MySQL entries, no console errors, no horizontal overflow.
+- CI and the Pages deploy were not checked: the GitHub Actions quota is used up until 2026-11-01.
+- Next: ROADMAP is empty again; add ideas (e.g. MySQL playground dialect, more art polish) before the next run.

@@ -227,4 +227,84 @@ export const MYSQL_CODEX: CodexEntry[] = [
       why: "/ is decimal division; DIV truncates to an integer.",
     },
   },
+  {
+    id: "mysql-null-safe-equal",
+    title: "NULL-safe equality: <=>",
+    category: "MySQL",
+    definition:
+      "In every SQL engine NULL = NULL is unknown, not true. MySQL adds the NULL-safe operator <=>, which returns 1 when both sides are equal or both NULL. PostgreSQL spells it IS NOT DISTINCT FROM; Oracle has no operator, so people write (a = b OR (a IS NULL AND b IS NULL)) or use DECODE(a, b, 1, 0).",
+    syntax: {
+      postgres: "-- MySQL\nSELECT NULL = NULL, NULL <=> NULL, 1 <=> NULL;   -- NULL, 1, 0\n\n-- PostgreSQL\nSELECT NULL IS NOT DISTINCT FROM NULL;          -- true",
+      oracle: "-- Oracle\nSELECT DECODE(NULL, NULL, 1, 0) FROM dual;     -- 1 (DECODE treats two NULLs as equal)",
+    },
+    enterprise:
+      "Joining or diffing two tables on nullable columns silently drops the NULL rows with plain =. Change-detection queries use the NULL-safe form so that NULL to NULL counts as unchanged.",
+    pitfalls: ["<=> never returns NULL, unlike =.", "An index may not be used for a NULL-safe comparison in every engine; check the plan."],
+    quiz: {
+      q: "In MySQL, what does SELECT 1 <=> NULL return?",
+      options: ["1", "0", "NULL", "An error"],
+      answer: 1,
+      why: "<=> is NULL-safe: one side is NULL and the other is not, so the answer is false (0), never NULL.",
+    },
+  },
+  {
+    id: "mysql-group-concat",
+    title: "GROUP_CONCAT vs STRING_AGG vs LISTAGG",
+    category: "MySQL",
+    definition:
+      "Joining the values of a group into one string is GROUP_CONCAT in MySQL, STRING_AGG in PostgreSQL and LISTAGG in Oracle. MySQL truncates the result at group_concat_max_len (1024 bytes by default) without an error, only a warning.",
+    syntax: {
+      postgres: "-- MySQL\nSELECT dept_id, GROUP_CONCAT(name ORDER BY name SEPARATOR ', ') FROM employees GROUP BY dept_id;\n\n-- PostgreSQL\nSELECT dept_id, STRING_AGG(name, ', ' ORDER BY name) FROM employees GROUP BY dept_id;",
+      oracle: "-- Oracle\nSELECT dept_id, LISTAGG(name, ', ') WITHIN GROUP (ORDER BY name) FROM employees GROUP BY dept_id;",
+    },
+    enterprise:
+      "A silently truncated list is a classic reporting bug: the string looks fine but the last names are missing. Raise group_concat_max_len or aggregate in the application when lists can be long. Oracle's LISTAGG raises ORA-01489 instead when the result exceeds 4000 bytes.",
+    pitfalls: ["The default separator in MySQL is a comma with no space.", "NULL values are skipped by all three aggregates."],
+    quiz: {
+      q: "A MySQL GROUP_CONCAT result is longer than group_concat_max_len. What happens by default?",
+      options: ["An error is raised", "The result is cut off with a warning", "NULL is returned", "The limit grows automatically"],
+      answer: 1,
+      why: "MySQL truncates the string and only raises a warning, so the data loss is easy to miss.",
+    },
+  },
+  {
+    id: "mysql-insert-ignore",
+    title: "INSERT IGNORE and ON CONFLICT",
+    category: "MySQL",
+    definition:
+      "INSERT IGNORE skips rows that would violate a unique key, but it also downgrades other errors (such as a value too long or a bad type) to warnings and stores a coerced value. PostgreSQL's INSERT ... ON CONFLICT DO NOTHING ignores only unique conflicts. Oracle uses MERGE, or the IGNORE_ROW_ON_DUPKEY_INDEX hint.",
+    syntax: {
+      postgres: "-- MySQL\nINSERT IGNORE INTO tags (name) VALUES ('sql');\n\n-- PostgreSQL\nINSERT INTO tags (name) VALUES ('sql') ON CONFLICT (name) DO NOTHING;",
+      oracle: "-- Oracle\nMERGE INTO tags t USING (SELECT 'sql' AS name FROM dual) s ON (t.name = s.name)\nWHEN NOT MATCHED THEN INSERT (name) VALUES (s.name);",
+    },
+    enterprise:
+      "Idempotent loaders use these forms so a retried batch does not fail on rows already inserted. Prefer the narrow form (ON CONFLICT or ON DUPLICATE KEY UPDATE) so real data errors are not swallowed.",
+    pitfalls: ["INSERT IGNORE can hide truncation of strings and out-of-range numbers.", "Ignored rows still consume AUTO_INCREMENT values in InnoDB."],
+    quiz: {
+      q: "Besides duplicate keys, what else does MySQL's INSERT IGNORE turn into a warning?",
+      options: ["Nothing, only duplicates", "Other row-level errors such as a too-long string", "Syntax errors", "Permission errors"],
+      answer: 1,
+      why: "IGNORE downgrades many data errors to warnings and stores an adjusted value, which is why it is riskier than ON CONFLICT DO NOTHING.",
+    },
+  },
+  {
+    id: "mysql-window-versions",
+    title: "Window functions and CTEs need MySQL 8",
+    category: "MySQL",
+    definition:
+      "MySQL added window functions (ROW_NUMBER, RANK, LAG, SUM() OVER) and CTEs, including WITH RECURSIVE, in version 8.0. In 5.7 and earlier they do not exist and people used user variables or self joins. PostgreSQL has had both for years and Oracle has had analytic functions since 8i.",
+    syntax: {
+      postgres: "-- MySQL 8.0+\nSELECT name, salary, RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS r FROM employees;\n\n-- PostgreSQL (identical)\nSELECT name, salary, RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS r FROM employees;",
+      oracle: "-- Oracle (identical)\nSELECT name, salary, RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS r FROM employees;",
+    },
+    enterprise:
+      "Check the server version before porting top-N-per-group queries. On MySQL 5.7 the same result needs a correlated subquery or a self join, which is slower and easier to get wrong.",
+    pitfalls: ["MariaDB added window functions in 10.2, on a different version line from MySQL.", "MySQL has no QUALIFY clause; filter a window result in an outer query."],
+    quiz: {
+      q: "Which MySQL version first supports window functions such as RANK() OVER (...)?",
+      options: ["5.5", "5.7", "8.0", "They are not supported"],
+      answer: 2,
+      why: "Window functions and CTEs arrived together in MySQL 8.0.",
+    },
+  },
 ];
