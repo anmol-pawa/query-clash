@@ -108,3 +108,8 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
   - [x] D6a. "Codex ▸" links under interview explanations (battle and mock review) that open the matching entry in `/codex?entry=<id>` in study mode (`content/interview/codexLinks.ts`, `tests/codexLinks.test.ts`).
   - [x] D6b. Illustrated battle backdrops per biome (`game/render/scenery.ts`): sky bands, sun/moon, clouds/stars/ash, two ridge silhouettes, speckled ground and horizon props, one scene per chapter's boss; gallery in `/dev/sprites`, `tests/scenery.test.ts`.
   - [x] D6c. Scope decided: no MySQL engine runs in-browser (no WASM build is bundled) and a translation layer would teach wrong behaviour, so MySQL stays codex-only. The sandbox links to the MySQL Codex tab via `/codex?cat=MySQL` (preselects the tab, study mode on).
+
+## E. Polish
+
+- [x] E1. Scroll the Codex tab bar to the selected tab (deep links like `/codex?cat=MySQL` on phones).
+- [ ] E2. Ideas: more interview topics, evolve/faint frame polish.

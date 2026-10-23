@@ -533,3 +533,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Decided MySQL stays codex-only: no MySQL-compatible engine runs in the browser here, and a translation layer on PGlite would teach wrong behaviour. The sandbox header gets a "Coming from MySQL? ▸" link to `/codex?cat=MySQL`, a new deep link that preselects a category tab and turns on study mode.
 - Verified: lint, typecheck, 622 tests, `build`, `build:pages` pass. Playwright on the static export at 1280x800 and iPhone 14: the link works from the sandbox, the Codex opens on MySQL entries, no console errors, no horizontal overflow. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks left; add new ideas (e.g. scroll the Codex tab bar to the selected tab, more interview topics, art polish for evolve/faint frames) before the next run.
+
+## 2026-10-23 - E1: Codex tab bar follows the selected tab
+
+- ROADMAP had no unchecked tasks, so added section E. `/codex` now scrolls the selected category tab into view (`app/codex/page.tsx`), so `/codex?cat=MySQL` shows the MySQL tab on phones instead of leaving it off-screen in the scrolling tab bar.
+- Verified: lint, typecheck, 622 tests, `build:pages` pass. Playwright on the static export at 1280x800 and iPhone 14: `?cat=MySQL` selected tab is fully inside the tablist, no console errors, no horizontal overflow. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: E2 (more interview topics, evolve/faint frame polish).

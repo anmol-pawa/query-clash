@@ -41,6 +41,11 @@ export default function CodexPage() {
     }
   }, []);
 
+  // Keep the selected tab visible in the horizontally scrolling tab bar (matters for deep links on phones).
+  useEffect(() => {
+    document.querySelector('[role="tablist"] [aria-selected="true"]')?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [cat]);
+
   const list = useMemo(() => filterCodex(CODEX, cat, q), [cat, q]);
   const progress = useMemo(() => categoryProgress(CODEX, save.codex), [save.codex]);
 
