@@ -483,3 +483,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Verified: lint, typecheck, 556 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: `/interview` renders (305 questions), no console errors, no horizontal overflow.
 - CI and the Pages deploy were not checked: the GitHub Actions quota is used up until 2026-11-01.
 - Next: D3b3 (Transactions/Distributed, Storage, SQL to 30+).
+
+## 2026-10-23 — D3b3a: more Transactions and Distributed questions
+
+- Added 9 transactions questions (ACID corners, isolation per engine incl. Oracle, conflicts, autocommit, PG aborted transactions) and 8 distributed ones (CAP, quorum overlap, Raft majority, 2PC in-doubt, vnodes, hash vs range, AP behaviour), each keyed in `tests/interviewTxDistMore.test.ts`. Static counts: tx 33, dst 32.
+- Verified: lint, typecheck, 560 tests, `build`, `build:pages` all pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: D3b3b (Storage 26 → 30+, SQL bank 14 → 30).

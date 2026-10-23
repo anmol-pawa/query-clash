@@ -99,5 +99,6 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
   - [ ] D3b. Top the remaining topics up to 30+ static questions.
     - [x] D3b1. Recovery: 16 → 31 (`content/interview/recoveryMore.ts`, keyed in `tests/interviewRecoveryMore.test.ts`).
     - [x] D3b2. MVCC 19 → 31, ER 20 → 32, Query 22 → 33 (`content/interview/{mvccMore,erMore,queryMore}.ts`, keyed in `tests/interviewMoreTopics.test.ts`).
-    - [ ] D3b3. Transactions/Distributed (24), Storage (26), SQL (14).
+    - [x] D3b3a. Transactions 24 → 33, Distributed 24 → 32 (`content/interview/{transactionsMore,distributedMore}.ts`, keyed in `tests/interviewTxDistMore.test.ts`).
+    - [ ] D3b3b. Storage (26), SQL (14).
 - [ ] D4. A third dialect note set (MySQL differences) as codex-only entries.
