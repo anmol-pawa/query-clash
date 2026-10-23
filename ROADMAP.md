@@ -107,4 +107,6 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
 - [ ] D6. Ideas for the next run: MySQL as a sandbox dialect; more art polish (battle backgrounds per biome check in `/dev/sprites`).
   - [x] D6a. "Codex ▸" links under interview explanations (battle and mock review) that open the matching entry in `/codex?entry=<id>` in study mode (`content/interview/codexLinks.ts`, `tests/codexLinks.test.ts`).
   - [x] D6b. Illustrated battle backdrops per biome (`game/render/scenery.ts`): sky bands, sun/moon, clouds/stars/ash, two ridge silhouettes, speckled ground and horizon props, one scene per chapter's boss; gallery in `/dev/sprites`, `tests/scenery.test.ts`.
-  - [ ] D6c. MySQL as a sandbox dialect (needs a MySQL-compatible engine or a translation layer; decide scope first).
+  - [ ] D6c. MySQL as a sandbox dialect, via a translation layer onto PGlite (no MySQL engine in the browser). Not a mission/interview dialect: sandbox only.
+    - [x] D6c1. `lib/dialect/mysql.ts` `transpileMysql` (backticks, "strings", # comments, LIMIT o,c, IFNULL, IF(), GROUP_CONCAT, <=>, CURDATE), run against PGlite in `tests/mysql.test.ts`.
+    - [ ] D6c2. Add `"mysql"` to the sandbox only: a third option in the dialect toggle on `/sandbox` (separate from the saved `Dialect` used by missions), wired into `runScript`, with MySQL examples and the translation notes shown.
