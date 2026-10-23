@@ -16,6 +16,7 @@ export const CATEGORY_COLOR: Record<CodexCategory, string> = {
   Hierarchies: "#a3e635",
   Performance: "#facc15",
   "Modern SQL": "#e879f9",
+  MySQL: "#2dd4bf",
 };
 
 /** "All" followed by every category present, in first-seen order. */

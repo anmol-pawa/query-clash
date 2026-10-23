@@ -1,4 +1,5 @@
 import type { CodexEntry } from "./types";
+import { MYSQL_CODEX } from "./codexMysql";
 
 /**
  * The Codex: the game's reference book. Entries unlock as missions are won;
@@ -874,6 +875,7 @@ export const CODEX: CodexEntry[] = [
     ],
     dialectNotes: "Oracle's implicit conversions are far more permissive than PostgreSQL's, so type mismatches hide longer there.",
   },
+  ...MYSQL_CODEX,
 ];
 
 export function codexById(id: string): CodexEntry | undefined {

@@ -501,3 +501,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Added 16 SQL interview missions to `content/interview/sql.ts` (14 → 30): revenue per customer, unsold products, headcount with empty departments (COUNT(col) vs COUNT(*)), median via PERCENTILE_CONT, repeat customers, top earner per department with ties, shipping delay, NULL-safe total pay, hires per year, revenue by category, same-city pairs (self join), 3-row moving average, recursive org-level headcount (Oracle variant without RECURSIVE), DENSE_RANK over an aggregate, payroll share, idle accounts. Every mission runs on both dialects and must agree; the test file also recomputes org depth, headcount, payroll shares, median, anti-joins and category revenue independently. This completes D3.
 - Verified: lint, typecheck, 596 tests, `build`, `build:pages` all pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: D4 (MySQL differences as codex-only entries).
+
+## 2026-10-23 — D4: MySQL differences in the Codex
+
+- Added a "MySQL" Codex category (teal tab) with 11 codex-only entries in `content/codexMysql.ts`: LIMIT offset order, AUTO_INCREMENT gaps, backticks / `||` / CONCAT NULL, ON DUPLICATE KEY UPDATE vs REPLACE, ONLY_FULL_GROUP_BY, InnoDB clustered PK, DDL implicit commit, REPEATABLE READ default and gap locks, FULL OUTER JOIN emulation and set ops, case-insensitive collation and Oracle's ''=NULL, `/` vs DIV and date arithmetic. Each has MySQL, PostgreSQL and Oracle forms (MySQL sits under a `-- MySQL` comment in the PostgreSQL box) and a quiz keyed in `tests/codexMysql.test.ts`. They are not tied to missions, so they are read via study mode.
+- Verified: lint, typecheck, 599 tests, `build:pages` pass. Playwright on the static export at 1280x900 and iPhone 14: `/codex` shows the MySQL tab and entries, no console errors, no horizontal overflow.
+- CI and the Pages deploy were not checked: the GitHub Actions quota is used up until 2026-11-01.
+- Next: ROADMAP has no unchecked tasks left; add new ideas (e.g. MySQL playground dialect, more art polish) before the next run.

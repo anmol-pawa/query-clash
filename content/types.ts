@@ -61,7 +61,7 @@ export interface Chapter {
 export interface CodexEntry {
   id: string;
   title: string;
-  category: "Basics" | "Joins" | "Aggregation" | "Subqueries" | "DML" | "Transactions" | "DDL" | "Analytics" | "Hierarchies" | "Performance" | "Modern SQL";
+  category: "Basics" | "Joins" | "Aggregation" | "Subqueries" | "DML" | "Transactions" | "DDL" | "Analytics" | "Hierarchies" | "Performance" | "Modern SQL" | "MySQL";
   definition: string;
   syntax: Record<Dialect, string>;
   enterprise: string;
