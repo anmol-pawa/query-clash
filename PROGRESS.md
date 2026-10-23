@@ -471,3 +471,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Verified: lint, typecheck, 548 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: `/interview` renders, no console errors, no horizontal overflow.
 - CI and the Pages deploy were not checked: the GitHub Actions quota is used up until 2026-11-01.
 - Next: D3b (top up the other topics to 30+).
+
+## 2026-10-23 (01:4x UTC): D3b1 recovery questions
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-9qzfbm`, same commit as main). Split D3b into D3b1-3. Recovery went from 16 to 31 static questions: WAL rule, commit flush, FORCE/STEAL, prevLSN, recLSN, pageLSN redo skip, CLR undoNextLSN, ARIES phases and undo set, checkpoints, log record contents, crash during recovery, media failure. Every answer is keyed in `tests/interviewRecoveryMore.test.ts`.
+- Verified: lint, typecheck, 551 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: `/interview` renders, no console errors, no horizontal overflow.
+- CI and the Pages deploy were not checked: the GitHub Actions quota is used up until 2026-11-01.
+- Next: D3b2 (MVCC, ER, Query to 30+).

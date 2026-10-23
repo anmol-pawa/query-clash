@@ -96,5 +96,8 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
 - [x] D2. Refresh `docs/bosses.png` (README screenshot) so it shows all twelve bosses.
 - [ ] D3. More interview questions per topic (aim for 30+ each), each with a test for its answer.
   - [x] D3a. Fundamentals (`basics`): 12 → 34 questions (`content/interview/basicsMore.ts`, keyed in `tests/interviewBasicsMore.test.ts`).
-  - [ ] D3b. Recovery (16), MVCC (19), ER (20), Query (22), Transactions/Distributed (24), Storage (26), SQL (14): top each up to 30+.
+  - [ ] D3b. Top the remaining topics up to 30+ static questions.
+    - [x] D3b1. Recovery: 16 → 31 (`content/interview/recoveryMore.ts`, keyed in `tests/interviewRecoveryMore.test.ts`).
+    - [ ] D3b2. MVCC (19), ER (20), Query (22).
+    - [ ] D3b3. Transactions/Distributed (24), Storage (26), SQL (14).
 - [ ] D4. A third dialect note set (MySQL differences) as codex-only entries.
