@@ -21,6 +21,15 @@ export default function CodexPage() {
 
   useEffect(() => {
     document.documentElement.style.setProperty("--accent", ALL_COLOR);
+    // Deep link from an interview explanation: /codex?entry=<id> opens that entry in study mode.
+    const entry = new URLSearchParams(window.location.search).get("entry");
+    if (entry && CODEX.some((e) => e.id === entry)) {
+      requestAnimationFrame(() => {
+        setStudy(true);
+        setOpen(entry);
+        requestAnimationFrame(() => document.querySelector(`[data-entry="${entry}"]`)?.scrollIntoView({ block: "center" }));
+      });
+    }
   }, []);
 
   const list = useMemo(() => filterCodex(CODEX, cat, q), [cat, q]);

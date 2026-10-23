@@ -514,3 +514,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added D5 and D6. Added 8 interview SQL missions to `content/interview/sql.ts` (30 -> 38): managers with 2+ reports (self join), each customer's second order (ROW_NUMBER), products with 3+ distinct buyers, orders with 3+ lines, order status shares, top-2 products per category by revenue, first-to-last order span, departments above average budget. All run on both dialects and must agree; `tests/interviewSql.test.ts` recomputes the answers independently.
 - Verified: lint, typecheck, tests, `build`, `build:pages` pass (617 tests). Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: D6 (MySQL sandbox dialect, art polish, codex links in interview explanations).
+
+## 2026-10-23 - D6a: Codex links in interview explanations
+
+- Interview explanations now end with up to two "Codex ▸" links, derived from question tags (`TAG_TO_CODEX` in `content/interview/codexLinks.ts`), shown in the battle explanation box and in the mock-interview review. `/codex?entry=<id>` turns on study mode, opens that entry and scrolls to it. `tests/codexLinks.test.ts` checks every mapped id exists in the Codex and that the helper caps at two unique ids.
+- Verified: lint, typecheck, 620 tests, `build`, `build:pages` pass. Playwright on the static export at 1280x900 and iPhone 14: played the daily battle to an explanation with links, clicked through to the Codex entry (opened), no console errors, no horizontal overflow.
+- CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: D6 remainder (MySQL sandbox dialect, biome background art check).

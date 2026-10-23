@@ -11,6 +11,7 @@ import { WIN_TONE, LOSS_TONE, starRow } from "@/components/battle/endCard";
 import { DIFFICULTY_COLOR, DIFFICULTY_LABEL, KIND_LABEL } from "@/components/menu/interviewList";
 import { SpriteCanvas } from "@/components/sprites/SpriteCanvas";
 import { Button, Modal } from "@/components/ui/kit";
+import { CodexLinks } from "./CodexLinks";
 import { QUESTIONS, TOPICS } from "@/content/interview";
 import type { Question, Response, Topic } from "@/content/interview/types";
 import { setMusic, setVolume, sfx, startMusic, stopMusic } from "@/game/audio/synth";
@@ -247,6 +248,7 @@ export function InterviewBattle({ topic, deck, seed, onExit, onRematch, onVictor
                 )}
                 <p className="mt-1 text-sm leading-relaxed text-white/75">{q.explanation}</p>
                 {q.explainGraph && <PrecedenceGraph graph={q.explainGraph} />}
+                <CodexLinks q={q} />
                 {q.askedAt && <p className="mt-1.5 text-[11px] text-white/45">▸ {q.askedAt}</p>}
                 <div className="mt-2 hidden justify-end lg:flex">
                   <Button variant="primary" onClick={next} className="px-cursor tracking-[0.15em]">

@@ -2,6 +2,7 @@
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { DIFFICULTY_COLOR, DIFFICULTY_LABEL, KIND_LABEL } from "@/components/menu/interviewList";
 import { Button } from "@/components/ui/kit";
+import { CodexLinks } from "./CodexLinks";
 import { QUESTIONS, TOPICS } from "@/content/interview";
 import type { Question, Response } from "@/content/interview/types";
 import { sfx } from "@/game/audio/synth";
@@ -236,6 +237,7 @@ function Result({ deck, responses, card, onExit, onRetry }: { deck: Question[]; 
               </p>
               {!r && <p className="text-xs text-white/50">You skipped this one.</p>}
               <p className="mt-1 text-sm leading-relaxed text-white/75">{q.explanation}</p>
+              <CodexLinks q={q} />
             </details>
           );
         })}
