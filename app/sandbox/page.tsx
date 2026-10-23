@@ -79,6 +79,9 @@ export default function SandboxPage() {
         <h1 className="font-display text-lg font-bold tracking-[0.25em]">SANDBOX</h1>
         <span className="text-xs text-white/40">{status === "ready" ? "PostgreSQL 18 (WASM) ready" : status === "booting" ? "Booting database…" : "Engine error"}</span>
         <div className="ml-auto flex flex-wrap items-center gap-2">
+          <NavLink href="/codex?cat=MySQL" className="text-xs">
+            Coming from MySQL? ▸
+          </NavLink>
           <select
             className="rounded-lg border border-white/10 bg-black/40 px-2 py-1.5 text-xs"
             onChange={(e) => {

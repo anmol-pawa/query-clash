@@ -22,7 +22,16 @@ export default function CodexPage() {
   useEffect(() => {
     document.documentElement.style.setProperty("--accent", ALL_COLOR);
     // Deep link from an interview explanation: /codex?entry=<id> opens that entry in study mode.
-    const entry = new URLSearchParams(window.location.search).get("entry");
+    const params = new URLSearchParams(window.location.search);
+    // /codex?cat=MySQL preselects a category tab and turns on study mode so its entries are readable.
+    const catParam = params.get("cat");
+    if (catParam && CODEX.some((e) => e.category === catParam)) {
+      requestAnimationFrame(() => {
+        setCat(catParam);
+        setStudy(true);
+      });
+    }
+    const entry = params.get("entry");
     if (entry && CODEX.some((e) => e.id === entry)) {
       requestAnimationFrame(() => {
         setStudy(true);

@@ -104,7 +104,7 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
     - [x] D3b3c. SQL bank: 14 → 30 (new entries in `content/interview/sql.ts`; the SQL test checks both dialects, plus known answers).
 - [x] D4. A third dialect note set (MySQL differences) as codex-only entries (`content/codexMysql.ts`, keyed in `tests/codexMysql.test.ts`).
 - [x] D5. SQL interview bank 30 -> 38: managers with 2+ reports, second order per customer, products with 3+ distinct buyers, orders with 3+ lines, status shares, top-2 products per category, first-to-last order span, above-average budgets (both dialects agree, known answers recomputed in `tests/interviewSql.test.ts`).
-- [ ] D6. Ideas for the next run: MySQL as a sandbox dialect; more art polish (battle backgrounds per biome check in `/dev/sprites`).
+- [x] D6. Ideas for the next run: MySQL as a sandbox dialect; more art polish (battle backgrounds per biome check in `/dev/sprites`).
   - [x] D6a. "Codex ▸" links under interview explanations (battle and mock review) that open the matching entry in `/codex?entry=<id>` in study mode (`content/interview/codexLinks.ts`, `tests/codexLinks.test.ts`).
   - [x] D6b. Illustrated battle backdrops per biome (`game/render/scenery.ts`): sky bands, sun/moon, clouds/stars/ash, two ridge silhouettes, speckled ground and horizon props, one scene per chapter's boss; gallery in `/dev/sprites`, `tests/scenery.test.ts`.
-  - [ ] D6c. MySQL as a sandbox dialect (needs a MySQL-compatible engine or a translation layer; decide scope first).
+  - [x] D6c. Scope decided: no MySQL engine runs in-browser (no WASM build is bundled) and a translation layer would teach wrong behaviour, so MySQL stays codex-only. The sandbox links to the MySQL Codex tab via `/codex?cat=MySQL` (preselects the tab, study mode on).
