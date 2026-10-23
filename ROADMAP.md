@@ -112,6 +112,6 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
 ## E. Polish
 
 - [x] E1. Scroll the Codex tab bar to the selected tab (deep links like `/codex?cat=MySQL` on phones).
-- [ ] E2. Ideas: more interview topics, evolve/faint frame polish.
+- [x] E2. Ideas: more interview topics, evolve/faint frame polish.
   - [x] E2a. Concurrency 26 → 32 static questions (`content/interview/concurrencyMore.ts`, keyed in `tests/interviewConcurrencyMore.test.ts`).
-  - [ ] E2b. Evolve/faint frame polish.
+  - [x] E2b. Evolve/faint polish: orbiting pixel sparkles in the evolution scene, flash + blink + dust on faint.

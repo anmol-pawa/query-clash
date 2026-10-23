@@ -109,3 +109,19 @@ describe("evolvedByCapture (the victory card's evolution, read back from the sav
     expect(evolvedByCapture(migrated, boss(3), forms)).toBeNull();
   });
 });
+
+describe("evolution sparkles", () => {
+  it("are absent before the glow and stay deterministic and near the sprite", async () => {
+    const { evolutionSparkles } = await import("@/game/sprites/evolution");
+    expect(evolutionSparkles("before", 3, 64, 64)).toEqual([]);
+    for (const beat of ["glow", "morph", "reveal"] as const) {
+      const a = evolutionSparkles(beat, 5, 64, 64);
+      expect(a.length).toBeGreaterThanOrEqual(4);
+      expect(evolutionSparkles(beat, 5, 64, 64)).toEqual(a);
+      for (const s of a) {
+        expect(s.x).toBeGreaterThan(-40);
+        expect(s.x).toBeLessThan(104);
+      }
+    }
+  });
+});

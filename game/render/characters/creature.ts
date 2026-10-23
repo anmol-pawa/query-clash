@@ -113,7 +113,16 @@ export class Creature extends Character {
     const c = this.hitPoint();
     for (let i = 0; i < 3; i++) fx.burst(c.x + (Math.random() - 0.5) * 100, c.y + (Math.random() - 0.5) * 120, { count: 20, color: this.color, speed: 300, life: 1 });
     const faint = this.sprite.play("faint", false, true);
-    await tw.to(this.body, { y: 40 }, 0.9, ease.inCubic);
+    // white flash, then sink into the platform with a stepped (pixel) blink and dust puffs
+    this.sprite.flashAmount = 1;
+    tw.to(this.sprite, { flashAmount: 0 }, 0.3);
+    for (let i = 0; i < 10 * fx.scale; i++) fx.emit({ x: c.x + (Math.random() - 0.5) * 120, y: c.y + this.sprite.height * 0.4, vx: (Math.random() - 0.5) * 120, vy: -10 - Math.random() * 30, size: 10, sizeEnd: 28, life: 0.8, color: 0xb8aa8c, alpha: 0.5 });
+    const sink = tw.to(this.body, { y: 40 }, 0.9, ease.inCubic);
+    for (const a of [0.3, 1, 0.3, 1, 0.3]) {
+      this.body.alpha = a;
+      await tw.wait(0.08);
+    }
+    await sink;
     await faint;
     await tw.to(this.body, { alpha: 0 }, 0.3);
   }

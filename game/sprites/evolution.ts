@@ -35,3 +35,29 @@ export function evolutionTimeline(from: SpriteDef, to: SpriteDef): EvolutionStep
   for (let i = b.length - 1; i >= 0; i--) steps.push({ def: to, frame: b[i], ms: i === 0 ? 400 : 160, beat: "reveal" });
   return steps;
 }
+
+/** A sparkle pixel-star centre in sprite pixels, with its arm length (1 = plus sign, 2 = long arms). */
+export interface Sparkle {
+  x: number;
+  y: number;
+  arm: 1 | 2;
+}
+
+/**
+ * Sparkles orbiting the creature during the evolution scene. Pure and
+ * deterministic in (beat, tick, size): "before" has none, "glow" and "morph"
+ * circle the sprite faster as the morph speeds up, "reveal" bursts outwards.
+ */
+export function evolutionSparkles(beat: EvolutionStep["beat"], tick: number, w: number, h: number): Sparkle[] {
+  if (beat === "before") return [];
+  const cx = w / 2;
+  const cy = h * 0.5;
+  const out: Sparkle[] = [];
+  const n = beat === "glow" ? 4 : 6;
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + tick * (beat === "morph" ? 0.5 : 0.25);
+    const r = beat === "reveal" ? w * (0.3 + 0.08 * tick) : w * (0.42 + 0.05 * Math.sin(tick * 0.7 + i));
+    out.push({ x: Math.round(cx + Math.cos(a) * r), y: Math.round(cy + Math.sin(a) * r * 0.8), arm: (i + tick) % 2 === 0 ? 2 : 1 });
+  }
+  return out;
+}

@@ -545,3 +545,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Added 6 concurrency questions (`content/interview/concurrencyMore.ts`): rigorous vs strict 2PL, update locks and conversion deadlock, timestamp-ordering late read, victims for a ring deadlock, row locks vs phantoms, SKIP LOCKED. Answers keyed in `tests/interviewConcurrencyMore.test.ts`.
 - Verified: lint, typecheck, 624 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: E2b (evolve/faint frame polish).
+
+## 2026-10-23 - E2b: evolve/faint polish
+
+- Evolution scene: deterministic orbiting pixel sparkles (`evolutionSparkles`, amber plus-stars drawn on the canvas) through the glow, morph and reveal beats; the scene is also previewed on `/dev/sprites`. Faint (`Creature.ko`): white flash, stepped alpha blink, sink into the platform with dust puffs, then the existing fade.
+- Verified: lint, typecheck, 625 tests, `build`, `build:pages` pass. Playwright on the static export at 1280x900 and iPhone 14: evolution preview shows sparkles on the white silhouette, no console errors, no horizontal overflow. The faint tweak is Pixi-only and was not screenshotted (typecheck/tests only). CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (more interview topics, screenshot-check the faint sequence in a battle).

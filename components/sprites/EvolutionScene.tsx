@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { sfx } from "@/game/audio/synth";
-import { evolutionTimeline } from "@/game/sprites/evolution";
+import { evolutionSparkles, evolutionTimeline } from "@/game/sprites/evolution";
 import { frameToRGBA } from "@/game/sprites/pixel";
 import type { SpriteDef } from "@/game/sprites/pixel";
 
@@ -21,10 +21,18 @@ export function EvolutionScene({ from, to, scale = 2, reducedMotion }: { from: S
     const tmp = document.createElement("canvas");
     tmp.width = from.w;
     tmp.height = from.h;
-    const draw = (def: SpriteDef, frame: readonly string[]) => {
+    const draw = (def: SpriteDef, frame: readonly string[], beat?: "before" | "glow" | "morph" | "reveal", tick = 0) => {
       tmp.getContext("2d")!.putImageData(new ImageData(frameToRGBA(def, frame) as Uint8ClampedArray<ArrayBuffer>, def.w, def.h), 0, 0);
       g.clearRect(0, 0, from.w * scale, from.h * scale);
       g.drawImage(tmp, 0, 0, from.w * scale, from.h * scale);
+      if (!beat) return;
+      for (const s of evolutionSparkles(beat, tick, from.w, from.h)) {
+        g.fillStyle = "#f59e0b";
+        g.fillRect((s.x - s.arm) * scale, s.y * scale, (s.arm * 2 + 1) * scale, scale);
+        g.fillRect(s.x * scale, (s.y - s.arm) * scale, scale, (s.arm * 2 + 1) * scale);
+        g.fillStyle = "#b45309";
+        g.fillRect(s.x * scale, s.y * scale, scale, scale);
+      }
     };
     let timer: ReturnType<typeof setTimeout>;
     const idle = (i: number) => {
@@ -45,7 +53,7 @@ export function EvolutionScene({ from, to, scale = 2, reducedMotion }: { from: S
       }
       const st = steps[i];
       if (st.beat === "glow" && steps[i - 1]?.beat === "before") sfx.evolving();
-      draw(st.def, st.frame);
+      draw(st.def, st.frame, st.beat, i);
       timer = setTimeout(() => play(i + 1), st.ms);
     };
     play(0);

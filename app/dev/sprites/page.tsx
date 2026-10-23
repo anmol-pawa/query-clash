@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Button, NavLink } from "@/components/ui/kit";
+import { EvolutionScene } from "@/components/sprites/EvolutionScene";
 import { SPRITES } from "@/game/sprites";
+import { starterSprite } from "@/game/sprites/roster";
 import type { SpriteDef } from "@/game/sprites/pixel";
 import { frameCanvas } from "@/game/sprites/texture";
 import { FX_KINDS, fxSprite } from "@/game/sprites/effects";
@@ -221,6 +223,10 @@ export default function SpriteViewer() {
             </figure>
           ))}
         </div>
+      </section>
+      <section className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4" data-testid="evolution-preview">
+        <h2 className="font-display text-lg font-bold tracking-widest">EVOLUTION SCENE</h2>
+        <EvolutionScene from={starterSprite("front", 1)} to={starterSprite("front", 2)} />
       </section>
       {SPRITES.map((def) => (
         <section
