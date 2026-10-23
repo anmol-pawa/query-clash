@@ -83,9 +83,11 @@ function LazyPixiPreview({ def }: { def: SpriteDef }) {
 /** Live Pixi preview through PixelSprite, the same path the battle stage uses. */
 function PixiPreview({ def }: { def: SpriteDef }) {
   const host = useRef<HTMLDivElement>(null);
-  const api = useRef<{ play: (anim: string) => void; hurt: () => void } | null>(
-    null,
-  );
+  const api = useRef<{
+    play: (anim: string) => void;
+    hurt: () => void;
+    faint: () => void;
+  } | null>(null);
   useEffect(() => {
     let dead = false;
     let cleanup = () => {};
@@ -112,9 +114,21 @@ function PixiPreview({ def }: { def: SpriteDef }) {
       s.position.set(160, 220);
       app.stage.addChild(s);
       let flash = 0;
+      let faintT = -1; // seconds into the faint sequence, -1 when idle
       app.ticker.add((tk) => {
         const dt = tk.deltaMS / 1000;
         s.update(dt);
+        if (faintT >= 0) {
+          // mirrors Creature.ko: flash, stepped blink, sink, fade
+          faintT += dt;
+          s.flashAmount = faintT < 0.3 ? 1 - faintT / 0.3 : 0;
+          s.alpha = faintT < 0.4 ? [0.3, 1, 0.3, 1, 0.3][Math.floor(faintT / 0.08)] : Math.max(0, 1 - (faintT - 0.9) / 0.3);
+          s.y = 220 + 40 * Math.min(1, faintT / 0.9) ** 3;
+          if (faintT > 1.5) faintT = -1;
+          return;
+        }
+        s.alpha = 1;
+        s.y = 220;
         flash = Math.max(0, flash - dt * 3);
         s.flashAmount = flash > 0 ? (Math.floor(flash * 12) % 2 ? 1 : 0) : 0;
         s.x = 160 + (flash > 0 ? Math.sin(flash * 40) * 4 : 0);
@@ -122,6 +136,10 @@ function PixiPreview({ def }: { def: SpriteDef }) {
       api.current = {
         play: (anim) => void s.play(anim),
         hurt: () => (flash = 1),
+        faint: () => {
+          faintT = 0;
+          void s.play("faint", false, true);
+        },
       };
       cleanup = () => app.destroy(true, { children: true });
     })().catch((e) => console.error(e));
@@ -144,6 +162,11 @@ function PixiPreview({ def }: { def: SpriteDef }) {
         <Button size="sm" onClick={() => api.current?.hurt()}>
           Hurt
         </Button>
+        {def.anims.faint && (
+          <Button size="sm" onClick={() => api.current?.faint()}>
+            Faint
+          </Button>
+        )}
         {def.anims.evolve && (
           <Button size="sm" onClick={() => api.current?.play("evolve")}>
             Evolve

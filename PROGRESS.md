@@ -551,3 +551,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Evolution scene: deterministic orbiting pixel sparkles (`evolutionSparkles`, amber plus-stars drawn on the canvas) through the glow, morph and reveal beats; the scene is also previewed on `/dev/sprites`. Faint (`Creature.ko`): white flash, stepped alpha blink, sink into the platform with dust puffs, then the existing fade.
 - Verified: lint, typecheck, 625 tests, `build`, `build:pages` pass. Playwright on the static export at 1280x900 and iPhone 14: evolution preview shows sparkles on the white silhouette, no console errors, no horizontal overflow. The faint tweak is Pixi-only and was not screenshotted (typecheck/tests only). CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (more interview topics, screenshot-check the faint sequence in a battle).
+
+## 2026-10-23 - E3: faint preview in the sprite viewer
+
+- ROADMAP had no unchecked tasks, so added E3. `/dev/sprites` creature previews get a Faint button that plays the faint frames with the same flash, stepped blink, sink and fade as `Creature.ko`, so the sequence can be reviewed without a battle.
+- Verified: lint, typecheck, tests, `build`, `build:pages` pass. Playwright on the static export at 1280x900 and iPhone 14: Faint plays the faint frame on the sprite, no console errors, no horizontal overflow. Frame timing under software GL was too coarse to confirm each blink step by eye. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (more interview topics, in-battle faint screenshot).
