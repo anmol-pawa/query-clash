@@ -557,3 +557,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added E3. `/dev/sprites` creature previews get a Faint button that plays the faint frames with the same flash, stepped blink, sink and fade as `Creature.ko`, so the sequence can be reviewed without a battle.
 - Verified: lint, typecheck, tests, `build`, `build:pages` pass. Playwright on the static export at 1280x900 and iPhone 14: Faint plays the faint frame on the sprite, no console errors, no horizontal overflow. Frame timing under software GL was too coarse to confirm each blink step by eye. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (more interview topics, in-battle faint screenshot).
+
+## 2026-10-23 - F1: more normalization questions
+
+- ROADMAP had no unchecked tasks (MySQL sandbox scope was already settled as codex-only), so added F1: 6 normalization questions (chain FD highest NF, 3-key cycle count, all-prime implies 3NF, minimal cover size, lossy binary split, 3NF-but-not-BCNF). Answers are keyed and recomputed with the FD solvers in `tests/interviewNormalizationMore.test.ts`.
+- Verified: lint, typecheck, tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, other topics to 40+).

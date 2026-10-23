@@ -15,6 +15,7 @@ import { SQL } from "./sql";
 import { STORAGE, STORAGE_GENERATORS } from "./storage";
 import { STORAGE_MORE } from "./storageMore";
 import { NORMALIZATION, NORMALIZATION_GENERATORS } from "./normalization";
+import { NORMALIZATION_MORE } from "./normalizationMore";
 import { TRANSACTIONS, TRANSACTIONS_GENERATORS } from "./transactions";
 import { TRANSACTIONS_MORE } from "./transactionsMore";
 import type { Generator, Question, Topic, TopicId } from "./types";
@@ -35,6 +36,6 @@ export const TOPICS: Topic[] = [
   { id: "sql", foe: "subzero", title: "Interview SQL", blurb: "Nth highest salary, gaps and islands, top-N per group…", color: "#4ade80" },
 ];
 
-export const QUESTIONS: Question[] = [...BASICS, ...ER, ...ER_MORE, ...NORMALIZATION, ...TRANSACTIONS, ...TRANSACTIONS_MORE, ...CONCURRENCY, ...CONCURRENCY_MORE, ...RECOVERY, ...RECOVERY_MORE, ...MVCC, ...MVCC_MORE, ...STORAGE, ...STORAGE_MORE, ...QUERY, ...QUERY_MORE, ...DISTRIBUTED, ...DISTRIBUTED_MORE, ...SQL];
+export const QUESTIONS: Question[] = [...BASICS, ...ER, ...ER_MORE, ...NORMALIZATION, ...NORMALIZATION_MORE, ...TRANSACTIONS, ...TRANSACTIONS_MORE, ...CONCURRENCY, ...CONCURRENCY_MORE, ...RECOVERY, ...RECOVERY_MORE, ...MVCC, ...MVCC_MORE, ...STORAGE, ...STORAGE_MORE, ...QUERY, ...QUERY_MORE, ...DISTRIBUTED, ...DISTRIBUTED_MORE, ...SQL];
 export const GENERATORS: Generator[] = [...BASICS_GENERATORS, ...ER_GENERATORS, ...NORMALIZATION_GENERATORS, ...TRANSACTIONS_GENERATORS, ...CONCURRENCY_GENERATORS, ...RECOVERY_GENERATORS, ...MVCC_GENERATORS, ...STORAGE_GENERATORS, ...QUERY_GENERATORS, ...DISTRIBUTED_GENERATORS];
 export type { TopicId };
