@@ -79,3 +79,41 @@ describe("interview SQL bank", () => {
     expect(grade(q, { kind: "mcq", choice: 0 })).toBe(false);
   });
 });
+
+describe("interview SQL bank, D5 additions", () => {
+  it("has at least 38 missions", () => {
+    expect(SQL_MISSIONS.length).toBeGreaterThanOrEqual(38);
+  });
+
+  it("known answers recomputed independently", async () => {
+    const get = async (id: string) => (await expectedFor(db, SQL_MISSIONS.find((m) => m.id === id)!, "postgres"))!.rows;
+    const q = async (sql: string) => (await db.query<Record<string, string | number>>(sql)).rows;
+    // managers with >= 2 reports
+    const mgr = await q("SELECT manager_id AS id, COUNT(*)::int AS n FROM employees WHERE manager_id IS NOT NULL GROUP BY manager_id HAVING COUNT(*) >= 2");
+    expect((await get("iq-managers-reports")).length).toBe(mgr.length);
+    // order status shares add up to 100 (within rounding)
+    expect(Math.abs((await get("iq-status-share")).reduce((a, r) => a + Number(r[1]), 0) - 100)).toBeLessThan(0.5);
+    // second orders: one per customer with >= 2 orders
+    const multi = await q("SELECT customer_id FROM orders GROUP BY customer_id HAVING COUNT(*) >= 2");
+    expect((await get("iq-second-order")).length).toBe(multi.length);
+    expect((await get("iq-customer-lifespan")).length).toBe(multi.length);
+    // big orders and popular products
+    const big = await q("SELECT order_id FROM (SELECT order_id, COUNT(*) c FROM order_items GROUP BY order_id) t WHERE c >= 3");
+    expect((await get("iq-big-orders")).length).toBe(big.length);
+    for (const r of await get("iq-popular-products")) {
+      const c = await q(`SELECT COUNT(DISTINCT o.customer_id)::int AS n FROM order_items oi JOIN orders o USING (order_id) WHERE oi.product_id = ${Number(r[0])}`);
+      expect(Number(c[0].n)).toBe(Number(r[1]));
+      expect(Number(r[1])).toBeGreaterThanOrEqual(3);
+    }
+    // at most two products per category, and the first row of each category is its best seller
+    const top = await get("iq-top2-per-category");
+    const per = new Map<number, number>();
+    for (const r of top) per.set(Number(r[0]), (per.get(Number(r[0])) ?? 0) + 1);
+    expect(Math.max(...per.values())).toBeLessThanOrEqual(2);
+    const best = await q("SELECT MAX(rev)::text AS m FROM (SELECT p.category_id, p.product_id, SUM(oi.quantity * oi.unit_price) AS rev FROM order_items oi JOIN products p USING (product_id) WHERE p.category_id IS NOT NULL GROUP BY 1, 2) t");
+    expect(Math.max(...top.map((r) => Number(r[2])))).toBeCloseTo(Number(best[0].m), 2);
+    // above-average budgets
+    const avg = await q("SELECT dept_name FROM departments WHERE budget > (SELECT AVG(budget) FROM departments)");
+    expect((await get("iq-dept-above-budget-avg")).length).toBe(avg.length);
+  });
+});

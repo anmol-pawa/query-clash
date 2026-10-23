@@ -103,3 +103,5 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
     - [x] D3b3b. Storage 26 → 36 (`content/interview/storageMore.ts`, keyed in `tests/interviewStorageMore.test.ts`).
     - [x] D3b3c. SQL bank: 14 → 30 (new entries in `content/interview/sql.ts`; the SQL test checks both dialects, plus known answers).
 - [x] D4. A third dialect note set (MySQL differences) as codex-only entries (`content/codexMysql.ts`, keyed in `tests/codexMysql.test.ts`).
+- [x] D5. SQL interview bank 30 -> 38: managers with 2+ reports, second order per customer, products with 3+ distinct buyers, orders with 3+ lines, status shares, top-2 products per category, first-to-last order span, above-average budgets (both dialects agree, known answers recomputed in `tests/interviewSql.test.ts`).
+- [ ] D6. Ideas for the next run: MySQL as a sandbox dialect; more art polish (battle backgrounds per biome check in `/dev/sprites`); per-question "related codex entry" links in interview explanations.

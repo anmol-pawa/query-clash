@@ -508,3 +508,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Verified: lint, typecheck, 599 tests, `build:pages` pass. Playwright on the static export at 1280x900 and iPhone 14: `/codex` shows the MySQL tab and entries, no console errors, no horizontal overflow.
 - CI and the Pages deploy were not checked: the GitHub Actions quota is used up until 2026-11-01.
 - Next: ROADMAP has no unchecked tasks left; add new ideas (e.g. MySQL playground dialect, more art polish) before the next run.
+
+## 2026-10-23 - D5: SQL bank to 38
+
+- ROADMAP had no unchecked tasks, so added D5 and D6. Added 8 interview SQL missions to `content/interview/sql.ts` (30 -> 38): managers with 2+ reports (self join), each customer's second order (ROW_NUMBER), products with 3+ distinct buyers, orders with 3+ lines, order status shares, top-2 products per category by revenue, first-to-last order span, departments above average budget. All run on both dialects and must agree; `tests/interviewSql.test.ts` recomputes the answers independently.
+- Verified: lint, typecheck, tests, `build`, `build:pages` pass (617 tests). Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: D6 (MySQL sandbox dialect, art polish, codex links in interview explanations).
