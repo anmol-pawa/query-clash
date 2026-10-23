@@ -471,3 +471,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Verified: lint, typecheck, 548 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: `/interview` renders, no console errors, no horizontal overflow.
 - CI and the Pages deploy were not checked: the GitHub Actions quota is used up until 2026-11-01.
 - Next: D3b (top up the other topics to 30+).
+
+## 2026-10-23 (00:4x UTC): D3b-1 recovery and MVCC questions
+- Took the free lock (main was green). No `add_repo` tool; worked in the existing clone (branch `claude/focused-cerf-wo9uqq`, same commit as main). Split D3b into D3b-1 (this) and D3b-2.
+- Recovery 16 -> 31 (WAL order, steal/force combinations, log recovery values, ARIES tables/redo start/redo skip/CLRs, group commit, physiological logging, media failure, Oracle redo vs undo, PostgreSQL full-page writes). MVCC 19 -> 31 (isolation defaults, write skew, first-committer-wins, tuple versions, HOT, index-only scans, SCN, bloat, SKIP LOCKED, lost update). Every answer is keyed in `tests/interviewRecoveryMvccMore.test.ts`, which also recomputes the log-recovery values by simulation.
+- Verified: lint, typecheck, 552 tests, build:pages pass. Playwright on the static export at 1280x900 and iPhone 14: `/interview` renders (283 questions), no console errors, no horizontal overflow.
+- CI and the Pages deploy were not checked: the GitHub Actions quota is used up until 2026-11-01.
+- Next: D3b-2 (ER, Query, Transactions, Distributed, Storage, SQL to 30+).

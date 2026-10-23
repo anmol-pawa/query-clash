@@ -1,4 +1,5 @@
 import type { Generator, Question } from "./types";
+import { RECOVERY_MORE } from "./recoveryMore";
 import {
   ariesAnalysis,
   ariesTables,
@@ -219,6 +220,7 @@ export const RECOVERY: Question[] = [
     difficulty: 2,
     tags: ["shadow paging"],
   },
+  ...RECOVERY_MORE,
 ];
 
 const ITEMS = ["A", "B", "C", "D"];

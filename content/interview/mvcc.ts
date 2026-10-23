@@ -1,4 +1,5 @@
 import type { Generator, Question } from "./types";
+import { MVCC_MORE } from "./mvccMore";
 import type { Relation } from "@/lib/dbms/algebra";
 import {
   firstCommitterWins,
@@ -309,6 +310,7 @@ export const MVCC: Question[] = [
     difficulty: 3,
     tags: ["postgresql", "xid wraparound", "vacuum"],
   },
+  ...MVCC_MORE,
 ];
 
 const STATE_LABEL: Record<XidState, string> = { committed: "committed", aborted: "aborted", running: "still running" };
