@@ -489,3 +489,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Added 9 transactions questions (ACID corners, isolation per engine incl. Oracle, conflicts, autocommit, PG aborted transactions) and 8 distributed ones (CAP, quorum overlap, Raft majority, 2PC in-doubt, vnodes, hash vs range, AP behaviour), each keyed in `tests/interviewTxDistMore.test.ts`. Static counts: tx 33, dst 32.
 - Verified: lint, typecheck, 560 tests, `build`, `build:pages` all pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: D3b3b (Storage 26 → 30+, SQL bank 14 → 30).
+
+## 2026-10-23 — D3b3b: more Storage questions
+
+- Added 10 storage questions (B+ tree capacity and lookup cost, linked leaves, PK vs FK indexes, LIKE prefix, random-key splits, fill factor, rows-per-page maths, Oracle IOT), each keyed in `tests/interviewStorageMore.test.ts`. Static storage count 26 → 36. Split the SQL bank (14 → 30) into D3b3c.
+- Verified: lint, typecheck, 563 tests, `build`, `build:pages` all pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: D3b3c (SQL bank to 30), then D4.
