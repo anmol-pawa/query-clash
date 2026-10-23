@@ -47,6 +47,31 @@ describe("interview SQL bank", () => {
     expect(pivot).toBe(orders.rows[0].n);
   });
 
+  it("known answers for the extended bank", async () => {
+    const get = async (id: string) => (await expectedFor(db, SQL_MISSIONS.find((m) => m.id === id)!, "postgres"))!.rows;
+    const n = async (sql: string) => Number((await db.query<{ n: number }>(sql)).rows[0].n);
+    // org tree levels cover every employee exactly once
+    const levels = (await get("iq-org-depth")).reduce((a, r) => a + Number(r[1]), 0);
+    expect(levels).toBe(await n("SELECT COUNT(*)::int AS n FROM employees"));
+    // headcount includes the empty department and sums to the employees that have a department
+    const hc = await get("iq-dept-headcount");
+    expect(hc.some((r) => Number(r[1]) === 0)).toBe(true);
+    expect(hc.reduce((a, r) => a + Number(r[1]), 0)).toBe(await n("SELECT COUNT(*)::int AS n FROM employees WHERE dept_id IS NOT NULL"));
+    // payroll shares add up to 100 (within rounding)
+    expect(Math.abs((await get("iq-payroll-share")).reduce((a, r) => a + Number(r[1]), 0) - 100)).toBeLessThan(0.5);
+    // median agrees with a hand computation on the sorted salaries
+    const sal = (await db.query<{ s: string }>("SELECT salary::text AS s FROM employees ORDER BY salary")).rows.map((r) => Number(r.s));
+    const mid = sal.length % 2 ? sal[(sal.length - 1) / 2] : (sal[sal.length / 2 - 1] + sal[sal.length / 2]) / 2;
+    expect(Number((await get("iq-median-salary"))[0][0])).toBeCloseTo(mid, 2);
+    // unsold products and idle accounts match NOT IN over non-null keys
+    expect((await get("iq-unsold-products")).length).toBe(await n("SELECT COUNT(*)::int AS n FROM products WHERE product_id NOT IN (SELECT product_id FROM order_items WHERE product_id IS NOT NULL)"));
+    expect((await get("iq-idle-accounts")).length).toBe(await n("SELECT COUNT(*)::int AS n FROM accounts WHERE account_id NOT IN (SELECT account_id FROM transactions WHERE account_id IS NOT NULL)"));
+    // total revenue by category equals revenue of order lines whose product has a category
+    const cat = (await get("iq-category-revenue")).reduce((a, r) => a + Number(r[1]), 0);
+    const tot = Number((await db.query<{ t: string }>("SELECT SUM(oi.quantity * oi.unit_price)::text AS t FROM order_items oi JOIN products p ON p.product_id = oi.product_id WHERE p.category_id IS NOT NULL")).rows[0].t);
+    expect(cat).toBeCloseTo(tot, 2);
+  });
+
   it("grade accepts only a correct sql verdict", () => {
     const q = sqlQs[0];
     expect(grade(q, correctResponse(q))).toBe(true);

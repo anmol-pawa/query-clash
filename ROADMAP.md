@@ -94,12 +94,12 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
 
 - [x] D1. Spell-deck keyboard shortcuts in the campaign battle (1-4 to pick a spell), the item C3b skipped.
 - [x] D2. Refresh `docs/bosses.png` (README screenshot) so it shows all twelve bosses.
-- [ ] D3. More interview questions per topic (aim for 30+ each), each with a test for its answer.
+- [x] D3. More interview questions per topic (aim for 30+ each), each with a test for its answer.
   - [x] D3a. Fundamentals (`basics`): 12 → 34 questions (`content/interview/basicsMore.ts`, keyed in `tests/interviewBasicsMore.test.ts`).
-  - [ ] D3b. Top the remaining topics up to 30+ static questions.
+  - [x] D3b. Top the remaining topics up to 30+ static questions.
     - [x] D3b1. Recovery: 16 → 31 (`content/interview/recoveryMore.ts`, keyed in `tests/interviewRecoveryMore.test.ts`).
     - [x] D3b2. MVCC 19 → 31, ER 20 → 32, Query 22 → 33 (`content/interview/{mvccMore,erMore,queryMore}.ts`, keyed in `tests/interviewMoreTopics.test.ts`).
     - [x] D3b3a. Transactions 24 → 33, Distributed 24 → 32 (`content/interview/{transactionsMore,distributedMore}.ts`, keyed in `tests/interviewTxDistMore.test.ts`).
     - [x] D3b3b. Storage 26 → 36 (`content/interview/storageMore.ts`, keyed in `tests/interviewStorageMore.test.ts`).
-    - [ ] D3b3c. SQL bank: 14 → 30 (new entries in `content/interview/sql.ts`; the SQL test checks both dialects).
+    - [x] D3b3c. SQL bank: 14 → 30 (new entries in `content/interview/sql.ts`; the SQL test checks both dialects, plus known answers).
 - [ ] D4. A third dialect note set (MySQL differences) as codex-only entries.

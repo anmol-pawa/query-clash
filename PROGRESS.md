@@ -495,3 +495,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Added 10 storage questions (B+ tree capacity and lookup cost, linked leaves, PK vs FK indexes, LIKE prefix, random-key splits, fill factor, rows-per-page maths, Oracle IOT), each keyed in `tests/interviewStorageMore.test.ts`. Static storage count 26 → 36. Split the SQL bank (14 → 30) into D3b3c.
 - Verified: lint, typecheck, 563 tests, `build`, `build:pages` all pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: D3b3c (SQL bank to 30), then D4.
+
+## 2026-10-23 — D3b3c: SQL bank to 30
+
+- Added 16 SQL interview missions to `content/interview/sql.ts` (14 → 30): revenue per customer, unsold products, headcount with empty departments (COUNT(col) vs COUNT(*)), median via PERCENTILE_CONT, repeat customers, top earner per department with ties, shipping delay, NULL-safe total pay, hires per year, revenue by category, same-city pairs (self join), 3-row moving average, recursive org-level headcount (Oracle variant without RECURSIVE), DENSE_RANK over an aggregate, payroll share, idle accounts. Every mission runs on both dialects and must agree; the test file also recomputes org depth, headcount, payroll shares, median, anti-joins and category revenue independently. This completes D3.
+- Verified: lint, typecheck, 596 tests, `build`, `build:pages` all pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: D4 (MySQL differences as codex-only entries).
