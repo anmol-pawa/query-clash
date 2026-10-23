@@ -119,3 +119,4 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
 - [x] F1. Normalization: 6 more static questions (`content/interview/normalizationMore.ts`, keyed and recomputed with the FD solvers in `tests/interviewNormalizationMore.test.ts`).
 - [x] F2. Distributed: 6 more static questions (`content/interview/distributedMore2.ts`, keyed and recomputed in `tests/interviewDistributedMore2.test.ts`).
 - [x] G1. Cost-estimate questions (`content/interview/costsMore.ts`): B+ tree levels, block nested-loop both orders, external sort passes, Grace hash join, hash index vs range; keyed and recomputed in `tests/interviewCostsMore.test.ts`.
+- [x] H1. Schedule counting and locking details (`content/interview/schedulesMore.ts`): interleavings, serial orders, rigorous 2PL, upgrade deadlock, recoverable commit order, view vs conflict serializability; keyed in `tests/interviewSchedulesMore.test.ts`.
