@@ -563,3 +563,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks (MySQL sandbox scope was already settled as codex-only), so added F1: 6 normalization questions (chain FD highest NF, 3-key cycle count, all-prime implies 3NF, minimal cover size, lossy binary split, 3NF-but-not-BCNF). Answers are keyed and recomputed with the FD solvers in `tests/interviewNormalizationMore.test.ts`.
 - Verified: lint, typecheck, tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, other topics to 40+).
+
+## 2026-10-23 - F2: more distributed questions
+
+- ROADMAP had no unchecked tasks, so added F2: 6 distributed questions (`content/interview/distributedMore2.ts`): minimum read quorum, 2PC uncertain state, consistent-hash node add, mod-N resharding 4 to 5 shards (80% move), CP behaviour in a partition, async-replication loss on failover. Answers keyed and recomputed in `tests/interviewDistributedMore2.test.ts`.
+- Verified: lint, typecheck, 630 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, other topics to 40+).
