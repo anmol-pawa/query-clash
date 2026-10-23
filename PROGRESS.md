@@ -581,3 +581,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added H1: 6 concurrency questions (`content/interview/schedulesMore.ts`): interleavings of 3+2 operations (C(5,2)=10), 5! serial schedules, rigorous vs strict 2PL, S→X upgrade deadlock, recoverable commit order, view vs conflict serializability with blind writes. Keyed and brute-force recomputed in `tests/interviewSchedulesMore.test.ts`.
 - Verified: lint, typecheck, 634 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, other topics to 40+).
+
+## 2026-10-23 - I1: isolation and recovery questions
+
+- ROADMAP had no unchecked tasks, so added I1: 6 questions (`content/interview/isolationMore.ts`): READ COMMITTED anomalies, phantoms at REPEATABLE READ vs SERIALIZABLE, phenomena at READ UNCOMMITTED, undo set from a log, WAL flush rule, NO-FORCE. Keyed and recomputed in `tests/interviewIsolationMore.test.ts`.
+- Verified: lint, typecheck, tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, other topics to 40+).
