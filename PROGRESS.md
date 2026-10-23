@@ -508,3 +508,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Verified: lint, typecheck, 599 tests, `build:pages` pass. Playwright on the static export at 1280x900 and iPhone 14: `/codex` shows the MySQL tab and entries, no console errors, no horizontal overflow.
 - CI and the Pages deploy were not checked: the GitHub Actions quota is used up until 2026-11-01.
 - Next: ROADMAP has no unchecked tasks left; add new ideas (e.g. MySQL playground dialect, more art polish) before the next run.
+
+## 2026-10-23 — D5: Concurrency and Normalization questions to 30+
+
+- ROADMAP had no unchecked tasks, so added D5. 5 concurrency questions (timestamp write rule, S→X upgrade deadlock, phantoms vs row locks, rigorous 2PL, cycle breaking) and 4 normalization ones (superkey counting, augmentation, an invalid inference rule, FD ⇒ MVD). Static counts: cc 32, nf 33. Keyed in `tests/interviewCcNfMore.test.ts`, which also recomputes the superkey count, the rejected inference and the deadlock cycle with the repo's `fd` and `findCycle` code.
+- Worked on the designated branch `claude/focused-cerf-w9m770` (same commit as main at the start), not main.
+- Verified: lint, typecheck, tests, `build`, `build:pages` (603 tests pass). Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (MySQL playground dialect, more art polish) before the next run.

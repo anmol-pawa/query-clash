@@ -1,0 +1,57 @@
+import type { Question } from "./types";
+
+/** More concurrency-control questions: timestamp write rule, upgrade deadlocks, phantoms, rigorous 2PL, cycle breaking. Part of the "concurrency" topic. */
+export const CONCURRENCY_MORE: Question[] = [
+  {
+    id: "cc-to-write",
+    topic: "concurrency",
+    kind: "mcq",
+    prompt: "Basic timestamp ordering: T (TS = 20) wants to write Q, and R-TS(Q) = 25. What happens?",
+    choices: ["T is rolled back and restarted with a new timestamp", "The write goes ahead and W-TS(Q) becomes 20", "T waits until the reader commits", "The write is ignored (Thomas' write rule)"],
+    answer: 0,
+    explanation: "A younger transaction (TS 25) has already read Q, so a write by the older T would change what that reader should have seen. Since TS(T) < R-TS(Q), T is rolled back. Thomas' write rule only skips a write when TS(T) < W-TS(Q) and the read check passes.",
+    difficulty: 2,
+    tags: ["timestamp ordering", "write rule"],
+  },
+  {
+    id: "cc-upgrade-deadlock",
+    topic: "concurrency",
+    kind: "mcq",
+    prompt: "T1 and T2 both hold a shared lock on row Q. Each now asks to upgrade its lock to exclusive. What happens?",
+    choices: ["Deadlock: each waits for the other to release its S lock", "T1 upgrades first, then T2 follows immediately", "Both upgrades succeed because S locks are compatible", "The lock manager silently downgrades both requests"],
+    answer: 0,
+    explanation: "An X lock is incompatible with the other transaction's S lock, so each upgrade waits for the other to let go, and neither will while 2PL forbids shrinking. This is a classic upgrade deadlock. Taking an update (U) or SELECT … FOR UPDATE lock up front avoids it.",
+    difficulty: 2,
+    tags: ["deadlock", "lock upgrade"],
+  },
+  {
+    id: "cc-phantom-rows",
+    topic: "concurrency",
+    kind: "truefalse",
+    prompt: "Row-level two-phase locking on the rows a query actually read is not enough to prevent phantoms.",
+    answer: true,
+    explanation: "A phantom is a new row that matches the predicate, and no one can lock a row that does not exist yet. Serializable isolation needs index-range (next-key) locks or predicate locks, or an optimistic check such as PostgreSQL's SSI.",
+    difficulty: 2,
+    tags: ["phantom", "predicate locks", "serializable"],
+  },
+  {
+    id: "cc-rigorous",
+    topic: "concurrency",
+    kind: "truefalse",
+    prompt: "Under rigorous 2PL, which holds all locks (shared and exclusive) until commit, transactions serialize in the order they commit.",
+    answer: true,
+    explanation: "Strict 2PL holds only the exclusive locks until the end; rigorous 2PL holds the shared ones too. With every lock held until commit, the lock point coincides with the commit point, so the commit order is a valid serial order.",
+    difficulty: 3,
+    tags: ["rigorous 2PL", "commit order"],
+  },
+  {
+    id: "cc-break-cycles",
+    topic: "concurrency",
+    kind: "numeric",
+    prompt: "The wait-for graph has edges T1→T2, T2→T3, T3→T1 and T4→T5. What is the minimum number of transactions that must be aborted to remove every deadlock?",
+    answer: 1,
+    explanation: "Only T1, T2 and T3 form a cycle (T4→T5 is a plain wait, not a deadlock). Aborting any one of the three breaks it, so a single victim is enough.",
+    difficulty: 1,
+    tags: ["wait-for graph", "deadlock", "victim"],
+  },
+];

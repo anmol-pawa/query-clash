@@ -103,3 +103,4 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
     - [x] D3b3b. Storage 26 → 36 (`content/interview/storageMore.ts`, keyed in `tests/interviewStorageMore.test.ts`).
     - [x] D3b3c. SQL bank: 14 → 30 (new entries in `content/interview/sql.ts`; the SQL test checks both dialects, plus known answers).
 - [x] D4. A third dialect note set (MySQL differences) as codex-only entries (`content/codexMysql.ts`, keyed in `tests/codexMysql.test.ts`).
+- [x] D5. Top Concurrency (27 → 32) and Normalization (29 → 33) up to 30+ static questions (`content/interview/{concurrencyMore,normalizationMore}.ts`, keyed in `tests/interviewCcNfMore.test.ts`).
