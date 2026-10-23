@@ -115,3 +115,4 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
 - [x] E2. Ideas: more interview topics, evolve/faint frame polish.
   - [x] E2a. Concurrency 26 → 32 static questions (`content/interview/concurrencyMore.ts`, keyed in `tests/interviewConcurrencyMore.test.ts`).
   - [x] E2b. Evolve/faint polish: orbiting pixel sparkles in the evolution scene, flash + blink + dust on faint.
+- [x] E3. `/dev/stage`: the real Pixi battle stage with Faint foe / Faint player / Next foe buttons, used to screenshot-check the faint sequence (dissolve, sparkles, platform stays) at desktop and iPhone 14.
