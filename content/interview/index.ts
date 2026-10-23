@@ -1,5 +1,6 @@
 import { BASICS, BASICS_GENERATORS } from "./basics";
 import { CONCURRENCY, CONCURRENCY_GENERATORS } from "./concurrency";
+import { CONCURRENCY_MORE } from "./concurrencyMore";
 import { DISTRIBUTED, DISTRIBUTED_GENERATORS } from "./distributed";
 import { DISTRIBUTED_MORE } from "./distributedMore";
 import { ER, ER_GENERATORS } from "./er";
@@ -34,6 +35,6 @@ export const TOPICS: Topic[] = [
   { id: "sql", foe: "subzero", title: "Interview SQL", blurb: "Nth highest salary, gaps and islands, top-N per group…", color: "#4ade80" },
 ];
 
-export const QUESTIONS: Question[] = [...BASICS, ...ER, ...ER_MORE, ...NORMALIZATION, ...TRANSACTIONS, ...TRANSACTIONS_MORE, ...CONCURRENCY, ...RECOVERY, ...RECOVERY_MORE, ...MVCC, ...MVCC_MORE, ...STORAGE, ...STORAGE_MORE, ...QUERY, ...QUERY_MORE, ...DISTRIBUTED, ...DISTRIBUTED_MORE, ...SQL];
+export const QUESTIONS: Question[] = [...BASICS, ...ER, ...ER_MORE, ...NORMALIZATION, ...TRANSACTIONS, ...TRANSACTIONS_MORE, ...CONCURRENCY, ...CONCURRENCY_MORE, ...RECOVERY, ...RECOVERY_MORE, ...MVCC, ...MVCC_MORE, ...STORAGE, ...STORAGE_MORE, ...QUERY, ...QUERY_MORE, ...DISTRIBUTED, ...DISTRIBUTED_MORE, ...SQL];
 export const GENERATORS: Generator[] = [...BASICS_GENERATORS, ...ER_GENERATORS, ...NORMALIZATION_GENERATORS, ...TRANSACTIONS_GENERATORS, ...CONCURRENCY_GENERATORS, ...RECOVERY_GENERATORS, ...MVCC_GENERATORS, ...STORAGE_GENERATORS, ...QUERY_GENERATORS, ...DISTRIBUTED_GENERATORS];
 export type { TopicId };

@@ -539,3 +539,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added section E. `/codex` now scrolls the selected category tab into view (`app/codex/page.tsx`), so `/codex?cat=MySQL` shows the MySQL tab on phones instead of leaving it off-screen in the scrolling tab bar.
 - Verified: lint, typecheck, 622 tests, `build:pages` pass. Playwright on the static export at 1280x800 and iPhone 14: `?cat=MySQL` selected tab is fully inside the tablist, no console errors, no horizontal overflow. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: E2 (more interview topics, evolve/faint frame polish).
+
+## 2026-10-23 - E2a: more concurrency questions
+
+- Added 6 concurrency questions (`content/interview/concurrencyMore.ts`): rigorous vs strict 2PL, update locks and conversion deadlock, timestamp-ordering late read, victims for a ring deadlock, row locks vs phantoms, SKIP LOCKED. Answers keyed in `tests/interviewConcurrencyMore.test.ts`.
+- Verified: lint, typecheck, 624 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: E2b (evolve/faint frame polish).
