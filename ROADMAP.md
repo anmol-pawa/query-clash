@@ -118,3 +118,4 @@ A full DBMS curriculum for placement and system-design interviews, played as cre
 - [x] E3. Faint preview on `/dev/sprites`: a Faint button replays the in-battle faint (white flash, stepped blink, sink, fade) so it can be screenshot-checked.
 - [x] F1. Normalization: 6 more static questions (`content/interview/normalizationMore.ts`, keyed and recomputed with the FD solvers in `tests/interviewNormalizationMore.test.ts`).
 - [x] F2. Distributed: 6 more static questions (`content/interview/distributedMore2.ts`, keyed and recomputed in `tests/interviewDistributedMore2.test.ts`).
+- [x] G1. Cost-estimate questions (`content/interview/costsMore.ts`): B+ tree levels, block nested-loop both orders, external sort passes, Grace hash join, hash index vs range; keyed and recomputed in `tests/interviewCostsMore.test.ts`.

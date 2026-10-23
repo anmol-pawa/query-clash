@@ -569,3 +569,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added F2: 6 distributed questions (`content/interview/distributedMore2.ts`): minimum read quorum, 2PC uncertain state, consistent-hash node add, mod-N resharding 4 to 5 shards (80% move), CP behaviour in a partition, async-replication loss on failover. Answers keyed and recomputed in `tests/interviewDistributedMore2.test.ts`.
 - Verified: lint, typecheck, 630 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, other topics to 40+).
+
+## 2026-10-23 - G1: cost-estimate questions
+
+- ROADMAP had no unchecked tasks, so added G1: 6 questions (B+ tree levels for 1M keys, block nested-loop join cost in both orders, external sort passes for 1000 pages / B=11, Grace hash join 3(|R|+|S|), hash index cannot do ranges). Answers keyed and recomputed in `tests/interviewCostsMore.test.ts`.
+- Verified: lint, typecheck, 632 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, other topics to 40+).
