@@ -5,8 +5,20 @@ import { SPRITES } from "@/game/sprites";
 import type { SpriteDef } from "@/game/sprites/pixel";
 import { frameCanvas } from "@/game/sprites/texture";
 import { FX_KINDS, fxSprite } from "@/game/sprites/effects";
+import { BIOMES } from "@/game/render/overworld";
+import { SCENE_H, SCENE_W, SCENES, paintScene } from "@/game/render/scenery";
 
 const FX_COLORS = [0x60a5fa, 0xf97316, 0x4ade80, 0xe879f9];
+
+/** One biome's battle backdrop, painted at 3× (nearest-neighbour). */
+function SceneCanvas({ index }: { index: number }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const g = ref.current!.getContext("2d")!;
+    g.putImageData(new ImageData(paintScene(index) as Uint8ClampedArray<ArrayBuffer>, SCENE_W, SCENE_H), 0, 0);
+  }, [index]);
+  return <canvas ref={ref} width={SCENE_W} height={SCENE_H} className="w-full max-w-[640px] rounded-lg" style={{ imageRendering: "pixelated" }} data-testid={`scene-${index}`} />;
+}
 
 /** Plays one animation on a 2D canvas at an integer scale (nearest-neighbour). */
 function AnimCanvas({
@@ -196,6 +208,19 @@ export default function SpriteViewer() {
             </div>
           </div>
         ))}
+      </section>
+      <section className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4" data-testid="scenes">
+        <h2 className="font-display text-lg font-bold tracking-widest">BATTLE SCENES</h2>
+        <div className="grid gap-4 lg:grid-cols-2">
+          {SCENES.map((_, i) => (
+            <figure key={i} className="flex flex-col gap-1">
+              <SceneCanvas index={i} />
+              <figcaption className="font-mono text-xs uppercase text-white/60">
+                {i + 1} · {BIOMES[i].name}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
       </section>
       {SPRITES.map((def) => (
         <section

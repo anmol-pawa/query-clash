@@ -521,3 +521,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Verified: lint, typecheck, 620 tests, `build`, `build:pages` pass. Playwright on the static export at 1280x900 and iPhone 14: played the daily battle to an explanation with links, clicked through to the Codex entry (opened), no console errors, no horizontal overflow.
 - CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: D6 remainder (MySQL sandbox dialect, biome background art check).
+
+## 2026-10-23 - D6b: pixel battle backdrops per biome
+
+- The battle stage used one tinted neon-city background for every boss. Replaced it with `game/render/scenery.ts`: a deterministic 620x180 pixel scene per chapter biome (dithered sky bands, sun/moon, clouds/stars/ash, two ridge silhouettes, banded speckled ground, horizon props reusing the overworld stamps), scaled 4x with nearest-neighbour; each boss fights in its chapter's scene, versus/arena use scene 1. Removed the dead star/skyline/floor-line code from `stage.ts`. Added a "Battle scenes" gallery to `/dev/sprites` and `tests/scenery.test.ts`.
+- Verified: lint, typecheck, 622 tests, `build:pages` pass. Playwright on the static export, desktop 1280x800 (chapters 1, 4, 7, 10, 12) and iPhone 14 (3, 9): scenes look right, full width on the wide stage, no console errors, no horizontal overflow. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: D6c (MySQL sandbox dialect; scope needs deciding).

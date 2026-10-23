@@ -31,10 +31,10 @@ export const MAP_NODES: readonly (readonly [number, number])[] = [
 /** A node's centre in map pixels. */
 export const nodePx = (i: number): [number, number] => [Math.round((MAP_NODES[i][0] / 100) * MAP_W), Math.round((MAP_NODES[i][1] / 100) * MAP_H)];
 
-type RGB = [number, number, number];
-const hex = (h: string): RGB => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+export type RGB = [number, number, number];
+export const hex = (h: string): RGB => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 
-type DecorKind = "tree" | "pine" | "rock" | "tomb" | "crystal" | "spire";
+export type DecorKind = "tree" | "pine" | "rock" | "tomb" | "crystal" | "spire";
 
 export interface Biome {
   name: string;
@@ -62,7 +62,7 @@ export const BIOMES: readonly Biome[] = [
 ];
 
 // decoration stamps: o outline, a dark, b mid, c light, t trunk, u trunk light
-const STAMPS: Record<DecorKind, readonly string[]> = {
+export const STAMPS: Record<DecorKind, readonly string[]> = {
   tree: ["..oooo..", ".obccbo.", "obcccbbo", "obccbbao", "obbbbaao", "oabbaaao", ".oaaaao.", "..ootoo.", "...otuo.", "...oooo."],
   pine: ["...oo...", "..obco..", "..obao..", ".obcbao.", ".obbaao.", "obcbbaao", "obbbaaao", "oooooooo", "...otuo.", "...oooo."],
   rock: ["..ooo..", ".obcbo.", "obccbao", "obbbaao", ".ooooo."],

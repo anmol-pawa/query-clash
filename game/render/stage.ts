@@ -6,7 +6,7 @@
  *   await stage.attack("left", "blade", color, 142, true, false)
  *   await stage.counter(12)
  */
-import { Application, Container, Graphics, Sprite, Text } from "pixi.js";
+import { Application, Container, Graphics, Sprite } from "pixi.js";
 import type { BossId } from "@/content/types";
 import type { AttackKind } from "@/lib/dialect/concepts";
 import { bossAttack, performAttack } from "./attacks";
@@ -15,13 +15,14 @@ import { Creature } from "./characters/creature";
 import type { RigContext } from "./characters/rig";
 import { Camera, FxContext, impactSpark, popText, ring } from "./fx";
 import { Particles } from "./particles";
-import { skyTex, vignetteTex } from "./textures";
+import { BIOMES } from "./overworld";
+import { SCENES, SCENE_PAD, bossScene } from "./scenery";
+import { sceneTex, vignetteTex } from "./textures";
 import { Tweener, ease } from "./tween";
 
 export const W = 1280;
 export const H = 720;
 const HORIZON = 440;
-const FLOOR_LINES = 12;
 /** GBA layout: the foe stands top-right near the horizon, the player's creature bottom-left, seen from behind. */
 const FOE = { x: 905, y: 400, scale: 3 };
 const PLAYER = { x: 330, y: 680, scale: 5 };
@@ -38,34 +39,11 @@ export interface StageOptions {
   font: string;
 }
 
-const KEYWORDS = ["SELECT", "JOIN", "WHERE", "GROUP BY", "OVER()", "WITH", "MERGE", "COMMIT", "INDEX", "NULL", "EXISTS", "UNION", "{ }", "ROWNUM", "LATERAL", "PIVOT"];
-
-function mix(a: number, b: number, k: number) {
-  const ar = (a >> 16) & 255,
-    ag = (a >> 8) & 255,
-    ab = a & 255;
-  const br = (b >> 16) & 255,
-    bg = (b >> 8) & 255,
-    bb = b & 255;
-  const r = Math.round(ar + (br - ar) * k),
-    g = Math.round(ag + (bg - ag) * k),
-    bl = Math.round(ab + (bb - ab) * k);
-  return (r << 16) | (g << 8) | bl;
-}
-const hex = (n: number) => "#" + n.toString(16).padStart(6, "0");
-
 export class BattleStage {
   private app = new Application();
   private fit = new Container();
   private camera = new Container();
   private bg = new Container();
-  private floor = new Graphics();
-  private stars: Graphics[] = [new Graphics(), new Graphics(), new Graphics()];
-  /** Pre-drawn scrolling floor lines; only their y changes per frame (no Graphics rebuild). */
-  private floorLines: Graphics[] = [];
-  /** Moon + skyline: static, rasterised once into a single texture. */
-  private scenery = new Container();
-  private glyphs: Text[] = [];
   private fighters = new Container();
   private fxLayer = new Container();
   private top = new Container();
@@ -82,7 +60,6 @@ export class BattleStage {
   private t = 0;
   private destroyed = false;
   private opts: StageOptions;
-  private starSeed: { x: number; y: number; r: number; p: number }[] = [];
 
   private constructor(opts: StageOptions) {
     this.opts = opts;
@@ -110,62 +87,19 @@ export class BattleStage {
   }
 
   private build() {
-    const { accent, reducedMotion } = this.opts;
+    const { reducedMotion } = this.opts;
     this.fx.scale = reducedMotion ? 0.35 : 1;
 
-    // background
-    const sky = new Sprite(skyTex(hex(mix(0x05030d, accent, 0.05)), hex(mix(0x0b0718, accent, 0.28)), hex(mix(0x0b0718, accent, 0.12))));
-    sky.width = W + 2600;
-    sky.height = H + 1200;
-    sky.position.set(-1300, -600);
-    this.bg.addChild(sky);
+    // background: the boss's biome painted as a low-res pixel scene, scaled 4× with nearest-neighbour
+    const scene = bossScene(this.opts.versus ? undefined : this.opts.boss);
+    const bounds = new Graphics();
+    bounds.rect(-1300, -600, W + 2600, HORIZON + 600).fill({ color: SCENES[scene].sky[0] });
+    bounds.rect(-1300, HORIZON, W + 2600, H - HORIZON + 600).fill({ color: BIOMES[scene].ground[0] });
+    const backdrop = new Sprite(sceneTex(scene));
+    backdrop.scale.set(4);
+    backdrop.x = -SCENE_PAD * 4;
+    this.bg.addChild(bounds, backdrop);
 
-    for (let i = 0; i < 160; i++) this.starSeed.push({ x: -600 + Math.random() * (W + 1200), y: -200 + Math.random() * (HORIZON * 0.9 + 200), r: Math.random() * 1.6 + 0.3, p: Math.random() * 10 });
-    this.starSeed.forEach((st, i) => this.stars[i % 3].circle(st.x, st.y, st.r).fill({ color: 0xffffff }));
-    this.bg.addChild(...this.stars);
-
-    // moon / data core
-    const moon = new Graphics();
-    moon.circle(W * 0.5, 200, 120).fill({ color: mix(0x0b0718, accent, 0.5), alpha: 0.5 });
-    for (let i = 0; i < 7; i++) moon.rect(W * 0.5 - 120, 110 + i * 26, 240, 8).fill({ color: mix(0x05030d, accent, 0.15), alpha: 0.9 });
-    this.scenery.addChild(moon);
-
-    // skyline silhouettes (two parallax bands)
-    for (let band = 0; band < 2; band++) {
-      const city = new Graphics();
-      let x = -700;
-      while (x < W + 700) {
-        const w = 40 + Math.random() * 70;
-        const h = (band ? 60 : 110) + Math.random() * (band ? 70 : 130);
-        city.rect(x, HORIZON - h, w, h).fill({ color: band ? 0x0a0716 : mix(0x0a0716, accent, 0.08) });
-        for (let wy = HORIZON - h + 10; wy < HORIZON - 10; wy += 14)
-          for (let wx = x + 6; wx < x + w - 8; wx += 12) if (Math.random() < 0.18) city.rect(wx, wy, 5, 6).fill({ color: accent, alpha: 0.25 + Math.random() * 0.4 });
-        x += w + 4;
-      }
-      city.alpha = band ? 1 : 0.8;
-      this.scenery.addChild(city);
-    }
-    this.bg.addChild(this.scenery);
-    this.scenery.cacheAsTexture({ resolution: 1, antialias: false });
-
-    for (let i = 0; i < 14; i++) {
-      const t = new Text({ text: KEYWORDS[i % KEYWORDS.length], style: { fontFamily: "monospace", fontSize: 14 + Math.random() * 14, fill: accent, fontWeight: "700" } });
-      t.alpha = 0.08 + Math.random() * 0.1;
-      t.position.set(Math.random() * W, Math.random() * HORIZON);
-      this.glyphs.push(t);
-      this.bg.addChild(t);
-    }
-    // static floor: base + converging lines (scrolling lines are redrawn per frame)
-    this.floor.rect(-1300, HORIZON, W + 2600, H - HORIZON + 600).fill({ color: mix(0x05030d, accent, 0.06) });
-    for (let i = -30; i <= 30; i++) this.floor.moveTo(W / 2 + i * 12, HORIZON).lineTo(W / 2 + i * 150, H + 60);
-    this.floor.stroke({ width: 1.5, color: accent, alpha: 0.28 });
-    this.floor.moveTo(-1300, HORIZON).lineTo(W + 1300, HORIZON).stroke({ width: 3, color: accent, alpha: 0.7 });
-    for (let i = 0; i < FLOOR_LINES; i++) {
-      const line = new Graphics();
-      line.moveTo(-1300, 0).lineTo(W + 1300, 0).stroke({ width: 1.5, color: accent, alpha: 0.22 });
-      this.floorLines.push(line);
-    }
-    this.bg.addChild(this.floor, ...this.floorLines);
 
     this.rig = { tw: this.tw, fx: this.fx, reduced: reducedMotion, space: this.camera };
 
@@ -226,24 +160,6 @@ export class BattleStage {
     this.fx.update(dt);
     this.left.update(dt);
     this.right.update(dt);
-    this.drawBackground(realDt);
-  }
-
-  private drawBackground(dt: number) {
-    this.stars.forEach((g, i) => (g.alpha = 0.35 + 0.3 * Math.sin(this.t * (0.7 + i * 0.35) + i * 2)));
-
-    for (const g of this.glyphs) {
-      g.y -= dt * 8;
-      if (g.y < -30) {
-        g.y = HORIZON;
-        g.x = Math.random() * W;
-      }
-    }
-
-    const scroll = (this.t * 0.35) % 1;
-    this.floorLines.forEach((line, i) => {
-      line.y = HORIZON + Math.pow((i + scroll) / FLOOR_LINES, 2.2) * (H - HORIZON + 60);
-    });
   }
 
   /* --------------------------------------------------------------- API */

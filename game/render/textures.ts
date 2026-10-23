@@ -1,4 +1,5 @@
 import { Texture } from "pixi.js";
+import { SCENE_H, SCENE_W, paintScene } from "./scenery";
 
 function canvas(w: number, h: number) {
   const c = document.createElement("canvas");
@@ -62,4 +63,17 @@ export function vignetteTex(): Texture {
   g.fillRect(0, 0, 640, 360);
   vig = Texture.from(c);
   return vig;
+}
+
+const scenes = new Map<number, Texture>();
+/** A biome's battle backdrop as a crisp (nearest-neighbour) texture. */
+export function sceneTex(index: number): Texture {
+  let tex = scenes.get(index);
+  if (tex) return tex;
+  const [c, g] = canvas(SCENE_W, SCENE_H);
+  g.putImageData(new ImageData(paintScene(index) as Uint8ClampedArray<ArrayBuffer>, SCENE_W, SCENE_H), 0, 0);
+  tex = Texture.from(c);
+  tex.source.scaleMode = "nearest";
+  scenes.set(index, tex);
+  return tex;
 }
