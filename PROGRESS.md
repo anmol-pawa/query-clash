@@ -719,3 +719,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added AE1: 6 storage questions (`content/interview/bufferFine.ts`): records per page (40), scan page count (25), LRU hits (1), sequential flooding, dirty-page eviction, pin counts. Keyed and recomputed in `tests/interviewBufferFine.test.ts` (including an LRU simulator).
 - Verified: lint, typecheck, 690 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more questions for under-covered topics).
+
+## 2026-10-24 - AF1: query execution fine-print questions
+
+- ROADMAP had no unchecked tasks, so added AF1: 6 query questions (`content/interview/execFine.ts`): initial sorted runs (100), external sort I/O (8000), merge join with duplicate keys (6), hash join needs equality, blocking operators, interesting orders. Keyed and recomputed in `tests/interviewExecFine.test.ts` (including an external-sort simulator).
+- Verified: lint, typecheck, 693 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more questions for under-covered topics).
