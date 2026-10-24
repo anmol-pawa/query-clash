@@ -617,3 +617,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added N1: 6 basics questions (`content/interview/constraintsMore.ts`): CHECK with NULL passes, multiple NULLs under UNIQUE (PostgreSQL), cascade delete count (10), FK must reference PK/UNIQUE, deferred constraints, empty cross join (0). Keyed in `tests/interviewConstraintsMore.test.ts`. Kept difficulty ≤ 2 because the topic-picker test expects no tough basics questions.
 - Verified: lint, typecheck, 650 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
+
+## 2026-10-24 - O1: locking fine-print questions
+
+- ROADMAP had no unchecked tasks, so added O1: 6 concurrency questions (`content/interview/lockingFine.ts`): S vs X conflict, deadlock cycle victims (1), timestamp-ordering write rule (reject), IX intention-lock chain, FOR UPDATE NOWAIT, rollback dead tuples + VACUUM. Keyed in `tests/interviewLockingFine.test.ts`, with a small TO write-rule function checking the rule.
+- Verified: lint, typecheck, 652 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
