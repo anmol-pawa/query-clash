@@ -587,3 +587,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added I1: 6 questions (`content/interview/isolationMore.ts`): READ COMMITTED anomalies, phantoms at REPEATABLE READ vs SERIALIZABLE, phenomena at READ UNCOMMITTED, undo set from a log, WAL flush rule, NO-FORCE. Keyed and recomputed in `tests/interviewIsolationMore.test.ts`.
 - Verified: lint, typecheck, tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, other topics to 40+).
+
+## 2026-10-24 - J1: keys and relational fine-print questions
+
+- ROADMAP had no unchecked tasks, so added J1: 6 questions (`content/interview/keysMore.ts`): superkey count, nullable foreign key, natural join with no common attributes, minimum union size, weak-entity key, M:N table count. Keyed and recomputed in `tests/interviewKeysMore.test.ts`.
+- Verified: lint, typecheck, tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
