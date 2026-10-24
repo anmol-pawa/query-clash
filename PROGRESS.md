@@ -695,3 +695,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added AA1: 6 query questions (`content/interview/subqueryFine.ts`): NOT IN with NULL (0 rows), UNION distinct (3), EXCEPT ALL (2), scalar subquery returning two rows, empty-input aggregates, DISTINCT on pairs (3). Keyed and recomputed in `tests/interviewSubqueryFine.test.ts`.
 - Verified: lint, typecheck, 679 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more questions for under-covered topics).
+
+## 2026-10-24 - AB1: SQL fundamentals fine-print questions
+
+- ROADMAP had no unchecked tasks, so added AB1: 6 query questions (`content/interview/sqlFine.ts`): Oracle TRUNCATE can't be rolled back, plain views store no rows, no row order without ORDER BY, LIMIT/OFFSET (5), COALESCE (7), logical clause evaluation order. Keyed and recomputed in `tests/interviewSqlFine.test.ts`.
+- Verified: lint, typecheck, tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more questions for under-covered topics).
