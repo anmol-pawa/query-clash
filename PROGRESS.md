@@ -713,3 +713,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added AD1: 6 recovery questions (`content/interview/recoveryFine.ts`): commit needs a flushed log, CLR count (5), group commit, redo vs pageLSN (2), ARIES repeats history, checkpoint contents. Keyed and recomputed in `tests/interviewRecoveryFine.test.ts`.
 - Verified: lint, typecheck, 687 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more questions for under-covered topics).
+
+## 2026-10-24 - AE1: buffer pool fine-print questions
+
+- ROADMAP had no unchecked tasks, so added AE1: 6 storage questions (`content/interview/bufferFine.ts`): records per page (40), scan page count (25), LRU hits (1), sequential flooding, dirty-page eviction, pin counts. Keyed and recomputed in `tests/interviewBufferFine.test.ts` (including an LRU simulator).
+- Verified: lint, typecheck, 690 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more questions for under-covered topics).
