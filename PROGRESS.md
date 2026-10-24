@@ -623,3 +623,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added O1: 6 concurrency questions (`content/interview/lockingFine.ts`): S vs X conflict, deadlock cycle victims (1), timestamp-ordering write rule (reject), IX intention-lock chain, FOR UPDATE NOWAIT, rollback dead tuples + VACUUM. Keyed in `tests/interviewLockingFine.test.ts`, with a small TO write-rule function checking the rule.
 - Verified: lint, typecheck, 652 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
+
+## 2026-10-24 - P1: relational algebra fine-print questions
+
+- ROADMAP had no unchecked tasks, so added P1: 6 ER-topic questions (`content/interview/algebraFine.ts`): π set semantics (3), division (1), product size (12), non-commutative difference, commuting selections, 1:N foreign-key side. Keyed and recomputed (with a small division function) in `tests/interviewAlgebraFine.test.ts`.
+- Verified: lint, typecheck, 655 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
