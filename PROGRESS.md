@@ -683,3 +683,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added Y1: 6 query questions (`content/interview/windowFine.ts`): DENSE_RANK (3), default RANGE frame, AVG ignoring NULL (20), GROUP BY row bound (6), WHERE vs HAVING, ROW_NUMBER ties. Keyed and recomputed in `tests/interviewWindowFine.test.ts`.
 - Verified: lint, typecheck, 675 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more questions for under-covered topics).
+
+## 2026-10-24 - Z1: join fine-print questions
+
+- ROADMAP had no unchecked tasks, so added Z1: 6 query questions (`content/interview/joinFine.ts`): FULL OUTER JOIN size (6), NULL keys never match, self-join pairs (6), EXISTS vs JOIN (2), anti-join (1), foreign-key join size (12). Keyed and recomputed in `tests/interviewJoinFine.test.ts`.
+- Verified: lint, typecheck, 677 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more questions for under-covered topics).
