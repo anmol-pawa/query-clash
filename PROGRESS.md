@@ -593,3 +593,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added J1: 6 questions (`content/interview/keysMore.ts`): superkey count, nullable foreign key, natural join with no common attributes, minimum union size, weak-entity key, M:N table count. Keyed and recomputed in `tests/interviewKeysMore.test.ts`.
 - Verified: lint, typecheck, tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
+
+## 2026-10-24 - K1: query semantics questions
+
+- ROADMAP had no unchecked tasks, so added K1: 6 query questions (`content/interview/querySemanticsMore.ts`): NOT IN with a NULL in the subquery, COUNT(col) with NULLs, UNION size with overlap, LEFT JOIN + WHERE on the right table, LEFT JOIN row count, HAVING vs WHERE. Keyed and recomputed in `tests/interviewQuerySemanticsMore.test.ts`.
+- Verified: lint, typecheck, 643 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).

@@ -8,6 +8,7 @@ import { COSTS_MORE } from "./costsMore";
 import { SCHEDULES_MORE } from "./schedulesMore";
 import { ISOLATION_MORE } from "./isolationMore";
 import { KEYS_MORE } from "./keysMore";
+import { QUERY_SEMANTICS_MORE } from "./querySemanticsMore";
 import { ER, ER_GENERATORS } from "./er";
 import { ER_MORE } from "./erMore";
 import { MVCC, MVCC_GENERATORS } from "./mvcc";
@@ -41,6 +42,6 @@ export const TOPICS: Topic[] = [
   { id: "sql", foe: "subzero", title: "Interview SQL", blurb: "Nth highest salary, gaps and islands, top-N per group…", color: "#4ade80" },
 ];
 
-export const QUESTIONS: Question[] = [...BASICS, ...ER, ...ER_MORE, ...NORMALIZATION, ...NORMALIZATION_MORE, ...TRANSACTIONS, ...TRANSACTIONS_MORE, ...CONCURRENCY, ...CONCURRENCY_MORE, ...RECOVERY, ...RECOVERY_MORE, ...MVCC, ...MVCC_MORE, ...STORAGE, ...STORAGE_MORE, ...QUERY, ...QUERY_MORE, ...DISTRIBUTED, ...DISTRIBUTED_MORE, ...DISTRIBUTED_MORE_2, ...COSTS_MORE, ...SCHEDULES_MORE, ...ISOLATION_MORE, ...KEYS_MORE, ...SQL];
+export const QUESTIONS: Question[] = [...BASICS, ...ER, ...ER_MORE, ...NORMALIZATION, ...NORMALIZATION_MORE, ...TRANSACTIONS, ...TRANSACTIONS_MORE, ...CONCURRENCY, ...CONCURRENCY_MORE, ...RECOVERY, ...RECOVERY_MORE, ...MVCC, ...MVCC_MORE, ...STORAGE, ...STORAGE_MORE, ...QUERY, ...QUERY_MORE, ...DISTRIBUTED, ...DISTRIBUTED_MORE, ...DISTRIBUTED_MORE_2, ...COSTS_MORE, ...SCHEDULES_MORE, ...ISOLATION_MORE, ...KEYS_MORE, ...QUERY_SEMANTICS_MORE, ...SQL];
 export const GENERATORS: Generator[] = [...BASICS_GENERATORS, ...ER_GENERATORS, ...NORMALIZATION_GENERATORS, ...TRANSACTIONS_GENERATORS, ...CONCURRENCY_GENERATORS, ...RECOVERY_GENERATORS, ...MVCC_GENERATORS, ...STORAGE_GENERATORS, ...QUERY_GENERATORS, ...DISTRIBUTED_GENERATORS];
 export type { TopicId };
