@@ -605,3 +605,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added L1: 6 storage questions (`content/interview/storageFine.ts`): blocking factor (32), heap file blocks (313), sparse index entries, extendible-hash directory size (2^3), one clustered index, composite-index leftmost prefix. Keyed and recomputed in `tests/interviewStorageFine.test.ts`.
 - Verified: lint, typecheck, 646 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
+
+## 2026-10-24 - M1: Oracle vs PostgreSQL dialect questions
+
+- ROADMAP had no unchecked tasks, so added M1: 6 basics questions (`content/interview/dialectsMore.ts`): Oracle '' as NULL, transactional DDL, FETCH FIRST as the portable row limit, nextval vs NEXTVAL, NULL ordering, MINUS vs EXCEPT. Keyed in `tests/interviewDialectsMore.test.ts`.
+- Verified: lint, typecheck, tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
