@@ -725,3 +725,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added AF1: 6 query questions (`content/interview/execFine.ts`): initial sorted runs (100), external sort I/O (8000), merge join with duplicate keys (6), hash join needs equality, blocking operators, interesting orders. Keyed and recomputed in `tests/interviewExecFine.test.ts` (including an external-sort simulator).
 - Verified: lint, typecheck, 693 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more questions for under-covered topics).
+
+## 2026-10-24 - AG1: schedule fine-print questions
+
+- ROADMAP had no unchecked tasks, so added AG1: 6 concurrency questions (`content/interview/schedFine.ts`): timestamp-ordering write rejection, Thomas write rule, recoverability, cascading abort count (2), deadlock cycle size (3), what strict 2PL does not guarantee. Keyed and recomputed in `tests/interviewSchedFine.test.ts` (with small recoverability, cascade and cycle simulators).
+- Verified: lint, typecheck, 698 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more questions for under-covered topics).
