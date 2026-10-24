@@ -671,3 +671,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added W1: 6 basics questions (`content/interview/basicsFine.ts`): table cell count (12), UNIQUE allows several NULLs, COUNT(DISTINCT) (2), physical data independence, SQL tables are bags, INTERSECT size (2). Keyed and recomputed in `tests/interviewBasicsFine.test.ts`.
 - Verified: lint, typecheck, 671 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more ER depth).
+
+## 2026-10-24 - X1: ER modelling fine-print questions
+
+- ROADMAP had no unchecked tasks, so added X1: 6 ER questions (`content/interview/erFine.ts`): minimum table count for an ER→relational mapping (4), multivalued attribute table, total participation → NOT NULL foreign key, superkey count (4), M:N relationship-set bound (20), 1:N needs no own table. Keyed and recomputed in `tests/interviewErFine.test.ts`.
+- Verified: lint, typecheck, 673 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more questions for under-covered topics).
