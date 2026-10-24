@@ -665,3 +665,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added V1: 6 distributed questions (`content/interview/distributedFine.ts`): R+W > N overlap, 2PC message count (16), hot range shard, consistent-hash removal (250 keys), vector-clock concurrency, Lamport receive rule (8). Keyed and recomputed in `tests/interviewDistributedFine.test.ts`.
 - Verified: lint, typecheck, 669 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
+
+## 2026-10-24 - W1: DBMS basics fine-print questions
+
+- ROADMAP had no unchecked tasks, so added W1: 6 basics questions (`content/interview/basicsFine.ts`): table cell count (12), UNIQUE allows several NULLs, COUNT(DISTINCT) (2), physical data independence, SQL tables are bags, INTERSECT size (2). Keyed and recomputed in `tests/interviewBasicsFine.test.ts`.
+- Verified: lint, typecheck, 671 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more ER depth).
