@@ -641,3 +641,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added R1: 6 normalization questions (`content/interview/normalizationFine.ts`): closure size (5), every two-attribute relation is BCNF, BCNF can lose dependencies, lossless split on a shared key, cyclic FDs give 3 keys, partial dependency leaves 1NF. Keyed and recomputed with the FD solvers in `tests/interviewNormalizationFine.test.ts`.
 - Verified: lint, typecheck, 660 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
+
+## 2026-10-24 - S1: query optimizer fine-print questions
+
+- ROADMAP had no unchecked tasks, so added S1: 6 query questions (`content/interview/optimizerFine.ts`): uniform selectivity (200 rows), covering index / index-only scan, selection pushdown, LIKE prefix vs leading wildcard, left-deep join orders (4! = 24), index nested-loop cost (310). Keyed and recomputed in `tests/interviewOptimizerFine.test.ts`.
+- Verified: lint, typecheck, 663 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
