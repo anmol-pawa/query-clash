@@ -647,3 +647,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added S1: 6 query questions (`content/interview/optimizerFine.ts`): uniform selectivity (200 rows), covering index / index-only scan, selection pushdown, LIKE prefix vs leading wildcard, left-deep join orders (4! = 24), index nested-loop cost (310). Keyed and recomputed in `tests/interviewOptimizerFine.test.ts`.
 - Verified: lint, typecheck, 663 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
+
+## 2026-10-24 - T1: indexing fine-print questions
+
+- ROADMAP had no unchecked tasks, so added T1: 6 storage questions (`content/interview/indexFine.ts`): B+ tree leaf count (10,000), minimum children at order 5 (3), leaf chaining, dense secondary index, hash bucket collisions (4), why wide nodes. Keyed and recomputed in `tests/interviewIndexFine.test.ts`.
+- Verified: lint, typecheck, 665 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
