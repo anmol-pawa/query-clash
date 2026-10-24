@@ -629,3 +629,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added P1: 6 ER-topic questions (`content/interview/algebraFine.ts`): π set semantics (3), division (1), product size (12), non-commutative difference, commuting selections, 1:N foreign-key side. Keyed and recomputed (with a small division function) in `tests/interviewAlgebraFine.test.ts`.
 - Verified: lint, typecheck, 655 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
+
+## 2026-10-24 - Q1: transaction and recovery fine-print questions
+
+- ROADMAP had no unchecked tasks, so added Q1: 6 transactions questions (`content/interview/txFine.ts`): WAL durability, undo count from a checkpoint log (2), cascading rollback (3), strict 2PL is cascadeless, write skew under snapshot isolation, recoverable without cascadeless. Keyed and recomputed (log classifier, cascade closure) in `tests/interviewTxFine.test.ts`.
+- Verified: lint, typecheck, 658 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (in-battle faint screenshot, more SQL missions, more basics/ER depth).
