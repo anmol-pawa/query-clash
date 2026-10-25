@@ -522,6 +522,53 @@ const ENTRIES: Entry[] = [
     hints: ["Compute the average first.", "Use a scalar subquery in WHERE.", "WHERE budget > (SELECT AVG(budget) FROM departments)"],
     tables: ["departments"],
   },
+  {
+    id: "management-chain",
+    title: "Management chain above an employee",
+    difficulty: 2,
+    tags: ["recursive CTE", "hierarchy"],
+    askedAt: "Walking a parent pointer upwards (org chart, category tree) is the standard recursive-CTE question.",
+    task: "List the **management chain above employee 116**, starting with that employee and walking up to the top manager: `emp_id`, `last_name`, and `lvl` (1 = the employee, 2 = their manager, and so on). Order by lvl.",
+    postgres:
+      "WITH RECURSIVE chain (emp_id, last_name, manager_id, lvl) AS (SELECT emp_id, last_name, manager_id, 1 FROM employees WHERE emp_id = 116 UNION ALL SELECT e.emp_id, e.last_name, e.manager_id, c.lvl + 1 FROM employees e JOIN chain c ON e.emp_id = c.manager_id) SELECT emp_id, last_name, lvl FROM chain ORDER BY lvl",
+    oracle:
+      "WITH chain (emp_id, last_name, manager_id, lvl) AS (SELECT emp_id, last_name, manager_id, 1 FROM employees WHERE emp_id = 116 UNION ALL SELECT e.emp_id, e.last_name, e.manager_id, c.lvl + 1 FROM employees e JOIN chain c ON e.emp_id = c.manager_id) SELECT emp_id, last_name, lvl FROM chain ORDER BY lvl",
+    ordered: true,
+    explanation:
+      "The anchor is the starting employee; each recursive step joins employees to the CTE on e.emp_id = c.manager_id, so every pass moves one level up. Recursion stops by itself when manager_id is NULL, because the join then finds no row. Walking down the tree instead flips the join to e.manager_id = c.emp_id. Fixed self-joins (one per level) only work for a known depth, which is why interviewers want the recursive form.",
+    hints: ["Start from employee 116 and repeatedly move to their manager.", "Anchor on emp_id = 116, then join employees to the CTE on e.emp_id = c.manager_id.", "Carry a lvl column: 1 in the anchor, c.lvl + 1 in the recursive step."],
+    tables: ["employees"],
+  },
+  {
+    id: "txn-bursts",
+    title: "Sessionize transactions into bursts",
+    difficulty: 3,
+    tags: ["window functions", "sessionization", "LAG"],
+    askedAt: "Sessionization (a new session after an idle gap) is a favourite product-analytics question.",
+    task: "Split each account's transactions into **bursts**: a new burst starts when the gap since the account's previous transaction is **more than 30 days** (the first transaction always starts burst 1). Return `account_id`, `burst` (1, 2, 3, \u2026), `txn_count` and `first_txn` (the burst's earliest txn_date). Order by account_id, burst.",
+    postgres:
+      "SELECT account_id, burst, COUNT(*) AS txn_count, MIN(txn_date) AS first_txn FROM (SELECT account_id, txn_date, SUM(new_burst) OVER (PARTITION BY account_id ORDER BY txn_date, txn_id) AS burst FROM (SELECT account_id, txn_id, txn_date, CASE WHEN COALESCE(txn_date - LAG(txn_date) OVER (PARTITION BY account_id ORDER BY txn_date, txn_id), 31) > 30 THEN 1 ELSE 0 END AS new_burst FROM transactions) a) b GROUP BY account_id, burst ORDER BY account_id, burst",
+    ordered: true,
+    explanation:
+      "The classic three steps: (1) LAG finds the gap to the previous row per account, (2) a CASE flags rows that start a new burst, (3) a running SUM of the flags turns them into a burst number, which you then GROUP BY. COALESCE makes the first row (no previous date) count as a start. Boundary care matters: a gap of exactly 30 days stays in the same burst, so the test is > 30, not >= 30.",
+    hints: ["Compare each transaction's date with the previous one for the same account.", "LAG(txn_date) OVER (PARTITION BY account_id ORDER BY txn_date, txn_id), flag gaps > 30 with CASE.", "SUM(flag) OVER (PARTITION BY account_id ORDER BY \u2026) numbers the bursts; then GROUP BY account_id, burst."],
+    tables: ["transactions"],
+  },
+  {
+    id: "latest-two-orders-lateral",
+    title: "Two latest orders per customer (LATERAL)",
+    difficulty: 3,
+    tags: ["LATERAL", "top-N per group"],
+    askedAt: "Asked as the LATERAL / CROSS APPLY alternative to ROW_NUMBER for top-N per group.",
+    task: "Using a **LATERAL** join, return each customer's **two most recent orders**: `customer_id`, `order_id`, `order_date`. Customers without orders do not appear. Order by customer_id, order_date DESC, order_id DESC.",
+    postgres:
+      "SELECT c.customer_id, o.order_id, o.order_date FROM customers c CROSS JOIN LATERAL (SELECT x.order_id, x.order_date FROM orders x WHERE x.customer_id = c.customer_id ORDER BY x.order_date DESC, x.order_id DESC FETCH FIRST 2 ROWS ONLY) o ORDER BY c.customer_id, o.order_date DESC, o.order_id DESC",
+    ordered: true,
+    explanation:
+      "A LATERAL subquery may reference columns of the tables to its left, so it runs once per customer and can carry its own ORDER BY and row limit. That is the clean way to say 'top N per parent'; ROW_NUMBER() over the whole table does the same with one scan but needs a wrapping query. CROSS JOIN LATERAL drops customers whose subquery returns nothing; use LEFT JOIN LATERAL (\u2026) o ON TRUE to keep them. Oracle 12c+ spells it LATERAL or CROSS APPLY.",
+    hints: ["For every customer, you want a small ranked sub-result of their own orders.", "CROSS JOIN LATERAL (SELECT \u2026 FROM orders x WHERE x.customer_id = c.customer_id \u2026).", "Inside the subquery: ORDER BY order_date DESC, order_id DESC FETCH FIRST 2 ROWS ONLY."],
+    tables: ["customers", "orders"],
+  },
 ];
 
 export const SQL_MISSIONS: Mission[] = ENTRIES.map((e) => ({

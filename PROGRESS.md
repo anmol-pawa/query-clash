@@ -768,3 +768,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Added hidden cases to nth-salary, second-highest, top-per-dept, running-total and latest-order, each with a `naive` wrong query (OFFSET, ROW_NUMBER, RANGE frame, MAX-date join) in `SQL_NAIVE`. `tests/interviewSql.test.ts` checks the reference passes in both dialects, and each naive query passes the visible data but fails the hidden case.
 - Verified: lint, typecheck, full test suite, `build`, `build:pages` (see below). No visual change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F2 (recursive CTE, sessionization, retention, LATERAL, generate_series, JSON operators) using the hidden-case support.
+
+## 2026-10-25 - F2 (part 1): recursive, sessionization and LATERAL SQL missions
+
+- Added 3 SQL coding missions to `content/interview/sql.ts`: management chain via upward recursive CTE (employee 116 -> 100, with Oracle form lacking `RECURSIVE`), sessionizing transactions into bursts (LAG + flag + running SUM; gap of exactly 30 days stays in one burst, which the visible data already exercises), and two latest orders per customer with `CROSS JOIN LATERAL ... FETCH FIRST 2 ROWS ONLY`. Both dialect solutions are checked by the existing per-mission tests.
+- New tests in `tests/interviewSql.test.ts`: chain recomputed by hand, bursts recomputed by a JS sessionizer, LATERAL result recomputed by an independent ranking. (Note: tests that read the DB directly after hidden-case tests must call `resetDatabase` first, because mission setup is not rolled back until the next run.)
+- Verified: lint, typecheck, 731 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: F2b (BOM / reachability, retention, percentiles, anti-join, date series, JSON).

@@ -148,3 +148,56 @@ describe("hidden test cases", () => {
     }
   });
 });
+
+describe("F2 missions", () => {
+  beforeAll(async () => {
+    await resetDatabase(db);
+  });
+  const get = async (id: string) => (await expectedFor(db, SQL_MISSIONS.find((m) => m.id === id)!, "postgres"))!.rows;
+  const rows = async (sql: string) => (await db.query<Record<string, string | number>>(sql)).rows;
+
+  it("management chain climbs 116 -> 112 -> 110 -> 101 -> 100", async () => {
+    expect((await get("iq-management-chain")).map((r) => [Number(r[0]), Number(r[2])])).toEqual([[116, 1], [112, 2], [110, 3], [101, 4], [100, 5]]);
+  });
+
+  it("txn bursts match a hand-rolled JS sessionizer", async () => {
+    const t = await rows("SELECT account_id, txn_id, to_char(txn_date, 'YYYY-MM-DD') AS d FROM transactions ORDER BY account_id, txn_date, txn_id");
+    const expected: (string | number)[][] = [];
+    let prev: { acc: number; ms: number } | null = null;
+    for (const r of t) {
+      const acc = Number(r.account_id);
+      const ms = Date.parse(`${r.d}T00:00:00Z`);
+      const start = !prev || prev.acc !== acc || (ms - prev.ms) / 86400000 > 30;
+      if (start) expected.push([acc, expected.filter((e) => e[0] === acc).length + 1, 0, String(r.d)]);
+      expected[expected.length - 1][2] = Number(expected[expected.length - 1][2]) + 1;
+      prev = { acc, ms };
+    }
+    const got = (await get("iq-txn-bursts")).map((r) => [Number(r[0]), Number(r[1]), Number(r[2]), String(r[3]).slice(0, 10)]);
+    expect(got).toEqual(expected);
+  });
+
+  it("latest two orders agrees with an independent ranking", async () => {
+    const all = await rows("SELECT customer_id, order_id FROM orders ORDER BY customer_id, order_date DESC, order_id DESC");
+    const seen = new Map<number, number>();
+    const expected: number[][] = [];
+    for (const r of all) {
+      const c = Number(r.customer_id);
+      const n = seen.get(c) ?? 0;
+      if (n < 2) expected.push([c, Number(r.order_id)]);
+      seen.set(c, n + 1);
+    }
+    expect((await get("iq-latest-two-orders-lateral")).map((r) => [Number(r[0]), Number(r[1])])).toEqual(expected);
+  });
+});
+
+describe("F2 boundary", () => {
+  beforeAll(async () => {
+    await resetDatabase(db);
+  });
+  it("the visible data has a gap of exactly 30 days that must stay inside one burst", async () => {
+    const r = await db.query<{ n: number }>("SELECT COUNT(*)::int AS n FROM (SELECT txn_date - LAG(txn_date) OVER (PARTITION BY account_id ORDER BY txn_date, txn_id) AS g FROM transactions) t WHERE g = 30");
+    expect(r.rows[0].n).toBeGreaterThan(0);
+    const q = await expectedFor(db, SQL_MISSIONS.find((m) => m.id === "iq-txn-bursts")!, "postgres");
+    expect(q!.rows.filter((x) => Number(x[0]) === 13).length).toBe(4); // Jan 8 | Apr 13 + May 10 | Aug 2 | Oct 6 + Nov 5 (30 days apart)
+  });
+});
