@@ -743,3 +743,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added AI1: 6 questions (`content/interview/engineFine.ts`): PostgreSQL TOAST, XID wraparound and freezing, HOT updates; Oracle ORA-01555 and redo vs undo; page count (12346). Keyed and recomputed in `tests/interviewEngineFine.test.ts`.
 - Verified: lint, typecheck, 704 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more art polish such as back sprites for bosses).
+
+## 2026-10-25 - AJ1: B+ tree and hashing fine-print questions
+
+- ROADMAP had no unchecked tasks, so added AJ1: 6 storage questions (`content/interview/treeHashFine.ts`): non-root leaf minimum (2), three-level capacity (1,000,000), leaf split (2), extendible directory size (8), hash index and ranges, leaf sibling links. Keyed and recomputed in `tests/interviewTreeHashFine.test.ts` (with a leaf-split simulator).
+- Verified: lint, typecheck, 707 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more art polish such as back sprites for bosses).
