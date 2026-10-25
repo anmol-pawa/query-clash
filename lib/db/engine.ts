@@ -56,6 +56,8 @@ export interface Verdict {
   /** Planner cost of the player's final SELECT vs the reference answer's. */
   cost?: { player: number; reference: number };
   plan?: string;
+  /** Set when the visible data matched but the hidden test case did not. */
+  hidden?: { expected: ResultSet | null; actual: ResultSet | null };
 }
 
 type Db = PGlite;
@@ -234,12 +236,33 @@ async function planCost(db: Db, sql: string): Promise<{ cost: number; text: stri
   }
 }
 
+/** Re-run the reference and the player's (already translated) SQL on the mission's hidden edge-case data. */
+async function hiddenCase(db: Db, m: Mission, executed: string, dialect: Dialect) {
+  const derived: Mission = { ...m, id: `${m.id}#hidden`, setup: `${m.setup ?? ""}\n${m.hidden}` };
+  const expected = await expectedFor(db, derived, dialect);
+  const { run, observed } = await runMission(db, derived, executed, "postgres");
+  if (!run.ok) return { ok: false as const, reason: `Your query worked on the visible data but failed on a hidden test case: ${run.error.message}`, expected, actual: null };
+  const cmp = compareResults(expected, observed, !!m.ordered);
+  if (cmp.ok) return { ok: true as const };
+  const rows = (r: ResultSet | null) => (r ? r.rows.slice(0, 3).map((x) => x.map((c) => (c === null ? "NULL" : String(c))).join(", ")).join(" | ") : "no result");
+  return {
+    ok: false as const,
+    reason: `Passes the visible data, but fails a hidden test case with extra edge-case rows (ties, NULLs, gaps). ${cmp.reason ?? ""} Expected: ${rows(expected)}. Yours: ${rows(observed)}.`,
+    expected,
+    actual: observed,
+  };
+}
+
 export async function evaluate(db: Db, m: Mission, sql: string, dialect: Dialect): Promise<Verdict> {
   const expected = await expectedFor(db, m, dialect);
   const { run, observed } = await runMission(db, m, sql, dialect);
   if (!run.ok) return { run, correct: false, expected: expected ?? undefined };
 
   const cmp = compareResults(expected, observed, !!m.ordered);
+  if (cmp.ok && m.hidden && !m.check) {
+    const h = await hiddenCase(db, m, run.executed, dialect);
+    if (!h.ok) return { run, correct: false, reason: h.reason, expected: expected ?? undefined, hidden: { expected: h.expected, actual: h.actual } };
+  }
   let cost: Verdict["cost"];
   let plan: string | undefined;
   if (cmp.ok && !m.check) {

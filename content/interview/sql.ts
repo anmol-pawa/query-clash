@@ -17,6 +17,10 @@ interface Entry {
   /** Oracle-flavoured answer; defaults to the PostgreSQL one when the syntax is shared. */
   oracle?: string;
   ordered?: boolean;
+  /** Hidden edge-case rows (raw PostgreSQL) the answer must also survive; see `Mission.hidden`. */
+  hidden?: string;
+  /** A plausible but wrong query that passes the visible data and must fail the hidden case (tested). */
+  naive?: string;
   explanation: string;
   hints: [string, string, string];
   tables: string[];
@@ -31,6 +35,8 @@ const ENTRIES: Entry[] = [
     askedAt: "The single most-asked SQL interview question.",
     task: "Return the **3rd highest distinct salary** among employees, as one column `salary`.",
     postgres: "SELECT salary FROM (SELECT DISTINCT salary, DENSE_RANK() OVER (ORDER BY salary DESC) AS rnk FROM employees) t WHERE rnk = 3",
+    hidden: "INSERT INTO employees (emp_id, first_name, last_name, salary, hire_date, dept_id) VALUES (900, 'Tie', 'Alpha', 250000, DATE '2020-01-01', 10), (901, 'Tie', 'Beta', 250000, DATE '2020-01-02', 10);",
+    naive: "SELECT salary FROM employees ORDER BY salary DESC LIMIT 1 OFFSET 2",
     explanation:
       "DENSE_RANK numbers distinct salary values without gaps, so ties share a rank and rank 3 is the third distinct value. ROW_NUMBER would count tied rows separately, and RANK leaves gaps after ties. Without window functions: ORDER BY salary DESC OFFSET 2 ROWS FETCH FIRST 1 ROW ONLY over DISTINCT salaries.",
     hints: ["Ties matter: two people can share a salary.", "A ranking window function that does not skip numbers after ties.", "DENSE_RANK() OVER (ORDER BY salary DESC), then filter the rank in an outer query."],
@@ -44,6 +50,8 @@ const ENTRIES: Entry[] = [
     askedAt: "The follow-up: 'now do it without window functions'.",
     task: "Return the **second highest distinct salary** as a single value named `salary`, without using window functions or LIMIT/FETCH.",
     postgres: "SELECT MAX(salary) AS salary FROM employees WHERE salary < (SELECT MAX(salary) FROM employees)",
+    hidden: "INSERT INTO employees (emp_id, first_name, last_name, salary, hire_date, dept_id) VALUES (900, 'Tie', 'Alpha', 250000, DATE '2020-01-01', 10);",
+    naive: "SELECT salary FROM employees ORDER BY salary DESC LIMIT 1 OFFSET 1",
     explanation:
       "The inner query finds the top salary; the outer MAX over everything below it is the runner-up. This handles ties automatically and returns NULL (not an error) if there is no second value, unlike LIMIT 1 OFFSET 1.",
     hints: ["Find the maximum first.", "Take the maximum of the salaries strictly below it.", "SELECT MAX(salary) … WHERE salary < (SELECT MAX(salary) …)"],
@@ -113,6 +121,8 @@ const ENTRIES: Entry[] = [
     postgres:
       "SELECT dept_id, last_name, salary FROM (SELECT dept_id, last_name, salary, RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS rnk FROM employees WHERE dept_id IS NOT NULL) t WHERE rnk <= 2 ORDER BY dept_id, salary DESC, last_name",
     ordered: true,
+    hidden: "INSERT INTO employees (emp_id, first_name, last_name, salary, hire_date, dept_id) VALUES (900, 'Tie', 'Alpha', 190000, DATE '2020-01-01', 20), (901, 'Tie', 'Beta', 190000, DATE '2020-01-02', 20);",
+    naive: "SELECT dept_id, last_name, salary FROM (SELECT dept_id, last_name, salary, ROW_NUMBER() OVER (PARTITION BY dept_id ORDER BY salary DESC, last_name) AS rnk FROM employees WHERE dept_id IS NOT NULL) t WHERE rnk <= 2 ORDER BY dept_id, salary DESC, last_name",
     explanation:
       "PARTITION BY restarts the ranking in each department. A window function cannot appear in WHERE, so rank in a subquery and filter outside. Use ROW_NUMBER for exactly N rows, RANK to keep ties, DENSE_RANK to keep the top N distinct values.",
     hints: ["Rank inside each department, not over the whole table.", "RANK() OVER (PARTITION BY … ORDER BY …) in a subquery, filter outside.", "RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC), then WHERE rnk <= 2"],
@@ -140,6 +150,8 @@ const ENTRIES: Entry[] = [
     task: "For account **3**, list each transaction (`txn_id`, `amount`) with the **running total** of amount as `running`, in order of txn_date then txn_id.",
     postgres: "SELECT txn_id, amount, SUM(amount) OVER (ORDER BY txn_date, txn_id) AS running FROM transactions WHERE account_id = 3 ORDER BY txn_date, txn_id",
     ordered: true,
+    hidden: "INSERT INTO transactions (txn_id, account_id, txn_date, amount, txn_type) SELECT 9000 + txn_id, account_id, txn_date, 1, 'DEPOSIT' FROM transactions WHERE account_id = 3;",
+    naive: "SELECT txn_id, amount, SUM(amount) OVER (ORDER BY txn_date) AS running FROM transactions WHERE account_id = 3 ORDER BY txn_date, txn_id",
     explanation:
       "SUM() OVER (ORDER BY …) defaults to a frame from the first row to the current row. Add txn_id to break date ties: with RANGE framing, rows sharing the same date would all show the same total. Filter with WHERE first; windows run after it.",
     hints: ["A cumulative sum, not a group total.", "SUM(...) OVER with an ORDER BY and no PARTITION.", "SUM(amount) OVER (ORDER BY txn_date, txn_id)"],
@@ -183,6 +195,8 @@ const ENTRIES: Entry[] = [
     postgres:
       "SELECT customer_id, order_id FROM (SELECT customer_id, order_id, ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC, order_id DESC) AS rn FROM orders) t WHERE rn = 1 ORDER BY customer_id",
     ordered: true,
+    hidden: "INSERT INTO orders (order_id, customer_id, order_date, status) SELECT 9000 + order_id, customer_id, order_date, 'PENDING' FROM orders;",
+    naive: "SELECT o.customer_id, o.order_id FROM orders o WHERE o.order_date = (SELECT MAX(order_date) FROM orders x WHERE x.customer_id = o.customer_id) ORDER BY o.customer_id",
     explanation:
       "ROW_NUMBER with a full tie-break returns exactly one row per customer. Joining to MAX(order_date) instead would return several rows when a customer ordered twice on the latest day.",
     hints: ["One row per customer, the newest order.", "ROW_NUMBER partitioned by customer, newest first.", "ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC, order_id DESC) = 1"],
@@ -516,6 +530,7 @@ export const SQL_MISSIONS: Mission[] = ENTRIES.map((e) => ({
   taunt: "",
   task: e.task,
   ordered: e.ordered,
+  hidden: e.hidden,
   solution: { postgres: e.postgres, oracle: e.oracle ?? e.postgres },
   hints: e.hints,
   codex: [],
@@ -534,3 +549,6 @@ export const SQL: Question[] = ENTRIES.map((e) => ({
   tags: e.tags,
   askedAt: e.askedAt,
 }));
+
+/** Plausible-but-wrong answers per mission id: pass the visible data, fail the hidden case (checked by tests). */
+export const SQL_NAIVE: Record<string, string> = Object.fromEntries(ENTRIES.filter((e) => e.naive).map((e) => [`iq-${e.id}`, e.naive!]));

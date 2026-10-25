@@ -117,3 +117,34 @@ describe("interview SQL bank, D5 additions", () => {
     expect((await get("iq-dept-above-budget-avg")).length).toBe(avg.length);
   });
 });
+
+describe("hidden test cases", () => {
+  const withHidden = SQL_MISSIONS.filter((m) => m.hidden);
+
+  it("covers the classic edge-case questions", () => {
+    expect(withHidden.map((m) => m.id)).toEqual(
+      expect.arrayContaining(["iq-nth-salary", "iq-second-highest-no-window", "iq-top-per-dept", "iq-running-total", "iq-latest-order"]),
+    );
+  });
+
+  for (const m of withHidden) {
+    it(`${m.id}: the reference passes the hidden data in both dialects`, async () => {
+      expect((await evaluate(db, m, m.solution.postgres, "postgres")).correct).toBe(true);
+      expect((await evaluate(db, m, m.solution.oracle, "oracle")).correct).toBe(true);
+    });
+  }
+
+  it("a naive query passes the visible data but fails the hidden case", async () => {
+    const naives = (await import("@/content/interview/sql")).SQL_NAIVE;
+    expect(Object.keys(naives).length).toBeGreaterThanOrEqual(5);
+    for (const [id, sql] of Object.entries(naives)) {
+      const m = SQL_MISSIONS.find((x) => x.id === id)!;
+      const without = { ...m, hidden: undefined };
+      expect((await evaluate(db, without, sql, "postgres")).correct, `${id} naive should pass visible`).toBe(true);
+      const v = await evaluate(db, m, sql, "postgres");
+      expect(v.correct, `${id} naive should fail hidden`).toBe(false);
+      expect(v.hidden, id).toBeDefined();
+      expect(v.reason).toMatch(/hidden test case/);
+    }
+  });
+});

@@ -761,3 +761,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added AL1: 6 questions (`content/interview/programmableFine.ts`, topic `query`): materialized view staleness, trigger firing count (6), updatable views, procedure vs function COMMIT, cursor position (3 unread), WITH CHECK OPTION. Keyed and recomputed in `tests/interviewProgrammableFine.test.ts`.
 - Verified: lint, typecheck, 714 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more art polish).
+
+## 2026-10-25 - F1: hidden test cases for SQL coding missions
+
+- The classic F1 missions (Nth salary, top-N per group, running total, month-over-month, islands, pivot, managers) already existed in the SQL bank, so this run added the missing piece: a **hidden test dataset**. `Mission.hidden` is raw PostgreSQL adding edge-case rows (ties, same-day rows). After a query matches the visible data, `evaluate` (`lib/db/engine.ts`) reruns the reference and the player's query on the hidden data in a rolled-back transaction. On a mismatch the verdict is wrong, with `reason` giving the expected vs your first rows, and `Verdict.hidden` holding both result sets.
+- Added hidden cases to nth-salary, second-highest, top-per-dept, running-total and latest-order, each with a `naive` wrong query (OFFSET, ROW_NUMBER, RANGE frame, MAX-date join) in `SQL_NAIVE`. `tests/interviewSql.test.ts` checks the reference passes in both dialects, and each naive query passes the visible data but fails the hidden case.
+- Verified: lint, typecheck, full test suite, `build`, `build:pages` (see below). No visual change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: F2 (recursive CTE, sessionization, retention, LATERAL, generate_series, JSON operators) using the hidden-case support.

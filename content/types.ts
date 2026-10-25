@@ -17,6 +17,11 @@ export interface Mission {
   setup?: string;
   /** Raw PostgreSQL query whose result is compared instead of the player's output. */
   check?: string;
+  /**
+   * Hidden test case: raw PostgreSQL that adds edge-case rows (ties, NULLs, gaps). A query that matches the
+   * visible data must also match the reference on this data, otherwise it is hard-coded or too naive.
+   */
+  hidden?: string;
   /** Row order matters (the task asks for ORDER BY). */
   ordered?: boolean;
   /** Progressive hints: concept → structure → near-answer. */
