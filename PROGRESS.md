@@ -749,3 +749,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added AJ1: 6 storage questions (`content/interview/treeHashFine.ts`): non-root leaf minimum (2), three-level capacity (1,000,000), leaf split (2), extendible directory size (8), hash index and ranges, leaf sibling links. Keyed and recomputed in `tests/interviewTreeHashFine.test.ts` (with a leaf-split simulator).
 - Verified: lint, typecheck, 707 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more art polish such as back sprites for bosses).
+
+## 2026-10-25 - AK1: NULL and set-operation fine-print questions
+
+- ROADMAP had no unchecked tasks, so added AK1: 6 questions (`content/interview/nullSetFine.ts`, topic `query`): NULL = NULL, NOT IN with a NULL (0 rows), COUNT(DISTINCT) ignoring NULLs (2), UNION ALL (8) vs UNION (4), INTERSECT treating NULLs as equal. Keyed and recomputed in `tests/interviewNullSetFine.test.ts` (with a three-valued NOT IN simulator).
+- Verified: lint, typecheck, 711 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more art polish such as back sprites for bosses).
