@@ -755,3 +755,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added AK1: 6 questions (`content/interview/nullSetFine.ts`, topic `query`): NULL = NULL, NOT IN with a NULL (0 rows), COUNT(DISTINCT) ignoring NULLs (2), UNION ALL (8) vs UNION (4), INTERSECT treating NULLs as equal. Keyed and recomputed in `tests/interviewNullSetFine.test.ts` (with a three-valued NOT IN simulator).
 - Verified: lint, typecheck, 711 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more art polish such as back sprites for bosses).
+
+## 2026-10-25 - AL1: programmable-database fine-print questions
+
+- ROADMAP had no unchecked tasks, so added AL1: 6 questions (`content/interview/programmableFine.ts`, topic `query`): materialized view staleness, trigger firing count (6), updatable views, procedure vs function COMMIT, cursor position (3 unread), WITH CHECK OPTION. Keyed and recomputed in `tests/interviewProgrammableFine.test.ts`.
+- Verified: lint, typecheck, 714 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more art polish).
