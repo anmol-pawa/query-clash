@@ -731,3 +731,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added AG1: 6 concurrency questions (`content/interview/schedFine.ts`): timestamp-ordering write rejection, Thomas write rule, recoverability, cascading abort count (2), deadlock cycle size (3), what strict 2PL does not guarantee. Keyed and recomputed in `tests/interviewSchedFine.test.ts` (with small recoverability, cascade and cycle simulators).
 - Verified: lint, typecheck, 698 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more questions for under-covered topics).
+
+## 2026-10-25 - AH1: isolation-level fine-print questions
+
+- ROADMAP had no unchecked tasks, so added AH1: 6 isolation questions (`content/interview/isolationFine.ts`): lowest level preventing dirty reads, PostgreSQL READ UNCOMMITTED = READ COMMITTED, PostgreSQL REPEATABLE READ has no phantoms, lost update (10), Oracle SERIALIZABLE write skew, Oracle has no READ UNCOMMITTED. Keyed and recomputed in `tests/interviewIsolationFine.test.ts`.
+- Verified: lint, typecheck, 701 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more questions for under-covered topics).
