@@ -569,6 +569,70 @@ const ENTRIES: Entry[] = [
     hints: ["For every customer, you want a small ranked sub-result of their own orders.", "CROSS JOIN LATERAL (SELECT \u2026 FROM orders x WHERE x.customer_id = c.customer_id \u2026).", "Inside the subquery: ORDER BY order_date DESC, order_id DESC FETCH FIRST 2 ROWS ONLY."],
     tables: ["customers", "orders"],
   },
+  {
+    id: "non-managers-not-exists",
+    title: "Employees who manage nobody (NULL trap)",
+    difficulty: 2,
+    tags: ["anti-join", "NOT EXISTS", "NULL"],
+    askedAt: "The NOT IN vs NOT EXISTS NULL trap is a staple of 'find the rows with no match' questions.",
+    task: "List `emp_id` and `last_name` of every employee who is **not the manager of anyone**. Order by emp_id.",
+    postgres: "SELECT e.emp_id, e.last_name FROM employees e WHERE NOT EXISTS (SELECT 1 FROM employees r WHERE r.manager_id = e.emp_id) ORDER BY e.emp_id",
+    ordered: true,
+    explanation:
+      "NOT EXISTS is a true anti-join and is safe with NULLs. The tempting `emp_id NOT IN (SELECT manager_id FROM employees)` returns **no rows at all** here: the top manager has manager_id NULL, so the list contains a NULL and `x NOT IN (..., NULL)` is never true (it is UNKNOWN for every non-matching x). Fix NOT IN by filtering `WHERE manager_id IS NOT NULL`, or use NOT EXISTS / LEFT JOIN ... IS NULL.",
+    hints: ["Find employees for whom no other employee points at them.", "NOT EXISTS with a correlated subquery on manager_id = e.emp_id.", "Avoid NOT IN here: the CEO's NULL manager_id poisons the list."],
+    tables: ["employees"],
+  },
+  {
+    id: "monthly-orders-zero-fill",
+    title: "Orders per month, including empty months",
+    difficulty: 3,
+    tags: ["date series", "recursive CTE", "generate_series", "outer join"],
+    askedAt: "Gap-filling a time series: GROUP BY alone drops months with no rows.",
+    task: "Return every calendar month from the **first to the last order month** with its order count: `month` (as 'YYYY-MM') and `orders`. Months with no orders must appear with 0. Order by month.",
+    postgres:
+      "WITH bounds AS (SELECT DATE_TRUNC('month', MIN(order_date))::date AS lo, DATE_TRUNC('month', MAX(order_date))::date AS hi FROM orders), months AS (SELECT generate_series(lo, hi, INTERVAL '1 month')::date AS m FROM bounds) SELECT TO_CHAR(months.m, 'YYYY-MM') AS month, COUNT(o.order_id) AS orders FROM months LEFT JOIN orders o ON o.order_date >= months.m AND o.order_date < months.m + INTERVAL '1 month' GROUP BY months.m ORDER BY months.m",
+    oracle:
+      "WITH bounds (lo, hi) AS (SELECT TRUNC(MIN(order_date), 'MM'), TRUNC(MAX(order_date), 'MM') FROM orders), months (m, hi) AS (SELECT lo, hi FROM bounds UNION ALL SELECT ADD_MONTHS(m, 1), hi FROM months WHERE m < hi) SELECT TO_CHAR(months.m, 'YYYY-MM') AS month, COUNT(o.order_id) AS orders FROM months LEFT JOIN orders o ON o.order_date >= months.m AND o.order_date < ADD_MONTHS(months.m, 1) GROUP BY months.m ORDER BY months.m",
+    hidden: "INSERT INTO orders (order_id, customer_id, order_date, status) VALUES (950, 1, DATE '2025-03-10', 'DELIVERED');",
+    naive: "SELECT TO_CHAR(order_date, 'YYYY-MM') AS month, COUNT(*) AS orders FROM orders GROUP BY TO_CHAR(order_date, 'YYYY-MM') ORDER BY month",
+    ordered: true,
+    explanation:
+      "Aggregating orders alone can only produce months that have orders. Build the full calendar first (PostgreSQL: generate_series with a 1-month step; Oracle: a recursive CTE using ADD_MONTHS, or CONNECT BY LEVEL), then LEFT JOIN the facts onto it. Count a column from the right-hand table (COUNT(o.order_id)), never COUNT(*), or empty months would show 1. Use a half-open range (>= month start, < next month start) so no timestamp on the last day is lost.",
+    hints: ["You need a row per month even when there are no orders.", "Generate the month list, then LEFT JOIN orders onto it.", "COUNT(o.order_id), not COUNT(*), and join on a half-open date range."],
+    tables: ["orders"],
+  },
+  {
+    id: "median-salary-dept",
+    title: "Median salary per department",
+    difficulty: 2,
+    tags: ["percentile", "PERCENTILE_CONT", "aggregates"],
+    askedAt: "'Median' is not an aggregate function; interviewers want PERCENTILE_CONT or a ROW_NUMBER approach.",
+    task: "For each department that has employees, return `dept_id` and the **median salary** as `median_salary`. Order by dept_id.",
+    postgres: "SELECT dept_id, PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY salary) AS median_salary FROM employees WHERE dept_id IS NOT NULL GROUP BY dept_id ORDER BY dept_id",
+    ordered: true,
+    explanation:
+      "PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY salary) interpolates: with an even number of rows it averages the two middle values. PERCENTILE_DISC(0.5) instead returns an actual value from the data (the lower middle one). Both PostgreSQL and Oracle support the WITHIN GROUP syntax. Without it, number rows with ROW_NUMBER and COUNT(*) OVER and average the one or two middle rows.",
+    hints: ["AVG is the mean, not the median.", "An ordered-set aggregate: WITHIN GROUP (ORDER BY salary).", "PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY salary) ... GROUP BY dept_id"],
+    tables: ["employees"],
+  },
+  {
+    id: "monthly-retention",
+    title: "Month-over-month customer retention",
+    difficulty: 3,
+    tags: ["retention", "self join", "date arithmetic", "cohort"],
+    askedAt: "Retention / returning-user counts are a common product-analytics SQL round.",
+    task: "For each month with orders, return `month` ('YYYY-MM'), `active` (distinct customers who ordered that month) and `retained` (of those, how many **also ordered in the previous calendar month**). Order by month.",
+    postgres:
+      "WITH m AS (SELECT DISTINCT customer_id, DATE_TRUNC('month', order_date)::date AS mth FROM orders) SELECT TO_CHAR(cur.mth, 'YYYY-MM') AS month, COUNT(*) AS active, COUNT(prev.customer_id) AS retained FROM m cur LEFT JOIN m prev ON prev.customer_id = cur.customer_id AND prev.mth = (cur.mth - INTERVAL '1 month')::date GROUP BY cur.mth ORDER BY cur.mth",
+    oracle:
+      "WITH m AS (SELECT DISTINCT customer_id, TRUNC(order_date, 'MM') AS mth FROM orders) SELECT TO_CHAR(cur.mth, 'YYYY-MM') AS month, COUNT(*) AS active, COUNT(prev.customer_id) AS retained FROM m cur LEFT JOIN m prev ON prev.customer_id = cur.customer_id AND prev.mth = ADD_MONTHS(cur.mth, -1) GROUP BY cur.mth ORDER BY cur.mth",
+    ordered: true,
+    explanation:
+      "First reduce orders to one row per (customer, month) with DISTINCT so repeat buyers are not double counted. Then self-join that set to itself shifted back one month: a match means the customer was also active last month. LEFT JOIN keeps every active customer, and COUNT(prev.customer_id) counts only the matched ones (COUNT(*) would count all). The first month always has 0 retained.",
+    hints: ["One row per customer per month first.", "Self-join the monthly set: same customer, previous month.", "LEFT JOIN, then COUNT(*) for active and COUNT(prev.customer_id) for retained."],
+    tables: ["orders"],
+  },
 ];
 
 export const SQL_MISSIONS: Mission[] = ENTRIES.map((e) => ({

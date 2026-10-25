@@ -201,3 +201,64 @@ describe("F2 boundary", () => {
     expect(q!.rows.filter((x) => Number(x[0]) === 13).length).toBe(4); // Jan 8 | Apr 13 + May 10 | Aug 2 | Oct 6 + Nov 5 (30 days apart)
   });
 });
+
+describe("F2b answers", () => {
+  const rows = async (sql: string) => (await db.query<Record<string, unknown>>(sql)).rows;
+  const get = async (id: string) => (await expectedFor(db, SQL_MISSIONS.find((m) => m.id === id)!, "postgres"))!.rows;
+  beforeAll(async () => {
+    await resetDatabase(db);
+  });
+
+  it("NOT IN with a NULL manager returns nothing, NOT EXISTS returns the leaf employees", async () => {
+    expect(await rows("SELECT emp_id FROM employees WHERE emp_id NOT IN (SELECT manager_id FROM employees)")).toHaveLength(0);
+    const mgrs = new Set((await rows("SELECT manager_id FROM employees WHERE manager_id IS NOT NULL")).map((r) => Number(r.manager_id)));
+    const all = (await rows("SELECT emp_id FROM employees ORDER BY emp_id")).map((r) => Number(r.emp_id));
+    expect((await get("iq-non-managers-not-exists")).map((r) => Number(r[0]))).toEqual(all.filter((e) => !mgrs.has(e)));
+  });
+
+  it("month series is gap-free and covers every order", async () => {
+    const res = (await get("iq-monthly-orders-zero-fill")).map((r) => [String(r[0]), Number(r[1])]);
+    const dates = (await rows("SELECT to_char(order_date, 'YYYY-MM') AS ym FROM orders")).map((r) => String(r.ym));
+    const sorted = [...dates].sort();
+    const [lo, hi] = [sorted[0], sorted[sorted.length - 1]];
+    const expected: [string, number][] = [];
+    let [y, mo] = lo.split("-").map(Number);
+    for (;;) {
+      const ym = `${y}-${String(mo).padStart(2, "0")}`;
+      expected.push([ym, dates.filter((d) => d === ym).length]);
+      if (ym === hi) break;
+      mo++;
+      if (mo > 12) {
+        mo = 1;
+        y++;
+      }
+    }
+    expect(res).toEqual(expected);
+  });
+
+  it("median per department matches a JS median", async () => {
+    const sal = await rows("SELECT dept_id, salary::float8 AS s FROM employees WHERE dept_id IS NOT NULL ORDER BY dept_id, salary");
+    const by = new Map<number, number[]>();
+    for (const r of sal) by.set(Number(r.dept_id), [...(by.get(Number(r.dept_id)) ?? []), Number(r.s)]);
+    const expected = [...by].sort((a, b) => a[0] - b[0]).map(([d, v]) => [d, v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2]);
+    expect((await get("iq-median-salary-dept")).map((r) => [Number(r[0]), Number(r[1])])).toEqual(expected);
+    expect(expected.some(([d]) => (by.get(d as number)!.length % 2) === 0)).toBe(true);
+  });
+
+  it("retention agrees with a JS set computation", async () => {
+    const o = await rows("SELECT DISTINCT customer_id, to_char(order_date, 'YYYY-MM') AS ym FROM orders");
+    const key = (c: unknown, ym: string) => `${c}|${ym}`;
+    const present = new Set(o.map((r) => key(r.customer_id, String(r.ym))));
+    const prevYm = (ym: string) => {
+      const [y, m] = ym.split("-").map(Number);
+      return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, "0")}`;
+    };
+    const months = [...new Set(o.map((r) => String(r.ym)))].sort();
+    const expected = months.map((ym) => {
+      const cs = o.filter((r) => r.ym === ym).map((r) => r.customer_id);
+      return [ym, cs.length, cs.filter((c) => present.has(key(c, prevYm(ym)))).length];
+    });
+    expect((await get("iq-monthly-retention")).map((r) => [String(r[0]), Number(r[1]), Number(r[2])])).toEqual(expected);
+    expect(expected.some((e) => Number(e[2]) > 0)).toBe(true);
+  });
+});

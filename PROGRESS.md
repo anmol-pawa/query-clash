@@ -775,3 +775,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - New tests in `tests/interviewSql.test.ts`: chain recomputed by hand, bursts recomputed by a JS sessionizer, LATERAL result recomputed by an independent ranking. (Note: tests that read the DB directly after hidden-case tests must call `resetDatabase` first, because mission setup is not rolled back until the next run.)
 - Verified: lint, typecheck, 731 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F2b (BOM / reachability, retention, percentiles, anti-join, date series, JSON).
+
+## 2026-10-25 - F2b: anti-join, date series, median and retention SQL missions
+
+- Added 4 SQL coding missions to `content/interview/sql.ts`: employees managing nobody (NOT EXISTS; NOT IN returns 0 rows because of the CEO's NULL manager_id), orders per month with zero-filled months (PostgreSQL `generate_series`, Oracle recursive CTE with ADD_MONTHS; a hidden order in 2025-03 creates empty months and a GROUP BY-only naive query fails it), median salary per department (`PERCENTILE_CONT ... WITHIN GROUP`), and month-over-month retention (distinct customer-months self-joined to the previous month).
+- New `F2b answers` tests in `tests/interviewSql.test.ts` recompute each result independently in JS (leaf employees, month series, medians, retention) and assert the NOT IN trap returns nothing.
+- Verified: lint, typecheck, 744 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: F2c (bill of materials / reachability with `Mission.setup`, funnel, JSON operators).
