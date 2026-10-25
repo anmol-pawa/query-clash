@@ -737,3 +737,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - ROADMAP had no unchecked tasks, so added AH1: 6 isolation questions (`content/interview/isolationFine.ts`): lowest level preventing dirty reads, PostgreSQL READ UNCOMMITTED = READ COMMITTED, PostgreSQL REPEATABLE READ has no phantoms, lost update (10), Oracle SERIALIZABLE write skew, Oracle has no READ UNCOMMITTED. Keyed and recomputed in `tests/interviewIsolationFine.test.ts`.
 - Verified: lint, typecheck, 701 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more questions for under-covered topics).
+
+## 2026-10-25 - AI1: engine internals fine-print questions
+
+- ROADMAP had no unchecked tasks, so added AI1: 6 questions (`content/interview/engineFine.ts`): PostgreSQL TOAST, XID wraparound and freezing, HOT updates; Oracle ORA-01555 and redo vs undo; page count (12346). Keyed and recomputed in `tests/interviewEngineFine.test.ts`.
+- Verified: lint, typecheck, 704 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: ROADMAP has no unchecked tasks; add new ideas (more SQL missions, more art polish such as back sprites for bosses).
