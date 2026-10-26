@@ -789,3 +789,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - New `F2c answers` tests in `tests/interviewSql.test.ts`: BOM totals by hand (BOLT 8, SPOKE 64...), funnel recounted in JS and checked non-increasing, JSON aggregation recomputed in JS. Both dialect solutions are covered by the per-mission tests.
 - Verified: lint, typecheck, 753 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F3 (schema design drills graded by rules).
+
+## 2026-10-26 - F3a: schema design question bank
+
+- F3 split into F3a (questions), F3b (rule-based schema grader) and F3c (build-the-tables UI) in `ROADMAP.md`.
+- Added 16 questions in `content/interview/schemaDesignFine.ts` (topic "er"): soft delete uniqueness via partial unique index and its costs, trigger-written append-only audit tables, multi-tenancy models, composite tenant foreign keys and row-level security, ID choice (int4 exhaustion in days, Snowflake timestamp years and per-ms capacity, UUIDv4 vs UUIDv7 B+ tree behaviour, enumerable IDs), and design-the-schema scenarios (follows junction table, order price snapshot, exclusion constraint against double booking, URL shortener keys, timestamptz).
+- `tests/interviewSchemaDesignFine.test.ts` recomputes the numeric answers (24.9 days, ~70 years, 4096 per ms) and checks every answer key.
+- Verified: lint, typecheck, 757 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: F3b (rule-based schema grader).
