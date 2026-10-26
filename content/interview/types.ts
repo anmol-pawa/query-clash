@@ -29,6 +29,8 @@ interface QuestionBase {
   askedAt?: string;
   /** Small named relations shown under the prompt (relational-algebra problems). */
   tables?: Relation[];
+  /** Monospace text shown under the prompt (an EXPLAIN plan to read). */
+  plan?: string;
   /** A precedence graph drawn under the prompt (the question is about the graph itself). */
   graph?: PrecedenceGraphSpec;
   /** A precedence graph drawn in the explanation (the solution's graph, hidden until the player answers). */

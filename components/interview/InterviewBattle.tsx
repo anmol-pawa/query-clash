@@ -26,6 +26,7 @@ import { dayNumber, recordAnswer, tally } from "@/lib/leitner";
 import { level, updateSave, useSave } from "@/lib/save";
 import { PrecedenceGraph } from "./PrecedenceGraph";
 import { PromptTables } from "./PromptTables";
+import { PlanBlock } from "./PlanBlock";
 import { AnswerPanel } from "./AnswerPanel";
 
 const FIXED_IDS = new Set(QUESTIONS.map((q) => q.id));
@@ -232,6 +233,7 @@ export function InterviewBattle({ topic, deck, seed, onExit, onRematch, onVictor
               {q.prompt}
             </h2>
             {q.tables && <PromptTables tables={q.tables} />}
+            {q.plan && <PlanBlock plan={q.plan} />}
             {q.graph && <PrecedenceGraph graph={q.graph} />}
             <div className="mt-3">
               <AnswerPanel key={`${s.index}-${q.id}`} q={q} initialSteps={steps} locked={locked} picked={picked} onAnswer={answer} />

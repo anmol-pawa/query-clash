@@ -14,6 +14,7 @@ import { updateSave } from "@/lib/save";
 import { AnswerPanel } from "./AnswerPanel";
 import { PrecedenceGraph } from "./PrecedenceGraph";
 import { PromptTables } from "./PromptTables";
+import { PlanBlock } from "./PlanBlock";
 
 const ACCENT = "#f59e0b";
 const RIGHT = "#4ade80";
@@ -160,6 +161,7 @@ export function MockInterview({ deck, seed, onExit, onRetry }: { deck: Question[
             {q.prompt}
           </h2>
           {q.tables && <PromptTables tables={q.tables} />}
+          {q.plan && <PlanBlock plan={q.plan} />}
           {q.graph && <PrecedenceGraph graph={q.graph} />}
           <div className="mt-3">
             <AnswerPanel key={`${index}-${q.id}`} q={q} initialSteps={steps} locked={!!picked} picked={null} onAnswer={answer} />

@@ -814,3 +814,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `SCHEMA_DRILLS` in `content/interview/schemaScenarios.ts` carry briefs, hints, starters and reference solutions; new tests check every reference solution passes all rules and every starter fails.
 - Verified: lint, typecheck, 774 tests, `build`, `build:pages` pass. Playwright on the static export (desktop + iPhone 14): bookings reference solution scores 7/7 in-browser, follows starter 2/8, no console errors, no horizontal overflow. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F4 (next unchecked task in ROADMAP.md).
+
+## 2026-10-26 - F4: reading EXPLAIN / EXPLAIN ANALYZE
+
+- New optional `plan` field on questions plus `components/interview/PlanBlock.tsx` (monospace, scrolls horizontally inside its own box, focusable), shown in the interview battle and the mock interview.
+- 15 questions in `content/interview/explainPlans.ts` (topic "query") with real plan text: function on a column (expression index), Rows Removed by Filter (composite index), rows x loops, cardinality miss (extended statistics), Heap Fetches (visibility map), BitmapAnd, hash join batches, external merge sort, leading wildcard (pg_trgm), low selectivity (Seq Scan is right), date cast (half-open range), partial index predicate, leftmost-prefix rule, rows read by a Seq Scan, safe EXPLAIN ANALYZE on writes.
+- `tests/interviewExplainPlans.test.ts` parses the plan text to recompute the numeric answers (1,000 rows from loops, 1,000,000 rows scanned), checks the estimate-miss and 92% selectivity plans against their explanations, and keys every answer.
+- Verified: lint, typecheck, 781 tests, `build`, `build:pages` pass. Playwright on the static export (desktop + iPhone 14): plan renders under the prompt, no console errors, no horizontal page overflow. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: F5 (pagination and query patterns at scale).
