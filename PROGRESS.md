@@ -814,3 +814,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `SCHEMA_DRILLS` in `content/interview/schemaScenarios.ts` carry briefs, hints, starters and reference solutions; new tests check every reference solution passes all rules and every starter fails.
 - Verified: lint, typecheck, 774 tests, `build`, `build:pages` pass. Playwright on the static export (desktop + iPhone 14): bookings reference solution scores 7/7 in-browser, follows starter 2/8, no console errors, no horizontal overflow. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F4 (next unchecked task in ROADMAP.md).
+
+## 2026-10-26 - F4: reading EXPLAIN / EXPLAIN ANALYZE
+
+- Questions gained an optional `plan` field, rendered by the new `components/interview/PromptPlan.tsx` (monospace, scrolls sideways inside its own box) in both the battle and the mock interview.
+- Added 18 questions in `content/interview/explainFine.ts` (topic "query") showing real PostgreSQL plan text: low-selectivity Seq Scan, function on column, LIKE prefix vs wildcard, implicit cast, Index Only Scan heap fetches, bitmap scans, row-estimate misses with `loops`, seq-scan cost arithmetic (2250), composite index order, partial and INCLUDE indexes, hash vs merge join, sort spill, EXPLAIN ANALYZE on writes, OFFSET cost.
+- `tests/interviewExplainFine.test.ts` recomputes the numeric answers and keys each answer.
+- Verified: lint, typecheck, 779 tests, `build`, `build:pages` pass. Playwright on the dev server (desktop + iPhone 14): plan block renders, no page overflow, no page errors. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01). Worked on branch `claude/focused-cerf-xz1339` per the session's branch rule, so no lock commits were made.
+- Next: F5 (pagination and query patterns at scale).

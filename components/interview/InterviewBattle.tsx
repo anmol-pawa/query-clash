@@ -25,6 +25,7 @@ import { ATTACKS } from "@/lib/dialect/concepts";
 import { dayNumber, recordAnswer, tally } from "@/lib/leitner";
 import { level, updateSave, useSave } from "@/lib/save";
 import { PrecedenceGraph } from "./PrecedenceGraph";
+import { PromptPlan } from "./PromptPlan";
 import { PromptTables } from "./PromptTables";
 import { AnswerPanel } from "./AnswerPanel";
 
@@ -232,6 +233,7 @@ export function InterviewBattle({ topic, deck, seed, onExit, onRematch, onVictor
               {q.prompt}
             </h2>
             {q.tables && <PromptTables tables={q.tables} />}
+            {q.plan && <PromptPlan plan={q.plan} />}
             {q.graph && <PrecedenceGraph graph={q.graph} />}
             <div className="mt-3">
               <AnswerPanel key={`${s.index}-${q.id}`} q={q} initialSteps={steps} locked={locked} picked={picked} onAnswer={answer} />

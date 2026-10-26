@@ -13,6 +13,7 @@ import { MOCK_MINUTES, MOCK_SECONDS, type Scorecard, addResult, clock, scorecard
 import { updateSave } from "@/lib/save";
 import { AnswerPanel } from "./AnswerPanel";
 import { PrecedenceGraph } from "./PrecedenceGraph";
+import { PromptPlan } from "./PromptPlan";
 import { PromptTables } from "./PromptTables";
 
 const ACCENT = "#f59e0b";
@@ -160,6 +161,7 @@ export function MockInterview({ deck, seed, onExit, onRetry }: { deck: Question[
             {q.prompt}
           </h2>
           {q.tables && <PromptTables tables={q.tables} />}
+          {q.plan && <PromptPlan plan={q.plan} />}
           {q.graph && <PrecedenceGraph graph={q.graph} />}
           <div className="mt-3">
             <AnswerPanel key={`${index}-${q.id}`} q={q} initialSteps={steps} locked={!!picked} picked={null} onAnswer={answer} />
