@@ -14,4 +14,8 @@ for (const f of readdirSync(dist)) {
   if (/\.(js|wasm|data)$/.test(f)) cpSync(join(dist, f), join(out, f));
 }
 cpSync(join(dist, "fs"), join(out, "fs"), { recursive: true, filter: (p) => !p.endsWith(".cjs") && !p.endsWith(".map") && !p.endsWith(".d.ts") && !p.endsWith(".d.cts") });
+// Extensions the worker loads natively (btree_gist backs the bookings schema drill's EXCLUDE constraint).
+mkdirSync(join(out, "contrib"), { recursive: true });
+cpSync(join(dist, "contrib", "btree_gist.js"), join(out, "contrib", "btree_gist.js"));
+cpSync(join(dist, "btree_gist.tar.gz"), join(out, "btree_gist.tar.gz"));
 console.log("pglite browser build copied to public/pglite");

@@ -806,3 +806,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Note for F3c: the bookings design needs `btree_gist`; the app's PGlite worker must load `@electric-sql/pglite/contrib/btree_gist` (tests do).
 - Verified: lint, typecheck, 767 tests, `build`, `build:pages` pass. No UI change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F3c (build-the-tables mission UI).
+
+## 2026-10-26 - F3c: Schema Forge build-the-tables UI
+
+- New page `/interview/schema` (`components/interview/SchemaLab.tsx`): three drill tabs (follow graph, room bookings, URL shortener) with a brief, a 16px editor, hint and reset; "Check design" grades the script on the PGlite worker and lists each rule with a tick or a cross plus the reason. Linked from the ER topic panel on `/interview` as "Schema forge".
+- Worker/client/protocol gained a `gradeSchema` request. The worker now loads `btree_gist` (served from `public/pglite/contrib` by `scripts/copy-pglite.mjs`) so the bookings EXCLUDE constraint works in the app.
+- `SCHEMA_DRILLS` in `content/interview/schemaScenarios.ts` carry briefs, hints, starters and reference solutions; new tests check every reference solution passes all rules and every starter fails.
+- Verified: lint, typecheck, 774 tests, `build`, `build:pages` pass. Playwright on the static export (desktop + iPhone 14): bookings reference solution scores 7/7 in-browser, follows starter 2/8, no console errors, no horizontal overflow. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: F4 (next unchecked task in ROADMAP.md).

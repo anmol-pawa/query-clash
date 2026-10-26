@@ -6,6 +6,7 @@ import { useEffect, useSyncExternalStore } from "react";
  * (e.g. an accidental Cartesian product), and a boot-status signal for the UI.
  */
 import type { Dialect } from "../dialect/lint";
+import type { SchemaGrade } from "../dbms/schemaDesign";
 import type { ResultSet, RunResult, SqlError, Verdict } from "./engine";
 import type { Envelope, Reply, Request, Response } from "./protocol";
 
@@ -126,6 +127,15 @@ class SqlClient {
 
   expected(missionId: string, dialect: Dialect): Promise<ResultSet | null> {
     return this.call<ResultSet | null>({ type: "expected", missionId, dialect });
+  }
+
+  async gradeSchema(specId: string, ddl: string): Promise<SchemaGrade> {
+    try {
+      return await this.call<SchemaGrade>({ type: "gradeSchema", specId, ddl });
+    } catch (e) {
+      const error = e instanceof TimeoutError ? "Grading took too long and was cancelled." : e instanceof Error ? e.message : String(e);
+      return { ok: false, error, results: [], passed: 0, total: 0 };
+    }
   }
 
   reset(): Promise<unknown> {

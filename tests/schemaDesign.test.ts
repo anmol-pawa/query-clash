@@ -1,7 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
 import { btree_gist } from "@electric-sql/pglite/contrib/btree_gist";
 import { beforeAll, describe, expect, it } from "vitest";
-import { SCHEMA_SPECS } from "@/content/interview/schemaScenarios";
+import { SCHEMA_DRILLS, SCHEMA_SPECS } from "@/content/interview/schemaScenarios";
 import { gradeSchema, introspect } from "@/lib/dbms/schemaDesign";
 
 let db: PGlite;
@@ -108,4 +108,21 @@ describe("url shortener", () => {
     const g = await gradeSchema(db, `CREATE TABLE links (id serial PRIMARY KEY, code text, url text);`, spec("url_shortener"));
     expect(failed(g)).toEqual(["The short code is unique (it is the lookup key)", "The target URL is NOT NULL"]);
   });
+});
+
+describe("schema drills", () => {
+  it("has one drill per spec", () => {
+    expect(SCHEMA_DRILLS.map((d) => d.id).sort()).toEqual(SCHEMA_SPECS.map((s) => s.id).sort());
+  });
+  for (const d of SCHEMA_DRILLS) {
+    it(`${d.id}: the reference solution passes every check`, async () => {
+      const g = await gradeSchema(db, d.solution, spec(d.id));
+      expect(g.error).toBeUndefined();
+      expect(failed(g)).toEqual([]);
+    });
+    it(`${d.id}: the starter does not pass yet`, async () => {
+      const g = await gradeSchema(db, d.starter, spec(d.id));
+      expect(g.ok).toBe(false);
+    });
+  }
 });

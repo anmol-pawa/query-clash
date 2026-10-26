@@ -287,6 +287,11 @@ export default function InterviewPage() {
                   </li>
                 )}
               </ul>
+              {sel === "er" && (
+                <LinkButton href="/interview/schema" variant="ghost" size="md" className="mt-3 w-full">
+                  🛠 Schema forge
+                </LinkButton>
+              )}
               {sel === "storage" && (
                 <LinkButton href="/interview/btree" variant="ghost" size="md" className="mt-3 w-full">
                   🌲 B+ tree lab

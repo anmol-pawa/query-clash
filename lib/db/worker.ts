@@ -8,6 +8,8 @@
 import type { PGlite } from "@electric-sql/pglite";
 import { ALL_MISSIONS } from "@/content/chapters";
 import { SQL_MISSIONS } from "@/content/interview/sql";
+import { SCHEMA_SPECS } from "@/content/interview/schemaScenarios";
+import { gradeSchema } from "../dbms/schemaDesign";
 import { evaluate, expectedFor, resetDatabase, runScript } from "./engine";
 import type { Envelope, Reply, Response } from "./protocol";
 
@@ -24,7 +26,8 @@ const PGLITE_URL = `${BASE}/pglite/index.js`;
 
 async function boot(): Promise<PGlite> {
   const mod: typeof import("@electric-sql/pglite") = await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ PGLITE_URL);
-  const db = await mod.PGlite.create();
+  const gist: typeof import("@electric-sql/pglite/contrib/btree_gist") = await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ `${BASE}/pglite/contrib/btree_gist.js`);
+  const db = await mod.PGlite.create({ extensions: { btree_gist: gist.btree_gist } });
   await resetDatabase(db);
   return db;
 }
@@ -57,6 +60,12 @@ self.onmessage = async (ev: MessageEvent<Envelope>) => {
       case "expected":
         data = await expectedFor(db, mission(req.missionId), req.dialect);
         break;
+      case "gradeSchema": {
+        const spec = SCHEMA_SPECS.find((x) => x.id === req.specId);
+        if (!spec) throw new Error(`Unknown schema drill ${req.specId}`);
+        data = await gradeSchema(db, req.ddl, spec);
+        break;
+      }
       case "reset":
         await resetDatabase(db);
         data = { ok: true };
