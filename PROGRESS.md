@@ -797,3 +797,12 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `tests/interviewSchemaDesignFine.test.ts` recomputes the numeric answers (24.9 days, ~70 years, 4096 per ms) and checks every answer key.
 - Verified: lint, typecheck, 757 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F3b (rule-based schema grader).
+
+## 2026-10-26 - F3b: rule-based schema grader
+
+- Added `lib/dbms/schemaDesign.ts`: runs a player's CREATE TABLE script in a throwaway schema on PGlite, reads PKs, FKs, unique constraints, index column order and EXCLUDE constraints back from `pg_catalog`, then evaluates a `SchemaSpec` (table/pk/fk/junction/unique/index/exclusion/notNull checks, with alias names). SQL errors come back as `error`; the scratch schema is always dropped.
+- Added specs for the three F3c scenarios (follows, bookings, URL shortener) in `content/interview/schemaScenarios.ts`.
+- `tests/schemaDesign.test.ts` (10 tests): good and bad designs per scenario (missing composite junction key, missing reverse index, missing FKs, no overlap protection, nullable URL), cleanup of schemas, syntax errors.
+- Note for F3c: the bookings design needs `btree_gist`; the app's PGlite worker must load `@electric-sql/pglite/contrib/btree_gist` (tests do).
+- Verified: lint, typecheck, 767 tests, `build`, `build:pages` pass. No UI change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: F3c (build-the-tables mission UI).
