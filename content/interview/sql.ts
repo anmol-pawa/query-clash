@@ -17,6 +17,8 @@ interface Entry {
   /** Oracle-flavoured answer; defaults to the PostgreSQL one when the syntax is shared. */
   oracle?: string;
   ordered?: boolean;
+  /** Raw PostgreSQL run before the player's SQL (extra tables for the task); see `Mission.setup`. */
+  setup?: string;
   /** Hidden edge-case rows (raw PostgreSQL) the answer must also survive; see `Mission.hidden`. */
   hidden?: string;
   /** A plausible but wrong query that passes the visible data and must fail the hidden case (tested). */
@@ -633,6 +635,56 @@ const ENTRIES: Entry[] = [
     hints: ["One row per customer per month first.", "Self-join the monthly set: same customer, previous month.", "LEFT JOIN, then COUNT(*) for active and COUNT(prev.customer_id) for retained."],
     tables: ["orders"],
   },
+  {
+    id: "bom-explosion",
+    title: "Bill of materials: parts needed for one bike",
+    difficulty: 3,
+    tags: ["recursive CTE", "bill of materials", "tree traversal", "aggregation"],
+    askedAt: "Bill-of-materials explosion is the classic 'multiply down a tree' recursive CTE question.",
+    task: "The table `bom(parent, child, qty)` lists how many of each `child` part go into one `parent` assembly. Return the **base parts** (parts that are never a parent) needed to build **one 'BIKE'**: `part` and `total_qty`, summed over every path through the tree. Order by part.",
+    setup:
+      "CREATE TABLE bom (parent VARCHAR(20), child VARCHAR(20), qty INTEGER); INSERT INTO bom VALUES ('BIKE','FRAME',1),('BIKE','WHEEL',2),('BIKE','HANDLEBAR',1),('WHEEL','RIM',1),('WHEEL','SPOKE',32),('WHEEL','TIRE',1),('FRAME','TUBE',4),('FRAME','BOLT',6),('HANDLEBAR','GRIP',2),('HANDLEBAR','BOLT',2),('SCOOTER','DECK',1),('SCOOTER','BOLT',4);",
+    postgres:
+      "WITH RECURSIVE parts (part, qty) AS (SELECT child, qty FROM bom WHERE parent = 'BIKE' UNION ALL SELECT b.child, p.qty * b.qty FROM parts p JOIN bom b ON b.parent = p.part) SELECT part, SUM(qty) AS total_qty FROM parts WHERE part NOT IN (SELECT parent FROM bom) GROUP BY part ORDER BY part",
+    oracle:
+      "WITH parts (part, qty) AS (SELECT child, qty FROM bom WHERE parent = 'BIKE' UNION ALL SELECT b.child, p.qty * b.qty FROM parts p JOIN bom b ON b.parent = p.part) SELECT part, SUM(qty) AS total_qty FROM parts WHERE part NOT IN (SELECT parent FROM bom) GROUP BY part ORDER BY part",
+    ordered: true,
+    explanation:
+      "Walk the tree from the root: each step multiplies the running quantity by the edge quantity (2 wheels x 32 spokes = 64 spokes). The same base part can be reached by several paths (BOLT is in the frame and the handlebar), so the totals are summed only at the end with GROUP BY. Keep only base parts with `NOT IN (SELECT parent ...)` (safe here because parent is never NULL; prefer NOT EXISTS otherwise). Starting from 'BIKE' also keeps the unrelated SCOOTER rows out. Oracle writes the same recursive CTE without the RECURSIVE keyword; it also has CONNECT BY with PRIOR, but that cannot multiply quantities along the path as simply.",
+    hints: ["Start from the rows whose parent is 'BIKE', then repeatedly join the children of what you have.", "Carry a running quantity: parent_qty * edge qty at each level.", "After the recursion, keep parts that never appear as a parent and SUM(qty) GROUP BY part."],
+    tables: [],
+  },
+  {
+    id: "customer-funnel",
+    title: "Customer funnel: signed up, ordered, delivered, repeat",
+    difficulty: 2,
+    tags: ["funnel", "conditional aggregation", "LEFT JOIN", "analytics"],
+    askedAt: "Funnel and conversion counts are a staple of product-analytics SQL rounds.",
+    task: "Build a one-row funnel over all customers: `signed_up` (every customer), `ordered` (placed at least one order), `delivered` (has at least one DELIVERED order) and `repeat_buyers` (at least two DELIVERED orders).",
+    postgres:
+      "SELECT COUNT(*) AS signed_up, SUM(CASE WHEN n_orders >= 1 THEN 1 ELSE 0 END) AS ordered, SUM(CASE WHEN n_delivered >= 1 THEN 1 ELSE 0 END) AS delivered, SUM(CASE WHEN n_delivered >= 2 THEN 1 ELSE 0 END) AS repeat_buyers FROM (SELECT c.customer_id, COUNT(o.order_id) AS n_orders, COUNT(CASE WHEN o.status = 'DELIVERED' THEN 1 END) AS n_delivered FROM customers c LEFT JOIN orders o ON o.customer_id = c.customer_id GROUP BY c.customer_id) t",
+    explanation:
+      "Count per customer first, then count customers per stage with conditional aggregation (SUM(CASE ...), portable to both databases; PostgreSQL also has COUNT(*) FILTER (WHERE ...)). Start from customers with a LEFT JOIN: beginning from orders would silently drop customers who never ordered and make the top of the funnel too small. Each stage is a subset of the previous one, so the numbers must be non-increasing; checking that is a good sanity test.",
+    hints: ["The funnel's first stage is all customers, including those with no orders.", "LEFT JOIN orders and compute per-customer counts of orders and delivered orders.", "Then SUM(CASE WHEN count >= n THEN 1 ELSE 0 END) for each stage."],
+    tables: ["customers", "orders"],
+  },
+  {
+    id: "json-fragile-by-hub",
+    title: "Fragile shipments per hub (JSON fields)",
+    difficulty: 2,
+    tags: ["JSON", "JSONB", "JSON_VALUE", "semi-structured"],
+    askedAt: "Reading fields out of a JSON column comes up whenever a schema stores semi-structured attributes.",
+    task: "The `shipments.details` JSON has `hub`, `weight_kg` and `fragile` (true/false). For **fragile** shipments, return each `hub` with `shipments` (the count) and `total_kg` (the sum of `weight_kg`). Order by hub.",
+    postgres:
+      "SELECT details->>'hub' AS hub, COUNT(*) AS shipments, SUM((details->>'weight_kg')::numeric) AS total_kg FROM shipments WHERE details->>'fragile' = 'true' GROUP BY details->>'hub' ORDER BY hub",
+    oracle:
+      "SELECT JSON_VALUE(details, '$.hub') AS hub, COUNT(*) AS shipments, SUM(JSON_VALUE(details, '$.weight_kg' RETURNING NUMBER)) AS total_kg FROM shipments WHERE JSON_EXISTS(details, '$?(@.fragile == true)') GROUP BY JSON_VALUE(details, '$.hub') ORDER BY hub",
+    ordered: true,
+    explanation:
+      "PostgreSQL: `->` returns JSON, `->>` returns text, so a JSON boolean compares as the text 'true' and a number needs a cast (`::numeric`) before it can be summed. The containment operator `details @> '{\"fragile\": true}'` does the same filter and can use a GIN index. Oracle: JSON_VALUE(col, '$.path') returns a scalar as text unless you add RETURNING NUMBER, and JSON_EXISTS(col, '$?(@.fragile == true)') tests a condition on the document. Group by the same extracted expression you select. If you filter or group on a JSON key often, it deserves a real column or an expression index.",
+    hints: ["Pull each field out of the JSON column instead of reading the whole document.", "details->>'fragile' is the text 'true' or 'false'; ->> returns text, so cast weight_kg to numeric.", "GROUP BY details->>'hub' with COUNT(*) and SUM((details->>'weight_kg')::numeric)."],
+    tables: ["shipments"],
+  },
 ];
 
 export const SQL_MISSIONS: Mission[] = ENTRIES.map((e) => ({
@@ -641,6 +693,7 @@ export const SQL_MISSIONS: Mission[] = ENTRIES.map((e) => ({
   taunt: "",
   task: e.task,
   ordered: e.ordered,
+  setup: e.setup,
   hidden: e.hidden,
   solution: { postgres: e.postgres, oracle: e.oracle ?? e.postgres },
   hints: e.hints,

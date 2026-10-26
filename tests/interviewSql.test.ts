@@ -262,3 +262,36 @@ describe("F2b answers", () => {
     expect(expected.some((e) => Number(e[2]) > 0)).toBe(true);
   });
 });
+
+describe("F2c answers", () => {
+  const get = async (id: string) => (await expectedFor(db, SQL_MISSIONS.find((m) => m.id === id)!, "postgres"))!.rows;
+  beforeAll(async () => {
+    await resetDatabase(db);
+  });
+
+  it("BOM explosion multiplies quantities down every path (2 wheels x 32 spokes, bolts from two assemblies)", async () => {
+    const got = (await get("iq-bom-explosion")).map((r) => [String(r[0]), Number(r[1])]);
+    // BIKE = 1 FRAME(4 TUBE, 6 BOLT) + 2 WHEEL(1 RIM, 32 SPOKE, 1 TIRE) + 1 HANDLEBAR(2 GRIP, 2 BOLT); SCOOTER rows excluded
+    expect(got).toEqual([["BOLT", 8], ["GRIP", 2], ["RIM", 2], ["SPOKE", 64], ["TIRE", 2], ["TUBE", 4]]);
+  });
+
+  it("funnel matches a JS recount and never increases", async () => {
+    const c = (await db.query<{ n: number }>("SELECT COUNT(*)::int AS n FROM customers")).rows[0].n;
+    const per = (await db.query<{ o: number; d: number }>("SELECT COUNT(o.order_id)::int AS o, COUNT(CASE WHEN o.status = 'DELIVERED' THEN 1 END)::int AS d FROM customers c LEFT JOIN orders o USING (customer_id) GROUP BY c.customer_id")).rows;
+    const expected = [c, per.filter((r) => r.o >= 1).length, per.filter((r) => r.d >= 1).length, per.filter((r) => r.d >= 2).length];
+    const got = (await get("iq-customer-funnel"))[0].map(Number);
+    expect(got).toEqual(expected);
+    expect(got[0]).toBeGreaterThan(got[1]); // customers who never order exist, so starting from orders would undercount
+    expect(got[1] >= got[2] && got[2] >= got[3]).toBe(true);
+  });
+
+  it("fragile shipments per hub match a JS aggregation of the JSON", async () => {
+    const all = (await db.query<{ details: { hub: string; weight_kg: number; fragile: boolean } }>("SELECT details FROM shipments")).rows;
+    const by = new Map<string, [number, number]>();
+    for (const { details: d } of all) if (d.fragile) by.set(d.hub, [(by.get(d.hub)?.[0] ?? 0) + 1, (by.get(d.hub)?.[1] ?? 0) + d.weight_kg]);
+    const expected = [...by].sort((a, b) => (a[0] < b[0] ? -1 : 1)).map(([h, [n, kg]]) => [h, n, Math.round(kg * 10) / 10]);
+    const got = (await get("iq-json-fragile-by-hub")).map((r) => [String(r[0]), Number(r[1]), Math.round(Number(r[2]) * 10) / 10]);
+    expect(got).toEqual(expected);
+    expect(expected.length).toBeGreaterThan(1);
+  });
+});

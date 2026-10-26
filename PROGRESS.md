@@ -782,3 +782,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - New `F2b answers` tests in `tests/interviewSql.test.ts` recompute each result independently in JS (leaf employees, month series, medians, retention) and assert the NOT IN trap returns nothing.
 - Verified: lint, typecheck, 744 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F2c (bill of materials / reachability with `Mission.setup`, funnel, JSON operators).
+
+## 2026-10-26 - F2c: BOM explosion, funnel and JSON SQL missions
+
+- Added 3 SQL coding missions to `content/interview/sql.ts`: bill-of-materials explosion (recursive CTE multiplying quantities down every path; uses a `bom` table created through `Mission.setup`, which `Entry` now supports; unrelated SCOOTER rows test the root filter), a customer funnel (signed up / ordered / delivered / repeat buyers via LEFT JOIN plus conditional aggregation), and fragile shipments per hub from the JSONB `details` column (PostgreSQL `->>`, Oracle `JSON_VALUE` + `JSON_EXISTS`; `JSON_VALUE` on a boolean returns `t`/`f` in PostgreSQL 18 but `true` in Oracle, so the Oracle filter uses `JSON_EXISTS`).
+- New `F2c answers` tests in `tests/interviewSql.test.ts`: BOM totals by hand (BOLT 8, SPOKE 64...), funnel recounted in JS and checked non-increasing, JSON aggregation recomputed in JS. Both dialect solutions are covered by the per-mission tests.
+- Verified: lint, typecheck, 753 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: F3 (schema design drills graded by rules).
