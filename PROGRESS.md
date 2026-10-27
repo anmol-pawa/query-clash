@@ -850,3 +850,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `tests/interviewDistributedDepth.test.ts` recomputes the numbers (majority 4 of 7, R = 4, 16 of 20 keys move) and keys every answer.
 - Verified: lint, typecheck, 798 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F9 (caching and scale).
+
+## 2026-10-27 - F9: caching and scale
+
+- Added 16 questions in `content/interview/cachingScale.ts` (topics "distributed" and "storage"): cache-aside read path, write-through vs write-behind and its durability risk, delete-after-commit invalidation, stampede / thundering herd and its fixes (single-flight, jitter, stale-while-revalidate), cache penetration (negative caching, Bloom filter), Redis sorted sets and atomic INCR, read replicas and lag, LRU vs TTL, and capacity estimates (1,157 QPS, 50 GB of rows, 3.2 GB index, 1,000 DB reads/s at 90% hits, 2.0 ms average latency).
+- `tests/interviewCachingScale.test.ts` recomputes every numeric answer and keys every answer.
+- Verified: lint, typecheck, 802 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: F10 (operations and migrations).
