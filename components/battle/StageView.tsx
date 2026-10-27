@@ -2,6 +2,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { BossId } from "@/content/types";
 import { BattleStage } from "@/game/render/stage";
+import { useOsReducedMotion } from "@/lib/useOsReducedMotion";
 
 export interface StageHandle {
   stage: () => BattleStage | null;
@@ -9,9 +10,11 @@ export interface StageHandle {
 
 /** Hosts the PixiJS canvas. Handles React StrictMode double-mounting safely. */
 export const StageView = forwardRef<StageHandle, { boss?: BossId; versus?: boolean; starter?: number; accent: string; reducedMotion: boolean; font: string; onReady?: () => void }>(function StageView(
-  { boss, versus, starter, accent, reducedMotion, font, onReady },
+  { boss, versus, starter, accent, reducedMotion: setting, font, onReady },
   ref,
 ) {
+  // the in-game setting or the OS preference, whichever asks for less motion
+  const reducedMotion = useOsReducedMotion() || setting;
   const host = useRef<HTMLDivElement>(null);
   const stageRef = useRef<BattleStage | null>(null);
   const [failed, setFailed] = useState(false);

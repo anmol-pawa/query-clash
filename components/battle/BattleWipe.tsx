@@ -1,20 +1,10 @@
 "use client";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useOsReducedMotion } from "@/lib/useOsReducedMotion";
 import { WIPE, WIPE_MS, bandCover, bandFromLeft, blockScale, flashAlpha, wipeGrid } from "@/game/render/wipe";
 
 const DARK = "#0e0f1a";
 const EDGE = "#2b2d4a";
-const RM = "(prefers-reduced-motion: reduce)";
-
-// The OS setting, read through useSyncExternalStore so hydration starts from
-// the server value (false) instead of mismatching the static HTML.
-const subscribeRM = (cb: () => void) => {
-  const m = window.matchMedia?.(RM);
-  m?.addEventListener("change", cb);
-  return () => m?.removeEventListener("change", cb);
-};
-const osReducedMotion = () => !!window.matchMedia?.(RM).matches;
-
 /**
  * Battle-start screen wipe: encounter flashes, bands sweeping shut, then a
  * diagonal block dissolve that reveals the battle. Plays once on mount
@@ -24,7 +14,7 @@ const osReducedMotion = () => !!window.matchMedia?.(RM).matches;
 export function BattleWipe({ reducedMotion, accent = "#5eead4" }: { reducedMotion: boolean; accent?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const [done, setDone] = useState(false);
-  const skip = useSyncExternalStore(subscribeRM, osReducedMotion, () => false) || reducedMotion;
+  const skip = useOsReducedMotion() || reducedMotion;
 
   useEffect(() => {
     if (skip) return;

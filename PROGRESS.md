@@ -897,3 +897,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - No console errors, no horizontal overflow (scrollWidth 390 on iPhone 14). Not every creature sheet was inspected individually; the remaining ones were not opened this run.
 - Verified: `build:pages` passes; docs-only change otherwise. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: G3 (accessibility pass).
+
+## 2026-10-27 - G3: accessibility pass
+
+- Focus rings already existed globally (`:focus-visible` in `globals.css`), so the work went to the gaps. Mock loop: the timer now has a screen-reader text ("44 minutes 12 seconds left") instead of reading the glyph clock, a polite live region announces each round and the 10/5/1-minute warnings (not every second), and the scorecard heading takes focus on arrival with `aria-live` on the result. Reduced motion: new `lib/useOsReducedMotion.ts` (shared with `BattleWipe`) makes `StageView` honor the OS "reduce motion" setting as well as the in-game toggle, so battle tweens, shake and particles scale down for both.
+- Verified: lint, typecheck, 818 tests, `build:pages` pass. Playwright (desktop and iPhone 14) drove loop intro, round 1 and the scorecard: live text correct, focus lands on the scorecard heading, no console errors, no horizontal overflow, screenshot reviewed. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: G4 (more hidden-test SQL missions).

@@ -13,11 +13,14 @@ import type { SchemaGrade } from "@/lib/dbms/schemaDesign";
 import { dayNumber, recordAnswer, tally } from "@/lib/leitner";
 import { LOOP_MINUTES, LOOP_SECONDS, type LoopScorecard, type Round, type RoundOutcome, addLoopResult, loopScorecard, toLoopResult } from "@/lib/loop";
 import { clock } from "@/lib/mock";
+
 import { updateSave } from "@/lib/save";
 import { AnswerPanel } from "./AnswerPanel";
 import { CodexLinks } from "./CodexLinks";
 import { PlanBlock } from "./PlanBlock";
 import { PromptTables } from "./PromptTables";
+
+const spoken = (s: number) => `${Math.floor(s / 60)} minute${Math.floor(s / 60) === 1 ? "" : "s"} ${s % 60} seconds`;
 
 const ACCENT = "#fb7185";
 const RIGHT = "#4ade80";
@@ -148,6 +151,8 @@ export function LoopInterview({ rounds, seed, onExit, onRetry }: { rounds: Round
   if (phase === "done" && card) return <Result rounds={rounds} outcomes={shown} card={card} onExit={onExit} onRetry={onRetry} />;
 
   const urgent = left <= 300;
+  // announced only when the minute mark changes, never every second
+  const warn = [600, 300, 60].find((m) => left <= m && left > m - 5) ?? 0;
   return (
     <main className="mx-auto max-w-3xl px-4 py-4 pb-28">
       <header className="flex items-center gap-2">
@@ -156,9 +161,13 @@ export function LoopInterview({ rounds, seed, onExit, onRetry }: { rounds: Round
           Round {index + 1}/{rounds.length}
         </span>
         <span className="px-tag text-[11px] tabular-nums" style={tone(urgent ? WRONG : "#60a5fa")} data-testid="loop-clock" role="timer">
-          ⏱ {clock(left)}
+          <span aria-hidden>⏱ {clock(left)}</span>
+          <span className="sr-only">{spoken(left)} left</span>
         </span>
       </header>
+      <p className="sr-only" role="status" aria-live="polite" data-testid="loop-live">
+        {`Round ${index + 1} of ${rounds.length}, ${round ? ROUND_LABEL[round.kind] : ""}.${warn ? ` ${spoken(warn)} left.` : ""}`}
+      </p>
       <div className="mt-2 h-2 border-2 border-[#0e0f1a] bg-white/10" aria-hidden>
         <div className="h-full" style={{ width: `${(100 * index) / rounds.length}%`, background: ACCENT }} />
       </div>
@@ -260,9 +269,14 @@ function SchemaRound({ id, onGrade }: { id: string; onGrade: (g: SchemaGrade | n
 function Result({ rounds, outcomes, card, onExit, onRetry }: { rounds: Round[]; outcomes: (RoundOutcome | null)[]; card: LoopScorecard; onExit: () => void; onRetry: () => void }) {
   const color = card.pct >= 75 ? RIGHT : card.pct >= 40 ? "#facc15" : WRONG;
   const topics = Object.entries(card.perTopic).sort(([, a], [, b]) => a!.points / a!.max - b!.points / b!.max);
+  const heading = useRef<HTMLHeadingElement>(null);
+  // move focus to the scorecard so screen readers announce the result
+  useEffect(() => heading.current?.focus(), []);
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6 pb-12" data-testid="loop-result">
-      <h1 className="px-shadow font-display text-2xl tracking-[0.2em]">LOOP SCORECARD</h1>
+    <main className="mx-auto max-w-3xl px-4 py-6 pb-12" data-testid="loop-result" aria-live="polite">
+      <h1 ref={heading} tabIndex={-1} className="px-shadow font-display text-2xl tracking-[0.2em] outline-none">
+        LOOP SCORECARD
+      </h1>
       <section className="px-window mt-4 flex items-center gap-4 p-4" style={{ "--accent": color } as CSSProperties}>
         <div className="grid h-20 w-20 shrink-0 place-items-center border-4 border-[#0e0f1a] font-display text-5xl" style={{ background: color, color: "#0e0f1a" }} data-testid="loop-grade">
           {card.grade}
