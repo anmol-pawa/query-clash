@@ -685,6 +685,38 @@ const ENTRIES: Entry[] = [
     hints: ["Pull each field out of the JSON column instead of reading the whole document.", "details->>'fragile' is the text 'true' or 'false'; ->> returns text, so cast weight_kg to numeric.", "GROUP BY details->>'hub' with COUNT(*) and SUM((details->>'weight_kg')::numeric)."],
     tables: ["shipments"],
   },
+  {
+    id: "rank-ties-podium",
+    title: "Podium with ties: RANK vs ROW_NUMBER",
+    difficulty: 2,
+    tags: ["window functions", "RANK", "ties"],
+    askedAt: "Interviewers follow 'top N' with 'what if two people tie for the last place?'.",
+    task: "Return every employee whose salary **rank is 6 or better**, where tied salaries share a rank: `emp_id`, `salary` and `rnk`. Order by rnk, then emp_id.",
+    postgres: "SELECT emp_id, salary, rnk FROM (SELECT emp_id, salary, RANK() OVER (ORDER BY salary DESC) AS rnk FROM employees) t WHERE rnk <= 6 ORDER BY rnk, emp_id",
+    ordered: true,
+    hidden: "INSERT INTO employees (emp_id, first_name, last_name, salary, hire_date, dept_id) VALUES (900, 'Tie', 'Alpha', 150000, DATE '2020-01-01', 20);",
+    naive: "SELECT emp_id, salary, rnk FROM (SELECT emp_id, salary, ROW_NUMBER() OVER (ORDER BY salary DESC) AS rnk FROM employees) t WHERE rnk <= 6 ORDER BY rnk, emp_id",
+    explanation:
+      "RANK gives tied rows the same number and then skips: salaries 250, 190, 185, 175, 160, 150, 150, 145 get ranks 1, 2, 3, 4, 5, 6, 6, 8. Filtering `rnk <= 6` therefore keeps both people tied for 6th, while ROW_NUMBER numbers the tie arbitrarily and silently drops one of them. DENSE_RANK would also keep both but never skips (6, 6, 7), so use it for 'the Nth distinct value' and RANK for competition-style podiums. A window function cannot be filtered in the WHERE of the same query level, hence the subquery (Oracle and PostgreSQL both need it; neither has QUALIFY). The syntax is identical in Oracle.",
+    hints: ["Think about what should happen if two people share 6th place.", "RANK, DENSE_RANK and ROW_NUMBER all number rows; only two of them let tied rows share a number.", "Compute RANK() OVER (ORDER BY salary DESC) in a subquery and filter it with WHERE rnk <= 6."],
+    tables: ["employees"],
+  },
+  {
+    id: "commission-nulls-last",
+    title: "Sales leaderboard: NULLs last",
+    difficulty: 1,
+    tags: ["ORDER BY", "NULL", "NULLS LAST"],
+    askedAt: "'Where do NULLs sort?' is a favourite trap, because PostgreSQL and Oracle both put them first in a descending sort.",
+    task: "List the employees of department 30 as `emp_id` and `commission_pct`, **highest commission first**, with anyone who has no commission (NULL) at the very end. Break ties by emp_id.",
+    postgres: "SELECT emp_id, commission_pct FROM employees WHERE dept_id = 30 ORDER BY commission_pct DESC NULLS LAST, emp_id",
+    ordered: true,
+    hidden: "INSERT INTO employees (emp_id, first_name, last_name, salary, hire_date, dept_id) VALUES (902, 'No', 'Commission', 50000, DATE '2020-01-01', 30);",
+    naive: "SELECT emp_id, commission_pct FROM employees WHERE dept_id = 30 ORDER BY commission_pct DESC, emp_id",
+    explanation:
+      "NULL is neither bigger nor smaller than a number, so each database picks a side: in both PostgreSQL and Oracle NULLs sort as the largest value, which means ASC puts them last but DESC puts them FIRST. `NULLS LAST` (and `NULLS FIRST`) overrides that and is valid in both. In MySQL or SQL Server you would sort on `commission_pct IS NULL` first instead; `COALESCE(commission_pct, -1)` is a portable trick that also works but hides the intent. Every department-30 employee has a commission in the sample data, so the naive query looks right until someone without one appears.",
+    hints: ["Which end of a descending sort do NULLs land on?", "ORDER BY accepts a modifier that pins NULLs to one end.", "ORDER BY commission_pct DESC NULLS LAST, emp_id"],
+    tables: ["employees"],
+  },
 ];
 
 export const SQL_MISSIONS: Mission[] = ENTRIES.map((e) => ({

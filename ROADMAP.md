@@ -179,4 +179,5 @@ Coverage today: theory is deep (about 600 questions across basics, ER, normaliza
 - [x] G1. Loop replay: keep the last 5 loop questions' answers in the save so the scorecard can be revisited from `/interview`, with a "retry weak spots" button that builds a drill from the ranked weak topics.
 - [x] G2. Art pass: review `/dev/sprites` screenshots for every creature at desktop and iPhone 14 and fix any sprite whose silhouette, outline or idle frames read poorly.
 - [x] G3. (done: loop live region + spoken timer, scorecard focus, OS reduced-motion in `StageView` via `lib/useOsReducedMotion.ts`.) Accessibility pass: keyboard focus order and visible focus rings on `/interview` screens, `aria-live` for scorecard and timer, reduced-motion respect in battle tweens.
-- [ ] G4. More hidden-test SQL missions (windowing edge cases, ties in RANK vs DENSE_RANK, NULL ordering) with Oracle-form hints.
+- [x] G4. (done: `iq-rank-ties-podium` and `iq-commission-nulls-last`, each with hidden data and a naive query.) More hidden-test SQL missions (windowing edge cases, ties in RANK vs DENSE_RANK, NULL ordering) with Oracle-form hints.
+- [ ] G5. Pick the next idea: more hidden-test missions (gaps-and-islands ties, DISTINCT vs NULL in COUNT, LAG default values) or a content audit of the oldest interview banks.
