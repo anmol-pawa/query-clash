@@ -909,3 +909,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Added two interview missions to `content/interview/sql.ts`: `rank-ties-podium` (RANK vs ROW_NUMBER when two people tie for 6th; hidden row adds the tie, naive ROW_NUMBER query drops one) and `commission-nulls-last` (NULLs sort first in a DESC sort in both PostgreSQL and Oracle; hidden row adds an employee with no commission, naive query without `NULLS LAST` fails). Both have Oracle-form notes in the explanation (same syntax, MySQL/SQL Server alternative) and three hints. The existing test suite checks both dialects agree, the hidden case passes and the naive queries fail only the hidden case.
 - Verified: lint, typecheck, 824 tests, `build`, `build:pages` pass. Content-only change (missions render through the existing runner), so no new screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: G5 (next idea, see ROADMAP).
+
+## 2026-10-27 - G5: LAG default-value mission
+
+- Added `iq-order-gap-lag-default` to `content/interview/sql.ts`: days between a customer's consecutive orders using `LAG(order_date, 1, order_date)` with PARTITION BY, first order gives 0. Explanation covers the default argument, partitioning and WHERE-before-window. No hidden case: the visible data (non-chronological order ids across customers) already exposes the usual mistakes. The existing suite checks the reference in both dialects.
+- Verified: lint, typecheck, 826 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: G6 (content audit of the oldest banks, gaps-and-islands tie mission).

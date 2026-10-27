@@ -717,6 +717,20 @@ const ENTRIES: Entry[] = [
     hints: ["Which end of a descending sort do NULLs land on?", "ORDER BY accepts a modifier that pins NULLs to one end.", "ORDER BY commission_pct DESC NULLS LAST, emp_id"],
     tables: ["employees"],
   },
+  {
+    id: "order-gap-lag-default",
+    title: "Days between a customer's orders",
+    difficulty: 2,
+    tags: ["window functions", "LAG", "default value"],
+    askedAt: "Tests whether you know LAG's third argument and that PARTITION BY restarts the window per customer.",
+    task: "For each order of customers 1 to 3, return `customer_id`, `order_id` and `gap_days`: the days since that customer's previous order (by order date, then order_id), or **0 for their first order**. Order by customer_id, order_date, order_id.",
+    postgres: "SELECT customer_id, order_id, order_date - LAG(order_date, 1, order_date) OVER (PARTITION BY customer_id ORDER BY order_date, order_id) AS gap_days FROM orders WHERE customer_id <= 3 ORDER BY customer_id, order_date, order_id",
+    ordered: true,
+    explanation:
+      "LAG(expr, offset, default) returns the value `offset` rows back inside the partition, and `default` instead of NULL when there is no such row. Using the row's own order_date as the default makes the first gap 0 with no COALESCE. PARTITION BY customer_id restarts the window for every customer, so one customer's first order is never compared with another's last; without it the gaps would run across customers. The WHERE runs before the window, which is what we want here (only these customers are considered); filtering after the window would instead keep rows from other customers as 'previous'. Date subtraction gives a number of days in both PostgreSQL (date - date) and Oracle; the syntax is otherwise identical.",
+    hints: ["Each row needs to look at the previous row of the same customer.", "LAG takes an optional third argument for when there is no previous row.", "order_date - LAG(order_date, 1, order_date) OVER (PARTITION BY customer_id ORDER BY order_date, order_id)"],
+    tables: ["orders"],
+  },
 ];
 
 export const SQL_MISSIONS: Mission[] = ENTRIES.map((e) => ({
