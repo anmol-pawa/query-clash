@@ -188,3 +188,6 @@ Coverage today: theory is deep (about 600 questions across basics, ER, normaliza
 ## H. Next ideas (added 2026-10-27)
 
 - [ ] H1. Audit the next-oldest banks (`concurrency.ts`, `mvcc.ts`, `recovery.ts`, `normalization.ts`, `query.ts`, `er.ts`, `distributed.ts`) the same way: re-read explanations for correctness.
+  - [x] H1a. (done: `concurrency.ts`, `mvcc.ts`; one Thomas-write-rule explanation tightened.)
+  - [ ] H1b. `recovery.ts`, `normalization.ts`.
+  - [ ] H1c. `query.ts`, `er.ts`, `distributed.ts`.

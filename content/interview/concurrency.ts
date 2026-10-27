@@ -313,7 +313,7 @@ export const CONCURRENCY: Question[] = [
     kind: "truefalse",
     prompt: "With Thomas' write rule, timestamp ordering can produce schedules that are view serializable but not conflict serializable.",
     answer: true,
-    explanation: "Ignoring obsolete writes allows blind-write schedules such as R1(Q) W2(Q) W1(Q) with TS(T1) < TS(T2): view-equivalent to T1, T2, but the conflicts form a cycle.",
+    explanation: "Ignoring obsolete writes allows blind-write schedules such as R1(Q) W2(Q) W1(Q) with TS(T1) < TS(T2): the conflicts form a cycle (R1 → W2 → W1), yet once T1's obsolete write is dropped the result is view-equivalent to the serial order T1, T2.",
     difficulty: 3,
     tags: ["timestamp ordering", "thomas write rule", "view serializability"],
   },

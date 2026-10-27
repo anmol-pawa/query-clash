@@ -927,3 +927,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Re-read every explanation in `basics.ts`, `sql.ts`, `transactions.ts` and `storage.ts` against PostgreSQL/Oracle behaviour and textbook definitions (view/conflict serializability, recoverable/cascadeless/strict, B+ tree order and split rules, extendible/linear hashing). Three fixes in `sql.ts`: `second-highest-no-window` (LIMIT 1 OFFSET 1 returns no row rather than NULL, and repeats the top salary on a tie), `report-counts` (zero-count variant needs LEFT JOIN from m to e with COUNT(e.emp_id)), `status-share` (integer-division example now 100 * 1 / 3 -> 33, the old 100 * 3 / 10 is exact).
 - Verified: lint, typecheck, 829 tests, `build`, `build:pages` pass. Text-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: H1 (audit the next-oldest banks).
+
+## 2026-10-27 - H1a: audit of concurrency and MVCC banks
+
+- Re-read every explanation in `concurrency.ts` (lock compatibility count, 2PL variants, conversions, deadlock prevention, timestamp ordering, tree protocol) and `mvcc.ts` (xmin/xmax, vacuum, snapshot timing, Oracle undo/ORA-01555/ORA-08177, SSI, xid wraparound). All correct; one fix: the Thomas' write rule view-serializability explanation now says the schedule is view-equivalent to T1, T2 once the obsolete write is dropped, with the conflict cycle R1 -> W2 -> W1. Split H1 into H1a-c.
+- Verified: lint, typecheck, tests, `build`, `build:pages` pass. Text-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: H1b (`recovery.ts`, `normalization.ts`).
