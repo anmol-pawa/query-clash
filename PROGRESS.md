@@ -864,3 +864,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `tests/interviewOpsMigrations.test.ts` recomputes the numbers and keys every answer.
 - Verified: lint, typecheck, 806 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F11 (mock loop mode).
+
+## 2026-10-27 - F11a: mock loop logic
+
+- Split F11 into F11a (pure logic) and F11b (screen). Added `lib/loop.ts`: `buildLoop` picks five rounds in interview order (one SQL mission of difficulty 2+, one schema scenario, one EXPLAIN-plan question, two theory questions from different system-design topics), deterministic per seed; `loopScorecard` scores out of 100 (SQL 30, schema 25 with partial credit by checks passed, EXPLAIN 15, theory 15 each), with per-topic points, a grade, and weak spots ranked worst first; `toLoopResult` / `addLoopResult` for the save file.
+- `tests/loop.test.ts` covers round shape and pools over 60 seeds, determinism, perfect/empty/partial scoring, and history capping.
+- Verified: lint, typecheck, tests, `build`, `build:pages` pass. Logic-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: F11b (loop screen, save field, `/interview` card).
