@@ -172,4 +172,11 @@ Coverage today: theory is deep (about 600 questions across basics, ER, normaliza
 - [x] F10. (done: 16 questions in `content/interview/opsMigrations.ts`.) Operations and migrations: zero-downtime schema changes (expand/contract, backfills, adding NOT NULL / indexes concurrently), backups and PITR, vacuum/bloat, table partitioning, monitoring slow queries, locking during DDL.
 - [x] F11. (done: F11a logic in `lib/loop.ts`, F11b screen `LoopInterview` + `/interview` card.) Mock "loop" mode: timed 45-minute FAANG-style session mixing one SQL coding mission, one schema-design mission, one EXPLAIN reading and two theory/system-design questions, with a scorecard by topic and a weak-spot review list.
   - [x] F11a. (done: pure logic in `lib/loop.ts` - `buildLoop` picks the five rounds, `loopScorecard` scores out of 100 with per-topic points and a weak-spot list, saved-result helpers; tests in `tests/loop.test.ts`.)
-  - [ ] F11b. Loop screen: 45-minute timer, round-by-round flow (SQL mission via the mission runner, schema via SchemaLab grading, EXPLAIN and theory via AnswerPanel, no feedback until the end), scorecard with topic bars and weak-spot links, `loopResults` in `lib/save.ts` and a "Mock loop" card on `/interview`.
+  - [x] F11b. (done: `LoopInterview` + `/interview` card.) Loop screen: 45-minute timer, round-by-round flow (SQL mission via the mission runner, schema via SchemaLab grading, EXPLAIN and theory via AnswerPanel, no feedback until the end), scorecard with topic bars and weak-spot links, `loopResults` in `lib/save.ts` and a "Mock loop" card on `/interview`.
+
+## G. Next ideas (added when A-F were all done, 2026-10-27)
+
+- [ ] G1. Loop replay: keep the last 5 loop questions' answers in the save so the scorecard can be revisited from `/interview`, with a "retry weak spots" button that builds a drill from the ranked weak topics.
+- [ ] G2. Art pass: review `/dev/sprites` screenshots for every creature at desktop and iPhone 14 and fix any sprite whose silhouette, outline or idle frames read poorly.
+- [ ] G3. Accessibility pass: keyboard focus order and visible focus rings on `/interview` screens, `aria-live` for scorecard and timer, reduced-motion respect in battle tweens.
+- [ ] G4. More hidden-test SQL missions (windowing edge cases, ties in RANK vs DENSE_RANK, NULL ordering) with Oracle-form hints.

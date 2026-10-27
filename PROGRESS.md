@@ -877,3 +877,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Added `components/interview/LoopInterview.tsx`: intro listing the five rounds, a 45-minute clock computed from the start time, round-by-round play (SQL, EXPLAIN and theory reuse `AnswerPanel`; the schema round is a DDL editor graded on PGlite, last check scores), no feedback until the scorecard, then grade, per-round bars, per-topic points, ranked weak spots (with a Schema forge link) and a per-round answer review. Results update Leitner, topic stats, XP and the new `loopResults` save field; the `/interview` page has a "Mock loop" card with last/best score.
 - Verified: lint, typecheck, 815 tests, `build`, `build:pages` pass. Playwright (desktop and iPhone 14) drove a full loop through intro, schema check and scorecard: no console errors, no horizontal overflow, screenshots reviewed. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: roadmap section F is complete; take the next unchecked task in ROADMAP.md.
+
+## 2026-10-27 - Roadmap housekeeping
+
+- F11b was already delivered in the previous run but left unticked; ticked it. Added section G (loop replay, art review pass, accessibility pass, more hidden-test SQL missions) so the next run has work.
+- Verified: lint, typecheck, tests, `build`, `build:pages` pass. Docs-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: G1 (loop replay and retry weak spots).
