@@ -49,13 +49,13 @@ export type TwoPcOutcome = "commit" | "abort" | "blocked";
 
 /**
  * Two-phase commit. The coordinator commits only if every participant votes yes.
- * If it crashes after collecting yes votes but before sending the decision, prepared participants cannot decide alone: they block.
- * A coordinator crash before the decision with a no vote seen still lets everyone abort (a no voter aborts unilaterally and the rest time out and abort only if they have not voted yes).
+ * If it crashes before sending the decision, a participant that voted yes is prepared and cannot decide alone (it does not know whether the others voted yes or no): it blocks, even if some other participant voted no.
+ * Only when every vote was no does everyone abort unilaterally, since a no voter aborts at once.
  */
 export function twoPhaseCommit(votes: Vote[], coordinatorCrashesBeforeDecision: boolean): TwoPcOutcome {
   const allYes = votes.every((v) => v === "yes");
   if (!coordinatorCrashesBeforeDecision) return allYes ? "commit" : "abort";
-  return allYes ? "blocked" : "abort";
+  return votes.some((v) => v === "yes") ? "blocked" : "abort";
 }
 
 /** Messages in a failure-free 2PC round with n participants: prepare, vote, decision, ack. */

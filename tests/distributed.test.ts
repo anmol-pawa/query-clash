@@ -48,7 +48,8 @@ describe("distributed helpers", () => {
     expect(twoPhaseCommit(["yes", "yes"], false)).toBe("commit");
     expect(twoPhaseCommit(["yes", "no"], false)).toBe("abort");
     expect(twoPhaseCommit(["yes", "yes"], true)).toBe("blocked");
-    expect(twoPhaseCommit(["yes", "no"], true)).toBe("abort");
+    expect(twoPhaseCommit(["yes", "no"], true)).toBe("blocked");
+    expect(twoPhaseCommit(["no", "no"], true)).toBe("abort");
     expect(twoPcMessages(3)).toBe(12);
   });
 });
@@ -125,7 +126,7 @@ describe("distributed generators", () => {
       if (t.kind !== "mcq") throw new Error("expected mcq");
       const votes = t.tables![0].rows.map((r) => String(r[1]));
       const crash = t.prompt.includes("crashes");
-      const want = !votes.every((v) => v === "YES") ? 1 : crash ? 2 : 0;
+      const want = crash ? (votes.some((v) => v === "YES") ? 2 : 1) : votes.every((v) => v === "YES") ? 0 : 1;
       expect(t.answer).toBe(want);
       expect(new Set(t.choices).size).toBe(4);
       seen[(["commit", "abort", "blocked"] as const)[want]]++;

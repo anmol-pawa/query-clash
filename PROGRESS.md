@@ -939,3 +939,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Re-read every explanation in `recovery.ts` (WAL, steal/force, deferred vs immediate logging, checkpoints, ARIES analysis/redo/undo, CLRs, pageLSN rule) and `normalization.ts` (FDs, closure, keys, minimal cover, 1NF-5NF, lossless join, BCNF/3NF decomposition). All correct; two fixes: the shadow-paging note wrongly called SQLite's rollback journal a copy-on-write cousin (it is an undo log of original pages; LMDB-style COW trees are the real analogue), and the 5NF explanation now says the interesting join dependencies need three or more projections.
 - Verified: lint, typecheck, 829 tests, `build`, `build:pages` pass. Text-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: H1c (`query.ts`, `er.ts`, `distributed.ts`).
+
+## 2026-10-27 - H1c: audit of query, ER and distributed banks
+
+- Re-read every explanation in `query.ts` (join cost formulas, hash join phases, selectivity, join-order counts, EXPLAIN), `er.ts` (weak entities, ER-to-table mapping order, keys, relational algebra, division) and `distributed.ts` (CAP/PACELC, quorums, sharding, 2PC, sagas). Query and ER banks are correct. One real bug in the 2PC model: `twoPhaseCommit` answered "abort" when the coordinator crashed with a mixed vote, but participants that voted YES still block (they cannot tell whether the others voted NO or what was decided). Now a crash gives "blocked" whenever any participant voted YES and "abort" only when all voted NO; generator explanations and tests updated.
+- Verified: lint, typecheck, 829 tests, `build`, `build:pages` pass. Content/logic-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01). Committed on the session branch `claude/focused-cerf-tm9yk1` as instructed for this session, not `main`.
+- Next: first unchecked task in ROADMAP.md.
