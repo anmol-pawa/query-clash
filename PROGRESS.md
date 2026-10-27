@@ -871,3 +871,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `tests/loop.test.ts` covers round shape and pools over 60 seeds, determinism, perfect/empty/partial scoring, and history capping.
 - Verified: lint, typecheck, tests, `build`, `build:pages` pass. Logic-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F11b (loop screen, save field, `/interview` card).
+
+## 2026-10-27 - F11b: mock loop screen
+
+- Added `components/interview/LoopInterview.tsx`: intro listing the five rounds, a 45-minute clock computed from the start time, round-by-round play (SQL, EXPLAIN and theory reuse `AnswerPanel`; the schema round is a DDL editor graded on PGlite, last check scores), no feedback until the scorecard, then grade, per-round bars, per-topic points, ranked weak spots (with a Schema forge link) and a per-round answer review. Results update Leitner, topic stats, XP and the new `loopResults` save field; the `/interview` page has a "Mock loop" card with last/best score.
+- Verified: lint, typecheck, 815 tests, `build`, `build:pages` pass. Playwright (desktop and iPhone 14) drove a full loop through intro, schema check and scorecard: no console errors, no horizontal overflow, screenshots reviewed. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: roadmap section F is complete; take the next unchecked task in ROADMAP.md.

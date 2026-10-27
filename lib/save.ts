@@ -8,6 +8,7 @@ import type { Dialect } from "./dialect/lint";
 import { Dex, migrateDex } from "@/game/engine/querydex";
 import { EMPTY_DAILY, type DailyState } from "./daily";
 import type { LeitnerState, TopicStats } from "./leitner";
+import type { LoopResult } from "./loop";
 import type { MockResult } from "./mock";
 
 export interface Settings {
@@ -34,6 +35,7 @@ export interface SaveData {
   topicStats: TopicStats; // right / wrong answers per interview topic (weak-topic report)
   mockResults: MockResult[]; // scorecards of the last mock interviews, newest first
   daily: DailyState; // daily challenge streak
+  loopResults: LoopResult[]; // scorecards of the last mock loops, newest first
 }
 
 const KEY = "query-clash-save-v1";
@@ -55,6 +57,7 @@ const DEFAULT: SaveData = {
   topicStats: {},
   mockResults: [],
   daily: EMPTY_DAILY,
+  loopResults: [],
 };
 
 let cache: SaveData | null = null;

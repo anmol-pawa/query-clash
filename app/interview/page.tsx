@@ -5,12 +5,15 @@ import { SpriteCanvas } from "@/components/sprites/SpriteCanvas";
 import { Button, LinkButton, NavLink } from "@/components/ui/kit";
 import { GENERATORS, QUESTIONS, TOPICS } from "@/content/interview";
 import type { Question, Topic, TopicId } from "@/content/interview/types";
+import { LoopInterview } from "@/components/interview/LoopInterview";
 import { MockInterview } from "@/components/interview/MockInterview";
 import { InterviewBattle } from "@/components/interview/InterviewBattle";
 import { buildDeck } from "@/game/engine/interview";
 import { DECK_SIZE } from "@/game/engine/interviewBattle";
 import { sfx } from "@/game/audio/synth";
 import { bossSprite } from "@/game/sprites/roster";
+import { SCHEMA_DRILLS } from "@/content/interview/schemaScenarios";
+import { LOOP_MINUTES, buildLoop, type Round } from "@/lib/loop";
 import { buildMock, clock, MOCK_MINUTES, MOCK_SIZE } from "@/lib/mock";
 import { MAX_BOX, boxCounts, buildDrill, dayNumber, dueCount, weakTopics } from "@/lib/leitner";
 import { DAILY_SIZE, buildDaily, dailySeed, liveStreak, recordDailyWin, wonToday } from "@/lib/daily";
@@ -45,6 +48,13 @@ export default function InterviewPage() {
     window.scrollTo(0, 0);
   };
 
+  const [loop, setLoop] = useState<{ seed: number; rounds: Round[] } | null>(null);
+  const startLoop = () => {
+    const seed = Math.floor(Math.random() * 2 ** 31);
+    setLoop({ seed, rounds: buildLoop(QUESTIONS, SCHEMA_DRILLS, seed) });
+    window.scrollTo(0, 0);
+  };
+
   const startDrill = () => {
     const seed = Math.floor(Math.random() * 2 ** 31);
     const deck = buildDrill(QUESTIONS, GENERATORS, save.leitner, save.topicStats, dayNumber(), seed);
@@ -73,6 +83,8 @@ export default function InterviewPage() {
   const asked = QUESTIONS.find((q) => q.topic === sel && q.askedAt)?.askedAt;
 
   if (mock) return <MockInterview key={mock.seed} deck={mock.deck} seed={mock.seed} onExit={() => setMock(null)} onRetry={startMock} />;
+
+  if (loop) return <LoopInterview key={loop.seed} rounds={loop.rounds} seed={loop.seed} onExit={() => setLoop(null)} onRetry={startLoop} />;
 
   if (battle) {
     const topic = battle.topic === "drill" ? DRILL_TOPIC : battle.topic === "daily" ? DAILY_TOPIC : TOPICS.find((t) => t.id === battle.topic)!;
@@ -189,6 +201,28 @@ export default function InterviewPage() {
           </div>
           <Button variant="gold" size="lg" className="tracking-[0.15em]" data-testid="start-mock" onClick={startMock}>
             ▶ Start mock
+          </Button>
+        </div>
+      </section>
+
+      <section className="px-window mt-3 p-4" data-testid="loop-panel" style={{ "--accent": "#fb7185" } as React.CSSProperties}>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+          <div className="min-w-0 flex-1">
+            <div className="font-display text-[11px] tracking-[0.15em] uppercase" style={{ color: "#fb7185" }}>
+              Mock loop
+            </div>
+            <p className="mt-1 text-sm text-white/70">
+              A compressed on-site: SQL, schema design, an EXPLAIN plan and two system-design questions in {LOOP_MINUTES} minutes, scored out of 100.
+            </p>
+            {save.loopResults.length > 0 && (
+              <p className="mt-1 text-xs text-white/55" data-testid="loop-history">
+                Last: {save.loopResults[0].grade} · {save.loopResults[0].points}/100
+                {save.loopResults.length > 1 && ` · best ${Math.max(...save.loopResults.map((r) => r.points))}`}
+              </p>
+            )}
+          </div>
+          <Button variant="gold" size="lg" className="tracking-[0.15em]" data-testid="start-loop" onClick={startLoop}>
+            ▶ Start loop
           </Button>
         </div>
       </section>
