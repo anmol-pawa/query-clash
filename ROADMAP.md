@@ -181,6 +181,10 @@ Coverage today: theory is deep (about 600 questions across basics, ER, normaliza
 - [x] G3. (done: loop live region + spoken timer, scorecard focus, OS reduced-motion in `StageView` via `lib/useOsReducedMotion.ts`.) Accessibility pass: keyboard focus order and visible focus rings on `/interview` screens, `aria-live` for scorecard and timer, reduced-motion respect in battle tweens.
 - [x] G4. (done: `iq-rank-ties-podium` and `iq-commission-nulls-last`, each with hidden data and a naive query.) More hidden-test SQL missions (windowing edge cases, ties in RANK vs DENSE_RANK, NULL ordering) with Oracle-form hints.
 - [x] G5. (done: `iq-order-gap-lag-default`; gaps-and-islands ties and a content audit of the oldest banks remain for G6.) Pick the next idea: more hidden-test missions (gaps-and-islands ties, DISTINCT vs NULL in COUNT, LAG default values) or a content audit of the oldest interview banks.
-- [ ] G6. Content audit of the oldest interview banks (re-read explanations for correctness against PostgreSQL/Oracle docs) and a gaps-and-islands tie mission.
+- [x] G6. Content audit of the oldest interview banks (re-read explanations for correctness against PostgreSQL/Oracle docs) and a gaps-and-islands tie mission.
   - [x] G6a. Gaps-and-islands tie mission (`iq-login-streaks-dupes`: repeat visits on one day break ROW_NUMBER, DENSE_RANK survives; hidden data and a naive query).
-  - [ ] G6b. Content audit of the oldest interview banks (`basics.ts`, `sql.ts`, `transactions.ts`, `storage.ts`): re-read explanations for correctness.
+  - [x] G6b. (done: audited `basics.ts`, `sql.ts`, `transactions.ts`, `storage.ts`; three `sql.ts` explanations tightened.)
+
+## H. Next ideas (added 2026-10-27)
+
+- [ ] H1. Audit the next-oldest banks (`concurrency.ts`, `mvcc.ts`, `recovery.ts`, `normalization.ts`, `query.ts`, `er.ts`, `distributed.ts`) the same way: re-read explanations for correctness.

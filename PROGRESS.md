@@ -921,3 +921,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Added `iq-login-streaks-dupes` to `content/interview/sql.ts`: login streaks from a `logins` table where a user can visit twice in a day. The reference uses `date - DENSE_RANK()` (CAST to INTEGER so it works in PostgreSQL and Oracle) with `COUNT(DISTINCT ...)`; hidden rows add repeat visits and the naive `ROW_NUMBER` query splits a streak and fails only the hidden case. Split G6: the content audit is now G6b.
 - Verified: lint, typecheck, 829 tests, `build`, `build:pages` pass. Content-only change (renders through the existing runner), so no new screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: G6b (content audit of the oldest interview banks).
+
+## 2026-10-27 - G6b: content audit of the oldest interview banks
+
+- Re-read every explanation in `basics.ts`, `sql.ts`, `transactions.ts` and `storage.ts` against PostgreSQL/Oracle behaviour and textbook definitions (view/conflict serializability, recoverable/cascadeless/strict, B+ tree order and split rules, extendible/linear hashing). Three fixes in `sql.ts`: `second-highest-no-window` (LIMIT 1 OFFSET 1 returns no row rather than NULL, and repeats the top salary on a tie), `report-counts` (zero-count variant needs LEFT JOIN from m to e with COUNT(e.emp_id)), `status-share` (integer-division example now 100 * 1 / 3 -> 33, the old 100 * 3 / 10 is exact).
+- Verified: lint, typecheck, 829 tests, `build`, `build:pages` pass. Text-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: H1 (audit the next-oldest banks).

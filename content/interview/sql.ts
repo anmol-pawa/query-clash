@@ -55,7 +55,7 @@ const ENTRIES: Entry[] = [
     hidden: "INSERT INTO employees (emp_id, first_name, last_name, salary, hire_date, dept_id) VALUES (900, 'Tie', 'Alpha', 250000, DATE '2020-01-01', 10);",
     naive: "SELECT salary FROM employees ORDER BY salary DESC LIMIT 1 OFFSET 1",
     explanation:
-      "The inner query finds the top salary; the outer MAX over everything below it is the runner-up. This handles ties automatically and returns NULL (not an error) if there is no second value, unlike LIMIT 1 OFFSET 1.",
+      "The inner query finds the top salary; the outer MAX over everything below it is the runner-up. This handles ties automatically and returns NULL if there is no second value. LIMIT 1 OFFSET 1 returns no row in that case, and with a tie at the top it returns the top salary again instead of the runner-up.",
     hints: ["Find the maximum first.", "Take the maximum of the salaries strictly below it.", "SELECT MAX(salary) … WHERE salary < (SELECT MAX(salary) …)"],
     tables: ["employees"],
   },
@@ -109,7 +109,7 @@ const ENTRIES: Entry[] = [
     postgres: "SELECT m.last_name, COUNT(*) AS reports FROM employees e JOIN employees m ON e.manager_id = m.emp_id GROUP BY m.emp_id, m.last_name ORDER BY m.last_name",
     ordered: true,
     explanation:
-      "Join the table to itself with two aliases: e is the employee, m the manager reached through manager_id. Grouping by the manager's key counts the reports per manager. The inner join drops employees with no manager and managers with no reports; use a LEFT JOIN from m to e to keep every employee with a zero count.",
+      "Join the table to itself with two aliases: e is the employee, m the manager reached through manager_id. Grouping by the manager's key counts the reports per manager. The inner join drops employees with no manager and managers with no reports; to keep every employee with a zero count, LEFT JOIN from m to e and count COUNT(e.emp_id), since COUNT(*) would report 1 for the NULL-extended row.",
     hints: ["The employee and the manager are rows of the same table.", "Alias employees twice, join on manager_id = emp_id, and group by the manager.", "JOIN employees m ON e.manager_id = m.emp_id GROUP BY m.emp_id, m.last_name"],
     tables: ["employees"],
   },
@@ -483,7 +483,7 @@ const ENTRIES: Entry[] = [
     task: "For each order `status`, return its share of all orders as `pct` (rounded to 1 decimal). Order by pct DESC, status.",
     postgres: "SELECT status, ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS pct FROM orders GROUP BY status ORDER BY pct DESC, status",
     ordered: true,
-    explanation: "SUM(COUNT(*)) OVER () is the grand total repeated on every group row. The 100.0 literal avoids integer division in PostgreSQL, where 100 * 3 / 10 would truncate to 30 before rounding.",
+    explanation: "SUM(COUNT(*)) OVER () is the grand total repeated on every group row. The 100.0 literal avoids integer division in PostgreSQL, where 100 * 1 / 3 would truncate to 33 before ROUND could see the fraction.",
     hints: ["You need each group's count and the total count on one row.", "A window over an aggregate.", "100.0 * COUNT(*) / SUM(COUNT(*)) OVER ()"],
     tables: ["orders"],
   },
