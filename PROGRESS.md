@@ -890,3 +890,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `/interview`: the Mock loop card has a "Review recent loops" disclosure listing each saved loop's rounds (✔/◐/✘ and points) and a "Retry weak spots" button that starts a drill battle from `retryDeck`.
 - Verified: lint, typecheck, 818 tests, `build`, `build:pages` pass. Playwright (desktop and iPhone 14) with a seeded save: no console errors, no horizontal overflow, screenshot reviewed. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: G2 (art review pass over `/dev/sprites`).
+
+## 2026-10-27 - G2: art review pass
+
+- Reviewed `/dev/sprites` on the `build:pages` export at 1280x900 and iPhone 14: move effects (all 12 shapes x 4 colours), battle scenes, and the Bytebat, Nulloth, Rowreaper, Galeframe and Hydrax sheets (idle/attack/hurt/faint/evolve). Silhouettes, outlines, 3-4 step ramps and idle/attack/hurt/faint frames all read clearly, so no sprite changes were needed. Live Pixi previews are lazy (IntersectionObserver), so they show black until scrolled into view and initialised; that is expected, not a bug.
+- No console errors, no horizontal overflow (scrollWidth 390 on iPhone 14). Not every creature sheet was inspected individually; the remaining ones were not opened this run.
+- Verified: `build:pages` passes; docs-only change otherwise. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: G3 (accessibility pass).
