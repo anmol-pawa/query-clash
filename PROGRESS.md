@@ -843,3 +843,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `tests/interviewStoreChoice.test.ts` recomputes the numbers (5 x 1% = 0.05 reads, k = 10 ln 2 = 7, false-positive rate about 0.8%, 100 x 4 KB = 400 WCU) and keys every answer.
 - Verified: lint, typecheck, 794 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F8 (distributed data depth).
+
+## 2026-10-27 - F8: distributed data depth
+
+- Added 15 questions in `content/interview/distributedDepth.ts` (topic "distributed"): sync vs async replication, read-your-writes routing, failover data loss, Raft majority and leader election order, why clusters are odd-sized, R + W > N quorum math, sharding a hot tenant with a directory, key % N rebalancing (80% moves), cross-shard transfers (2PC vs saga), transactional outbox, effectively-once via idempotent consumers, log-based CDC, CAP/PACELC under partition, and consistency models ordered strongest to weakest.
+- `tests/interviewDistributedDepth.test.ts` recomputes the numbers (majority 4 of 7, R = 4, 16 of 20 keys move) and keys every answer.
+- Verified: lint, typecheck, 798 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: F9 (caching and scale).
