@@ -939,3 +939,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Re-read every explanation in `recovery.ts` (WAL, steal/force, deferred vs immediate logging, checkpoints, ARIES analysis/redo/undo, CLRs, pageLSN rule) and `normalization.ts` (FDs, closure, keys, minimal cover, 1NF-5NF, lossless join, BCNF/3NF decomposition). All correct; two fixes: the shadow-paging note wrongly called SQLite's rollback journal a copy-on-write cousin (it is an undo log of original pages; LMDB-style COW trees are the real analogue), and the 5NF explanation now says the interesting join dependencies need three or more projections.
 - Verified: lint, typecheck, 829 tests, `build`, `build:pages` pass. Text-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: H1c (`query.ts`, `er.ts`, `distributed.ts`).
+
+## 2026-10-27 - H1c: audit of query, ER and distributed banks
+
+- Re-read every explanation in `query.ts` (join cost formulas, hash join 3(b_r+b_s)+4n_h, selectivity, join-order counts, EXPLAIN / Oracle plans), `er.ts` (weak entities, ER-to-table mapping, keys, relational algebra, division) and `distributed.ts` (CAP/PACELC, quorums, sharding, 2PC, sagas, NoSQL). All correct; one fix: the generated 2PC question, when the coordinator crashes and some participant voted NO, now explains that YES voters are not blocked because a NO voter lets them learn ABORT via cooperative termination.
+- Verified: lint, typecheck, tests, `build`, `build:pages` pass. Text-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: first unchecked item in ROADMAP.

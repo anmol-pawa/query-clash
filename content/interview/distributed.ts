@@ -437,7 +437,7 @@ export const twoPcGen: Generator = {
         outcome === "commit"
           ? `All ${n} participants voted YES, so the coordinator logs COMMIT and tells everyone. A failure-free round costs ${msgs} messages (prepare, vote, decision, ack per participant).`
           : outcome === "abort"
-            ? `${noCount === 0 ? "" : `${noCount} participant(s) voted NO, so`} the decision is ABORT; any NO vote aborts the transaction. A NO voter may abort immediately.`
+            ? `${noCount} participant(s) voted NO, so the decision is ABORT; any NO vote aborts the transaction. A NO voter may abort immediately.${crash ? " Even though the coordinator crashed, the YES voters are not stuck: a NO voter knows the outcome can only be abort, so when they ask each other (the cooperative termination protocol) it tells them to roll back. Blocking needs every reachable participant to be prepared with no one who knows the decision." : ""}`
             : `Every vote was YES, so all participants are prepared and holding locks, but nobody has the decision. They cannot commit or abort alone and must wait for the coordinator to recover: this is why 2PC blocks.`,
       difficulty: 2,
       tags: twoPcGen.tags,
