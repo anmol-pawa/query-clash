@@ -1,6 +1,6 @@
 # Query Clash roadmap
 
-The hourly routine works top to bottom: take the first unchecked box. Split big items into sub-boxes when you start them.
+The routine (daily since 2026-10-28) works top to bottom: take the first unchecked box. Split big items into sub-boxes when you start them.
 
 ## A. Creature-battler art overhaul (original, Pokémon-*style*)
 
@@ -187,7 +187,74 @@ Coverage today: theory is deep (about 600 questions across basics, ER, normaliza
 
 ## H. Next ideas (added 2026-10-27)
 
-- [ ] H1. Audit the next-oldest banks (`concurrency.ts`, `mvcc.ts`, `recovery.ts`, `normalization.ts`, `query.ts`, `er.ts`, `distributed.ts`) the same way: re-read explanations for correctness.
+- [x] H1. Audit the next-oldest banks (`concurrency.ts`, `mvcc.ts`, `recovery.ts`, `normalization.ts`, `query.ts`, `er.ts`, `distributed.ts`) the same way: re-read explanations for correctness.
   - [x] H1a. (done: `concurrency.ts`, `mvcc.ts`; one Thomas-write-rule explanation tightened.)
   - [x] H1b. (done: `recovery.ts`, `normalization.ts`; shadow-paging and 5NF explanations tightened.)
   - [x] H1c. (done: `query.ts`, `er.ts`, `distributed.ts`; 2PC coordinator-crash-with-NO-vote explanation tightened.)
+
+## I. Correctness and coverage gate (added 2026-10-28; runs are daily now, so each box is one meaningful slice)
+
+- [ ] I1. Whole-bank audit test (`tests/bankAudit.test.ts`), as Kernel Clash did: unique ids across every `content/interview/*.ts` bank, every keyed answer valid, every explanation present, tags/topics valid, and **answer-position balance** (no bank where the correct MCQ slot is predictable). Fix every bank the test flags.
+- [ ] I2. `docs/COVERAGE.md`: a matrix of typical SDE / data-engineer / DBA interview topics (SQL coding, schema design, indexing, query plans, transactions, isolation, locking, replication, sharding, caching, NoSQL, migrations) against the missions, lessons and questions that cover them. Fill any hole the matrix shows (add new boxes below if a hole needs more than one run).
+- [ ] I3. Freshness pass (web-check, stamp "as of October 2026"): current PostgreSQL and Oracle releases and the features interviews now mention (PostgreSQL `MERGE` and `RETURNING` on `MERGE`, `JSON_TABLE`, virtual generated columns, UUIDv7, async I/O; Oracle JSON relational duality, boolean type, `IF [NOT] EXISTS`, `SELECT` without `FROM`). Update the dialect notes and codex, never state a version fact without the stamp.
+
+## J. SQL depth: chapters 13-16 (same recipe as C1: missions + codex, then boss art, then wiring)
+
+Each chapter is three or four boxes: (a) 5-6 missions with hidden edge-case data and a naive wrong query that must fail, both dialects where applicable, plus 3 codex entries, tested, not yet in `CHAPTERS`; (b) the boss (original 96×96 pixel monster, idle/attack/hurt/faint, `/dev/sprites`); (c) wiring, using the checklist of C1d2 and fixing every hard-coded chapter or boss count.
+
+- [ ] J1. Chapter 13 "Window functions mastery".
+  - [ ] J1a. Missions and codex: ROWS vs RANGE vs GROUPS frames, the `LAST_VALUE` default-frame trap, moving averages, `NTILE`, `PERCENT_RANK` / `CUME_DIST`, `LEAD`/`LAG` with defaults, top-N-per-group with ties.
+  - [ ] J1b. Boss art.
+  - [ ] J1c. Wiring.
+- [ ] J2. Chapter 14 "Recursive CTEs and graphs".
+  - [ ] J2a. Missions and codex: org-chart paths, bill-of-materials roll-up, cycle guards, shortest path in a small graph, date-series generation, transitive closure; Oracle `CONNECT BY` forms in the hints.
+  - [ ] J2b. Boss art.
+  - [ ] J2c. Wiring.
+- [ ] J3. Chapter 15 "Query tuning with EXPLAIN".
+  - [ ] J3a. Engine: plan-based grading. `Mission` may require a plan property (an index scan on table X, no sequential scan above N rows, no sort node) checked from `EXPLAIN (FORMAT JSON)` on PGlite, over a seeded larger dataset (`Mission.setup`). Unit tests with good and bad queries.
+  - [ ] J3b. Missions and codex: make a predicate sargable, add the right composite index, covering index, rewrite `OR` to `UNION ALL`, avoid a function on an indexed column, keyset pagination.
+  - [ ] J3c. Boss art.
+  - [ ] J3d. Wiring.
+- [ ] J4. Chapter 16 "Writes, integrity and transactions in SQL".
+  - [ ] J4a. Missions and codex: upsert (`ON CONFLICT` / `MERGE`), `RETURNING`, multi-row updates with joins, constraints and deferred checks, savepoints, `SELECT ... FOR UPDATE SKIP LOCKED` queue claim, soft delete with a partial unique index.
+  - [ ] J4b. Boss art.
+  - [ ] J4c. Wiring.
+
+## K. SQL practice modes and dialect depth
+
+- [ ] K1. "Fix the query" mode: a buggy query plus the expected result, the player repairs it (wrong join type, fan-out double counting, `HAVING` vs `WHERE`, `NULL` logic, off-by-one date ranges, missing `GROUP BY` column). 10 missions in batches of 5, each with a hidden dataset that exposes the bug.
+- [ ] K2. Mission count push: grow the playable SQL missions to 120+ across chapters, 6 per box, balanced across easy/medium/hard (K2a, K2b, …). Each new mission needs hidden data and a naive wrong query that fails. Prefer patterns real screens use (dedupe, sessionization, funnel, retention cohorts, running balance, interval overlap, top-N, pivot, anti-join, rolling windows).
+- [ ] K3. Oracle track: 15 dialect-pair missions (`ROWNUM` vs `FETCH FIRST`, `CONNECT BY`, `PIVOT`/`UNPIVOT`, `MERGE`, `NVL`/`NVL2`/`DECODE`, date arithmetic, `DUAL`, analytic functions, hierarchical `LEVEL`). Reuse the existing Oracle-form mechanism, and never claim a query was executed on Oracle unless it was.
+- [ ] K4. PL/pgSQL and PL/SQL: functions, triggers, cursors and exception handling as codex entries and 12 questions; 5 missions that run PL/pgSQL on PGlite.
+
+## L. Interview readiness
+
+- [ ] L1. Schema-design scenarios 3 → 10 (chat, inventory, ride hailing, double-entry ledger, multi-tenant SaaS, analytics events, social feed): each a spec for `lib/dbms/schemaDesign.ts` with good and bad designs in tests. Two per box.
+- [ ] L2. Data-layer case studies ("design the data layer for X"): 8 scenarios asking for partition key, index set, read and write path, and capacity numbers computed by solver code (rows, bytes, QPS, index size), with trade-offs stated both ways.
+- [ ] L3. Query-performance lab: "make it fast" missions over generated datasets, graded by plan shape and rows examined (builds on J3a).
+- [ ] L4. Communication layer in the Loop: before the SQL round the player chooses the approach, states complexity and edge cases (structured prompts), scored on the four loop dimensions (problem solving, coding, verification, communication) like real rubrics.
+- [ ] L5. Readiness report: per loop type (backend SDE, data engineer, DBA) a readiness % from Leitner boxes, loop scorecards and topic coverage, a ranked weak-area plan linking to missions and lessons.
+
+## M. Game depth and post-game
+
+- [ ] M1. Champion's League, unlocked after chapter 16: four elite bosses (Optimizer, Architect, Transactionist, Distributor) and a champion, each a multi-phase mixed battle (SQL mission → interview questions → plan reading).
+  - [ ] M1a. Data, gating, flow and ending scene (pure logic tested).
+  - [ ] M1b-e. One elite boss per box (original 96×96 art, full animation set).
+  - [ ] M1f. The champion boss, credits and a "Hall of Fame" screen.
+- [ ] M2. Battle depth: learning-linked status effects and combos (a no-hint streak builds a critical, repeated wrong topic applies a visible "Rust" debuff that Leitner review cures), with balance tests.
+- [ ] M3. Interview difficulty toggle for chapter rematches: hidden tests only, no hints, a timer; best times saved.
+- [ ] M4. Trainer card and achievements (stats, streaks, titles), saved and shown in the Querydex.
+- [ ] M5. Audio: synthesised looping music per biome and an SFX audit (mute persists, respects reduced-motion and silent-mode expectations on iPhone).
+- [ ] M6. Story beats: short pixel-portrait dialogues at the start and end of each chapter explaining why the topic matters in production.
+
+## N. Quality and maintenance
+
+- [ ] N1. Commit a Playwright smoke script (`scripts/smoke.mjs`) that visits every route at desktop and iPhone 14 and fails on console errors or horizontal overflow; document it in the README.
+- [ ] N2. Save export/import plus migration tests with fixtures of every older save shape.
+- [ ] N3. Offline check: after one online load every route (including PGlite) reloads with the network off; add an update prompt for new service-worker versions.
+- [ ] N4. Performance budget: measure first-load JS per route and battle frame cost on a throttled iPhone profile; record numbers in PROGRESS.
+- [ ] N5. README refresh with new screenshots and a section on how to add a mission, a question and a boss.
+
+## When every box above is checked
+
+Run a gap analysis from `docs/COVERAGE.md`, the weakest Leitner topics and the mission-count targets, then append a new lettered section of 5-8 run-sized boxes, tick nothing in it, and do the first one.
