@@ -829,3 +829,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `tests/interviewScaleFine.test.ts` recomputes the numeric answers (99,980 skipped, 51 queries, 50 s, 25 slots) and keys every answer.
 - Verified: lint, typecheck, 786 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F6 (transactions in application code).
+
+## 2026-10-27 - F6: transactions in application code
+
+- Added 15 questions in `content/interview/appTx.ts` (topic "transactions"): optimistic locking with a version column and when it fails under contention, guarded atomic UPDATE for oversell/double-spend, SELECT FOR UPDATE, SKIP LOCKED job queues, NOWAIT, which SQLSTATEs to retry (40001, 40P01) and the retry scope, lock ordering against deadlocks, idempotency keys with a unique constraint (and why check-then-insert races), pool throughput math (250 req/s), PgBouncer transaction-mode pitfalls, long-transaction hazards, unique constraint against double booking.
+- `tests/interviewAppTx.test.ts` recomputes the pool numbers and keys every answer.
+- Verified: lint, typecheck, 790 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: F7 (data-store choice and NoSQL).
