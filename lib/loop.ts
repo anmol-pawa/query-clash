@@ -13,6 +13,8 @@ export const LOOP_MINUTES = 45;
 export const LOOP_SECONDS = LOOP_MINUTES * 60;
 /** Saved loop scorecards kept in the save file. */
 export const LOOP_HISTORY = 10;
+/** The newest loops that also keep their per-round answers for replay. */
+export const LOOP_REPLAY = 5;
 
 export type RoundKind = "sql" | "schema" | "explain" | "theory";
 
@@ -62,6 +64,8 @@ export interface RoundScore {
   kind: RoundKind;
   topic: TopicId;
   title: string;
+  /** Question id, or the schema scenario id. */
+  ref: string;
   /** 0..1, or null when the round was never attempted. */
   fraction: number | null;
   points: number;
@@ -109,7 +113,7 @@ export function loopScorecard(rounds: readonly Round[], outcomes: readonly (Roun
   const scores: RoundScore[] = rounds.map((round, i) => {
     const fraction = fractionOf(round, outcomes[i]);
     const max = ROUND_POINTS[round.kind];
-    return { kind: round.kind, topic: roundTopic(round), title: roundTitle(round), fraction, points: Math.round(max * (fraction ?? 0) * 10) / 10, max };
+    return { kind: round.kind, topic: roundTopic(round), title: roundTitle(round), ref: roundRef(round), fraction, points: Math.round(max * (fraction ?? 0) * 10) / 10, max };
   });
   const points = Math.round(scores.reduce((s, x) => s + x.points, 0));
   const maxTotal = scores.reduce((s, x) => s + x.max, 0);
@@ -136,6 +140,8 @@ export interface LoopResult {
   grade: string;
   seconds: number;
   weakTopics: TopicId[];
+  /** Per-round answers, kept for the newest LOOP_REPLAY loops only. */
+  rounds?: RoundScore[];
 }
 
 export const toLoopResult = (c: LoopScorecard, day: number): LoopResult => ({
@@ -145,7 +151,35 @@ export const toLoopResult = (c: LoopScorecard, day: number): LoopResult => ({
   grade: c.grade,
   seconds: c.seconds,
   weakTopics: [...new Set(c.weakSpots.map((w) => w.topic))],
+  rounds: c.rounds,
 });
 
 /** Newest first, capped. */
-export const addLoopResult = (history: readonly LoopResult[], r: LoopResult): LoopResult[] => [r, ...history].slice(0, LOOP_HISTORY);
+export const addLoopResult = (history: readonly LoopResult[], r: LoopResult): LoopResult[] =>
+  [r, ...history].slice(0, LOOP_HISTORY).map((x, i) => (i < LOOP_REPLAY || !x.rounds ? x : { ...x, rounds: undefined }));
+
+/** Rounds of a saved loop that were not full marks, worst first. Schema rounds are included (ref = scenario id). */
+export const weakRounds = (r: LoopResult): RoundScore[] =>
+  (r.rounds ?? []).filter((x) => (x.fraction ?? 0) < 1).sort((a, b) => (a.fraction ?? 0) - (b.fraction ?? 0) || b.max - a.max);
+
+/**
+ * A retry drill from a saved loop: the questions it got wrong first (worst
+ * first), then more questions from the same weak topics, never repeating one.
+ * Schema rounds have no question, so their topic is not used for filling.
+ */
+export function retryDeck(questions: readonly Question[], r: LoopResult, seed: number, size = 8): Question[] {
+  const weak = weakRounds(r);
+  const byId = new Map(questions.map((q) => [q.id, q]));
+  const deck: Question[] = [];
+  const seen = new Set<string>();
+  for (const w of weak) {
+    const q = w.kind === "schema" ? undefined : byId.get(w.ref);
+    if (q && !seen.has(q.id)) {
+      deck.push(q);
+      seen.add(q.id);
+    }
+  }
+  const topics = new Set(weak.filter((w) => w.kind !== "schema").map((w) => w.topic));
+  const extra = shuffled(rng(seed), questions.filter((q) => topics.has(q.topic) && !seen.has(q.id)));
+  return [...deck, ...extra].slice(0, size);
+}

@@ -883,3 +883,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - F11b was already delivered in the previous run but left unticked; ticked it. Added section G (loop replay, art review pass, accessibility pass, more hidden-test SQL missions) so the next run has work.
 - Verified: lint, typecheck, tests, `build`, `build:pages` pass. Docs-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: G1 (loop replay and retry weak spots).
+
+## 2026-10-27 - G1: loop replay and retry weak spots
+
+- `lib/loop.ts`: `LoopResult` now keeps per-round scores (`rounds`, with question/scenario `ref`) for the newest 5 loops (`LOOP_REPLAY`); older entries drop them. Added `weakRounds` and `retryDeck` (missed questions first, then more from the weak topics, no repeats, deterministic per seed).
+- `/interview`: the Mock loop card has a "Review recent loops" disclosure listing each saved loop's rounds (✔/◐/✘ and points) and a "Retry weak spots" button that starts a drill battle from `retryDeck`.
+- Verified: lint, typecheck, 818 tests, `build`, `build:pages` pass. Playwright (desktop and iPhone 14) with a seeded save: no console errors, no horizontal overflow, screenshot reviewed. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: G2 (art review pass over `/dev/sprites`).

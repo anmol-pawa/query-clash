@@ -13,7 +13,7 @@ import { DECK_SIZE } from "@/game/engine/interviewBattle";
 import { sfx } from "@/game/audio/synth";
 import { bossSprite } from "@/game/sprites/roster";
 import { SCHEMA_DRILLS } from "@/content/interview/schemaScenarios";
-import { LOOP_MINUTES, buildLoop, type Round } from "@/lib/loop";
+import { LOOP_MINUTES, buildLoop, retryDeck, type Round } from "@/lib/loop";
 import { buildMock, clock, MOCK_MINUTES, MOCK_SIZE } from "@/lib/mock";
 import { MAX_BOX, boxCounts, buildDrill, dayNumber, dueCount, weakTopics } from "@/lib/leitner";
 import { DAILY_SIZE, buildDaily, dailySeed, liveStreak, recordDailyWin, wonToday } from "@/lib/daily";
@@ -52,6 +52,16 @@ export default function InterviewPage() {
   const startLoop = () => {
     const seed = Math.floor(Math.random() * 2 ** 31);
     setLoop({ seed, rounds: buildLoop(QUESTIONS, SCHEMA_DRILLS, seed) });
+    window.scrollTo(0, 0);
+  };
+
+  const retryLoop = () => {
+    const last = save.loopResults.find((r) => r.rounds);
+    if (!last) return;
+    const seed = Math.floor(Math.random() * 2 ** 31);
+    const deck = retryDeck(QUESTIONS, last, seed);
+    if (!deck.length) return;
+    setBattle({ topic: "drill", seed, deck });
     window.scrollTo(0, 0);
   };
 
@@ -225,6 +235,47 @@ export default function InterviewPage() {
             ▶ Start loop
           </Button>
         </div>
+        {save.loopResults.some((r) => r.rounds) && (
+          <details className="mt-3 border-t border-dotted border-white/15 pt-2 text-xs text-white/70" data-testid="loop-replay">
+            <summary className="cursor-pointer font-display text-[10px] tracking-[0.15em] uppercase text-white/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fb7185]">
+              Review recent loops
+            </summary>
+            <ul className="mt-2 space-y-2">
+              {save.loopResults
+                .filter((r) => r.rounds)
+                .map((r, i) => (
+                  <li key={i} data-testid="loop-replay-item">
+                    <div className="flex justify-between gap-2 font-mono">
+                      <span>
+                        {r.grade} · {r.points}/100
+                      </span>
+                      <span className="text-white/45">{r.day === today ? "today" : `${today - r.day}d ago`}</span>
+                    </div>
+                    <ul className="mt-1 space-y-0.5">
+                      {r.rounds!.map((x, j) => (
+                        <li key={j} className="flex items-baseline gap-2">
+                          <span className="w-3 shrink-0" style={{ color: (x.fraction ?? 0) >= 1 ? "#4ade80" : (x.fraction ?? 0) > 0 ? "#facc15" : "#f87171" }} aria-hidden>
+                            {(x.fraction ?? 0) >= 1 ? "✔" : (x.fraction ?? 0) > 0 ? "◐" : "✘"}
+                          </span>
+                          <span className="min-w-0 flex-1 truncate">{x.title}</span>
+                          <span className="shrink-0 font-mono text-white/55">
+                            {x.points}/{x.max}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+            </ul>
+            {retryDeck(QUESTIONS, save.loopResults.find((r) => r.rounds)!, 0).length > 0 && (
+              <div className="mt-3" data-testid="retry-weak">
+                <Button variant="primary" size="lg" className="tracking-[0.15em]" onClick={retryLoop}>
+                  ▶ Retry weak spots
+                </Button>
+              </div>
+            )}
+          </details>
+        )}
       </section>
 
       <div role="tablist" aria-label="Difficulty" className="px-tray mt-4 flex gap-1.5 overflow-x-auto p-2 scroll-thin">

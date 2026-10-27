@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { QUESTIONS } from "@/content/interview";
 import { SCHEMA_DRILLS } from "@/content/interview/schemaScenarios";
 import { correctResponse } from "@/game/engine/interview";
-import { LOOP_HISTORY, LOOP_MINUTES, ROUND_POINTS, THEORY_TOPICS, addLoopResult, buildLoop, loopScorecard, toLoopResult, type RoundOutcome } from "@/lib/loop";
+import { LOOP_HISTORY, LOOP_MINUTES, ROUND_POINTS, THEORY_TOPICS, LOOP_REPLAY, addLoopResult, buildLoop, loopScorecard, retryDeck, toLoopResult, weakRounds, type RoundOutcome } from "@/lib/loop";
 
 const schemas = SCHEMA_DRILLS.map((d) => ({ id: d.id, title: d.title }));
 
@@ -93,5 +93,37 @@ describe("loop history", () => {
     for (let i = 0; i < LOOP_HISTORY + 3; i++) h = addLoopResult(h, { ...res, day: i });
     expect(h).toHaveLength(LOOP_HISTORY);
     expect(h[0].day).toBe(LOOP_HISTORY + 2);
+  });
+
+  it("keeps per-round answers for the newest loops only", () => {
+    const res = toLoopResult(loopScorecard(buildLoop(QUESTIONS, schemas, 3), [], 10, false), 1);
+    expect(res.rounds).toHaveLength(5);
+    let h = [] as ReturnType<typeof addLoopResult>;
+    for (let i = 0; i < 8; i++) h = addLoopResult(h, { ...res, day: i });
+    expect(h.filter((x) => x.rounds).length).toBe(LOOP_REPLAY);
+    expect(h.slice(0, LOOP_REPLAY).every((x) => x.rounds)).toBe(true);
+  });
+});
+
+describe("retryDeck", () => {
+  it("puts the missed questions first, then fills from the weak topics without repeats", () => {
+    const loop = buildLoop(QUESTIONS, schemas, 11);
+    const outcomes: RoundOutcome[] = loop.map((r) => (r.kind === "schema" ? { kind: "schema", passed: 1, total: 2 } : correctResponse(r.question)));
+    const c = loopScorecard(loop, outcomes.map((o, i) => (i === 0 ? null : o)), 100, false);
+    const res = toLoopResult(c, 5);
+    const weak = weakRounds(res);
+    expect(weak[0].ref).toBe(c.weakSpots[0].ref);
+    const deck = retryDeck(QUESTIONS, res, 7);
+    expect(deck.length).toBeGreaterThan(0);
+    expect(deck.length).toBeLessThanOrEqual(8);
+    expect(new Set(deck.map((q) => q.id)).size).toBe(deck.length);
+    expect(deck[0].id).toBe(weak.find((w) => w.kind !== "schema")!.ref);
+    expect(deck.map((q) => q.id)).toEqual(retryDeck(QUESTIONS, res, 7).map((q) => q.id));
+  });
+  it("is empty for a loop saved without rounds or a perfect loop", () => {
+    const loop = buildLoop(QUESTIONS, schemas, 2);
+    const perfect = toLoopResult(loopScorecard(loop, loop.map((r) => (r.kind === "schema" ? { kind: "schema" as const, passed: 3, total: 3 } : correctResponse(r.question))), 5, false), 1);
+    expect(retryDeck(QUESTIONS, perfect, 1)).toEqual([]);
+    expect(retryDeck(QUESTIONS, { ...perfect, rounds: undefined }, 1)).toEqual([]);
   });
 });
