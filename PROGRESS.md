@@ -857,3 +857,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `tests/interviewCachingScale.test.ts` recomputes every numeric answer and keys every answer.
 - Verified: lint, typecheck, 802 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F10 (operations and migrations).
+
+## 2026-10-27 - F10: operations and migrations
+
+- Added 14 questions in `content/interview/opsMigrations.ts` (topics "storage", "transactions", "query"): expand/contract column rename, safe NOT NULL (NOT VALID + VALIDATE), CREATE INDEX CONCURRENTLY and why it can't run in a transaction, batched backfills, the DDL lock queue and lock_timeout, PITR requirements, replica vs backup, RPO/RTO, WAL archive window (2 min), VACUUM and bloat from long transactions, partitioning benefits, pg_stat_statements and ranking by total time (8,000 s).
+- `tests/interviewOpsMigrations.test.ts` recomputes the numbers and keys every answer.
+- Verified: lint, typecheck, 806 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01). Committed to the designated branch `claude/focused-cerf-w9z3yy` (no routine lock taken, since the branch is not shared).
+- Next: F11 (mock loop mode).
