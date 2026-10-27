@@ -915,3 +915,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Added `iq-order-gap-lag-default` to `content/interview/sql.ts`: days between a customer's consecutive orders using `LAG(order_date, 1, order_date)` with PARTITION BY, first order gives 0. Explanation covers the default argument, partitioning and WHERE-before-window. No hidden case: the visible data (non-chronological order ids across customers) already exposes the usual mistakes. The existing suite checks the reference in both dialects.
 - Verified: lint, typecheck, 826 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: G6 (content audit of the oldest banks, gaps-and-islands tie mission).
+
+## 2026-10-27 - G6a: gaps-and-islands with repeat visits
+
+- Added `iq-login-streaks-dupes` to `content/interview/sql.ts`: login streaks from a `logins` table where a user can visit twice in a day. The reference uses `date - DENSE_RANK()` (CAST to INTEGER so it works in PostgreSQL and Oracle) with `COUNT(DISTINCT ...)`; hidden rows add repeat visits and the naive `ROW_NUMBER` query splits a streak and fails only the hidden case. Split G6: the content audit is now G6b.
+- Verified: lint, typecheck, 829 tests, `build`, `build:pages` pass. Content-only change (renders through the existing runner), so no new screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: G6b (content audit of the oldest interview banks).

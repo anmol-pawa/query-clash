@@ -731,6 +731,26 @@ const ENTRIES: Entry[] = [
     hints: ["Each row needs to look at the previous row of the same customer.", "LAG takes an optional third argument for when there is no previous row.", "order_date - LAG(order_date, 1, order_date) OVER (PARTITION BY customer_id ORDER BY order_date, order_id)"],
     tables: ["orders"],
   },
+  {
+    id: "login-streaks-dupes",
+    title: "Login streaks with repeat visits",
+    difficulty: 3,
+    tags: ["window functions", "gaps and islands", "DENSE_RANK", "duplicates"],
+    askedAt: "The follow-up to gaps-and-islands: 'now the same day can appear twice'. It separates people who memorised the trick from those who understand it.",
+    task: "The table `logins(user_id, login_date)` records one row per visit, and a user may visit more than once on the same day. Return each user's **streaks of consecutive days**: `user_id`, `start_date`, `end_date` and `days` (distinct days in the streak). Order by user_id, start_date.",
+    setup:
+      "CREATE TABLE logins (user_id INTEGER, login_date DATE); INSERT INTO logins VALUES (1, DATE '2025-01-01'),(1, DATE '2025-01-02'),(1, DATE '2025-01-03'),(1, DATE '2025-01-05'),(1, DATE '2025-01-06'),(1, DATE '2025-01-09'),(2, DATE '2025-01-02'),(2, DATE '2025-01-03'),(2, DATE '2025-01-04'),(2, DATE '2025-01-05');",
+    postgres:
+      "SELECT user_id, MIN(login_date) AS start_date, MAX(login_date) AS end_date, COUNT(DISTINCT login_date) AS days FROM (SELECT user_id, login_date, login_date - CAST(DENSE_RANK() OVER (PARTITION BY user_id ORDER BY login_date) AS INTEGER) AS grp FROM logins) t GROUP BY user_id, grp ORDER BY user_id, start_date",
+    ordered: true,
+    hidden: "INSERT INTO logins VALUES (1, DATE '2025-01-02'), (2, DATE '2025-01-04');",
+    naive:
+      "SELECT user_id, MIN(login_date) AS start_date, MAX(login_date) AS end_date, COUNT(DISTINCT login_date) AS days FROM (SELECT user_id, login_date, login_date - CAST(ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY login_date) AS INTEGER) AS grp FROM logins) t GROUP BY user_id, grp ORDER BY user_id, start_date",
+    explanation:
+      "Inside a streak, the date and its position advance together, so date minus position is constant and changes at every gap. That only holds if the position advances once per distinct day. ROW_NUMBER numbers every row, so a second visit on the same day pushes the position ahead of the date and splits a single streak in two (1-2, 2-3 becomes two pieces). DENSE_RANK gives equal dates the same number and does not skip, so repeat visits stay in their island; the alternative is to SELECT DISTINCT user_id, login_date first and use ROW_NUMBER. Count days with COUNT(DISTINCT login_date), not COUNT(*), or repeat visits inflate the length. GROUP BY must include user_id as well as the island key, because two users can share the same key. Date minus integer gives a date in both PostgreSQL and Oracle; the CAST keeps PostgreSQL happy because DENSE_RANK returns bigint.",
+    hints: ["Within a streak the date and the position grow by one each day.", "What happens to ROW_NUMBER when one day appears twice? Look for a ranking function that gives equal dates the same number.", "login_date - CAST(DENSE_RANK() OVER (PARTITION BY user_id ORDER BY login_date) AS INTEGER) is constant inside a streak; GROUP BY user_id and that, with COUNT(DISTINCT login_date)."],
+    tables: [],
+  },
 ];
 
 export const SQL_MISSIONS: Mission[] = ENTRIES.map((e) => ({
