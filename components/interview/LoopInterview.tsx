@@ -65,7 +65,7 @@ export function LoopInterview({ rounds, seed, onExit, onRetry }: { rounds: Round
           if (ok) solved.push(r.question.id);
         }
       });
-      return { ...x, xp: x.xp + Math.round(c.points), leitner, topicStats, interview: mergeSolved(x.interview, solved, FIXED_IDS), loopResults: addLoopResult(x.loopResults ?? [], toLoopResult(c, today)) };
+      return { ...x, xp: x.xp + Math.round(c.points), leitner, topicStats, interview: mergeSolved(x.interview, solved, FIXED_IDS), loopResults: addLoopResult(x.loopResults ?? [], toLoopResult(c, today, rounds)) };
     });
     setShown(outcomes.current);
     setCard(c);

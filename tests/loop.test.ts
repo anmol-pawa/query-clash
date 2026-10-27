@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { QUESTIONS } from "@/content/interview";
 import { SCHEMA_DRILLS } from "@/content/interview/schemaScenarios";
 import { correctResponse } from "@/game/engine/interview";
-import { LOOP_HISTORY, LOOP_MINUTES, ROUND_POINTS, THEORY_TOPICS, addLoopResult, buildLoop, loopScorecard, toLoopResult, type RoundOutcome } from "@/lib/loop";
+import { GENERATORS } from "@/content/interview";
+import { LOOP_HISTORY, LOOP_REVIEW_KEPT, WEAK_DRILL_SIZE, reviewWeakSpots, weakDrill, LOOP_MINUTES, ROUND_POINTS, THEORY_TOPICS, addLoopResult, buildLoop, loopScorecard, toLoopResult, type RoundOutcome } from "@/lib/loop";
 
 const schemas = SCHEMA_DRILLS.map((d) => ({ id: d.id, title: d.title }));
 
@@ -93,5 +94,38 @@ describe("loop history", () => {
     for (let i = 0; i < LOOP_HISTORY + 3; i++) h = addLoopResult(h, { ...res, day: i });
     expect(h).toHaveLength(LOOP_HISTORY);
     expect(h[0].day).toBe(LOOP_HISTORY + 2);
+  });
+});
+
+describe("loop replay and weak-spot drill", () => {
+  const rounds = buildLoop(QUESTIONS, schemas, 7);
+  const outcomes: RoundOutcome[] = rounds.map((r, i) => (r.kind === "schema" ? { kind: "schema", passed: 1, total: 4 } : i === 2 ? correctResponse(r.question) : { kind: "short", text: "zzz" }));
+  const card = loopScorecard(rounds, outcomes, 600, false);
+  const result = toLoopResult(card, 100, rounds);
+
+  it("keeps a per-round review and ranks the weak spots worst first", () => {
+    expect(result.review).toHaveLength(5);
+    expect(result.review!.map((r) => r.kind)).toEqual(["sql", "schema", "explain", "theory", "theory"]);
+    const weak = reviewWeakSpots(result);
+    expect(weak.map((w) => w.ref)).toEqual(card.weakSpots.map((w) => w.ref));
+    expect(weak.some((w) => w.kind === "explain")).toBe(false);
+  });
+  it("only the newest loops keep their review", () => {
+    let h: ReturnType<typeof addLoopResult> = [];
+    for (let i = 0; i < LOOP_REVIEW_KEPT + 3; i++) h = addLoopResult(h, toLoopResult(card, i, rounds));
+    expect(h.filter((x) => x.review)).toHaveLength(LOOP_REVIEW_KEPT);
+    expect(h[0].review).toBeTruthy();
+    expect(h[LOOP_REVIEW_KEPT].review).toBeUndefined();
+  });
+  it("builds a drill with the missed questions first and filler from the same topics", () => {
+    const weak = reviewWeakSpots(result);
+    const deck = weakDrill(QUESTIONS, GENERATORS, weak, 3);
+    expect(deck.length).toBeGreaterThan(0);
+    expect(deck.length).toBeLessThanOrEqual(WEAK_DRILL_SIZE);
+    expect(new Set(deck.map((q) => q.id)).size).toBe(deck.length);
+    const topics = new Set(weak.map((w) => w.topic));
+    for (const w of weak.filter((x) => x.kind !== "schema")) expect(deck.some((q) => q.id === w.ref)).toBe(true);
+    for (const q of deck) expect(topics.has(q.topic)).toBe(true);
+    expect(weakDrill(QUESTIONS, GENERATORS, weak, 3).map((q) => q.id)).toEqual(deck.map((q) => q.id));
   });
 });

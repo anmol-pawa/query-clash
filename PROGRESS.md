@@ -883,3 +883,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - F11b was already delivered in the previous run but left unticked; ticked it. Added section G (loop replay, art review pass, accessibility pass, more hidden-test SQL missions) so the next run has work.
 - Verified: lint, typecheck, tests, `build`, `build:pages` pass. Docs-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: G1 (loop replay and retry weak spots).
+
+## 2026-10-27 - G1: loop replay and retry weak spots
+
+- `lib/loop.ts`: `LoopResult` now keeps an optional per-round `review` (kind, topic, title, ref, fraction, max) for the newest 5 loops (older ones keep only the summary, so old saves still load); `reviewWeakSpots` ranks the missed rounds and `weakDrill` builds an 8-question drill (missed questions first, then more non-SQL questions and generated problems from the same topics, round-robin so one topic can't take every slot; deterministic per seed).
+- `/interview`: the Mock loop card has a "Review last scorecard" section (per-round marks, `aria-live`) and a "↻ Retry weak spots" button that starts a "Weak-spot Drill" battle (rematch rebuilds it).
+- Verified: lint, typecheck, 818 tests (3 new in `tests/loop.test.ts`), `build`, `build:pages` pass. Playwright (desktop and iPhone 14) with a seeded save: replay list and retry button render, drill battle starts, no console errors, no horizontal overflow; screenshots reviewed. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Note: committed to the session's designated branch `claude/focused-cerf-f5dvoh` (not `main`) per the session instructions.
+- Next: G2 (art review pass).

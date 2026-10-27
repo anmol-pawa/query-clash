@@ -5,7 +5,7 @@
  * and a weak-spot review list. Everything here is pure; the screen is separate.
  */
 import { grade } from "@/game/engine/interview";
-import type { Question, Response, SqlQuestion, TopicId } from "@/content/interview/types";
+import type { Generator, Question, Response, SqlQuestion, TopicId } from "@/content/interview/types";
 import { gradeFor } from "@/lib/mock";
 import { rng, shuffled } from "@/lib/rng";
 
@@ -13,6 +13,10 @@ export const LOOP_MINUTES = 45;
 export const LOOP_SECONDS = LOOP_MINUTES * 60;
 /** Saved loop scorecards kept in the save file. */
 export const LOOP_HISTORY = 10;
+/** Loops that keep their per-round review in the save (older ones keep only the summary). */
+export const LOOP_REVIEW_KEPT = 5;
+/** Questions in a "retry weak spots" drill. */
+export const WEAK_DRILL_SIZE = 8;
 
 export type RoundKind = "sql" | "schema" | "explain" | "theory";
 
@@ -128,6 +132,18 @@ export function loopScorecard(rounds: readonly Round[], outcomes: readonly (Roun
   return { points, pct, grade: g.grade, verdict: g.verdict, seconds, timedOut, rounds: scores, perTopic, weakSpots };
 }
 
+/** One round of a saved loop: enough to show the scorecard again and re-drill it. */
+export interface LoopReviewRound {
+  kind: RoundKind;
+  topic: TopicId;
+  title: string;
+  /** Question id, or the schema scenario id. */
+  ref: string;
+  /** 0..1, or null when the round was never attempted. */
+  fraction: number | null;
+  max: number;
+}
+
 /** What the save file keeps of a loop scorecard. */
 export interface LoopResult {
   day: number;
@@ -136,16 +152,52 @@ export interface LoopResult {
   grade: string;
   seconds: number;
   weakTopics: TopicId[];
+  /** The five rounds with their scores; only the newest LOOP_REVIEW_KEPT loops keep it. */
+  review?: LoopReviewRound[];
 }
 
-export const toLoopResult = (c: LoopScorecard, day: number): LoopResult => ({
+export const toLoopResult = (c: LoopScorecard, day: number, rounds?: readonly Round[]): LoopResult => ({
   day,
   points: c.points,
   pct: c.pct,
   grade: c.grade,
   seconds: c.seconds,
   weakTopics: [...new Set(c.weakSpots.map((w) => w.topic))],
+  ...(rounds && { review: rounds.map((r, i): LoopReviewRound => ({ kind: r.kind, topic: c.rounds[i].topic, title: c.rounds[i].title, ref: roundRef(r), fraction: c.rounds[i].fraction, max: c.rounds[i].max })) }),
 });
 
-/** Newest first, capped. */
-export const addLoopResult = (history: readonly LoopResult[], r: LoopResult): LoopResult[] => [r, ...history].slice(0, LOOP_HISTORY);
+/** Newest first, capped; only the newest few keep their per-round review. */
+export const addLoopResult = (history: readonly LoopResult[], r: LoopResult): LoopResult[] =>
+  [r, ...history].slice(0, LOOP_HISTORY).map((x, i) => (i < LOOP_REVIEW_KEPT || !x.review ? x : { ...x, review: undefined }));
+
+/** The rounds of a saved loop that were not full marks, worst first. */
+export const reviewWeakSpots = (r: LoopResult): LoopReviewRound[] =>
+  (r.review ?? []).filter((x) => (x.fraction ?? 0) < 1).sort((a, b) => (a.fraction ?? 0) - (b.fraction ?? 0) || b.max - a.max);
+
+/**
+ * A drill from a saved loop's weak spots: the missed questions themselves first,
+ * then other questions and generated problems from the same topics, mixed by seed.
+ * Schema rounds have no question, so their topic ("er") supplies the filler.
+ */
+export function weakDrill(questions: readonly Question[], generators: readonly Generator[], weak: readonly LoopReviewRound[], seed: number, size = WEAK_DRILL_SIZE): Question[] {
+  const r = rng(seed);
+  const byId = new Map(questions.map((q) => [q.id, q]));
+  const out: Question[] = [];
+  const seen = new Set<string>();
+  const push = (q: Question | undefined) => {
+    if (q && out.length < size && !seen.has(q.id)) {
+      seen.add(q.id);
+      out.push(q);
+    }
+  };
+  for (const w of weak) if (w.kind !== "schema") push(byId.get(w.ref));
+  const topics = [...new Set(weak.map((w) => w.topic))];
+  const pool = shuffled(r, [
+    ...questions.filter((q) => topics.includes(q.topic) && q.kind !== "sql" && !q.plan),
+    ...generators.filter((g) => topics.includes(g.topic)).map((g) => g.generate(Math.floor(r() * 2 ** 31))),
+  ]);
+  // round-robin over topics so the weakest topic doesn't take every slot
+  const queues = topics.map((t) => pool.filter((q) => q.topic === t));
+  for (let i = 0; out.length < size && queues.some((q) => i < q.length); i++) for (const q of queues) push(q[i]);
+  return shuffled(r, out);
+}

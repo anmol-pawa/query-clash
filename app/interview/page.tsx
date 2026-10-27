@@ -13,7 +13,7 @@ import { DECK_SIZE } from "@/game/engine/interviewBattle";
 import { sfx } from "@/game/audio/synth";
 import { bossSprite } from "@/game/sprites/roster";
 import { SCHEMA_DRILLS } from "@/content/interview/schemaScenarios";
-import { LOOP_MINUTES, buildLoop, type Round } from "@/lib/loop";
+import { LOOP_MINUTES, buildLoop, reviewWeakSpots, weakDrill, type Round } from "@/lib/loop";
 import { buildMock, clock, MOCK_MINUTES, MOCK_SIZE } from "@/lib/mock";
 import { MAX_BOX, boxCounts, buildDrill, dayNumber, dueCount, weakTopics } from "@/lib/leitner";
 import { DAILY_SIZE, buildDaily, dailySeed, liveStreak, recordDailyWin, wonToday } from "@/lib/daily";
@@ -23,6 +23,7 @@ const ACCENT = "#60a5fa";
 const SILHOUETTE = "#2a2f4f";
 /** The guardian and title shared by every daily drill battle. */
 const DRILL_TOPIC: Topic = { id: "basics", foe: "optimizer", title: "Daily Drill", blurb: "Ten mixed questions, due reviews first.", color: "#f59e0b" };
+const WEAK_TOPIC: Topic = { id: "basics", foe: "optimizer", title: "Weak-spot Drill", blurb: "Your missed loop rounds, plus more from the same topics.", color: "#fb7185" };
 const DAILY_TOPIC: Topic = { id: "basics", foe: "reaper", title: "Daily Challenge", blurb: "Five questions, the same for everyone today.", color: "#f43f5e" };
 const FIXED_IDS = new Set(QUESTIONS.map((q) => q.id));
 const tone = (c: string) => ({ "--tone": c }) as React.CSSProperties;
@@ -31,7 +32,7 @@ export default function InterviewPage() {
   const save = useSave();
   const [diff, setDiff] = useState<DifficultyFilter>("all");
   const [sel, setSel] = useState<TopicId>("basics");
-  const [battle, setBattle] = useState<{ topic: TopicId | "drill" | "daily"; seed: number; deck: Question[] } | null>(null);
+  const [battle, setBattle] = useState<{ topic: TopicId | "drill" | "daily" | "weak"; seed: number; deck: Question[] } | null>(null);
 
   const startBattle = (topic: TopicId) => {
     const seed = Math.floor(Math.random() * 2 ** 31);
@@ -62,6 +63,14 @@ export default function InterviewPage() {
     window.scrollTo(0, 0);
   };
 
+  const startWeakDrill = () => {
+    const seed = Math.floor(Math.random() * 2 ** 31);
+    const deck = weakDrill(QUESTIONS, GENERATORS, reviewWeakSpots(save.loopResults[0]), seed);
+    if (!deck.length) return;
+    setBattle({ topic: "weak", seed, deck });
+    window.scrollTo(0, 0);
+  };
+
   const startDaily = () => {
     const day = dayNumber();
     setBattle({ topic: "daily", seed: dailySeed(day), deck: buildDaily(QUESTIONS, GENERATORS, day) });
@@ -87,7 +96,7 @@ export default function InterviewPage() {
   if (loop) return <LoopInterview key={loop.seed} rounds={loop.rounds} seed={loop.seed} onExit={() => setLoop(null)} onRetry={startLoop} />;
 
   if (battle) {
-    const topic = battle.topic === "drill" ? DRILL_TOPIC : battle.topic === "daily" ? DAILY_TOPIC : TOPICS.find((t) => t.id === battle.topic)!;
+    const topic = battle.topic === "drill" ? DRILL_TOPIC : battle.topic === "weak" ? WEAK_TOPIC : battle.topic === "daily" ? DAILY_TOPIC : TOPICS.find((t) => t.id === battle.topic)!;
     return (
       <InterviewBattle
         key={battle.seed}
@@ -99,7 +108,7 @@ export default function InterviewPage() {
           document.documentElement.style.setProperty("--accent", ACCENT);
         }}
         onVictory={battle.topic === "daily" ? () => updateSave((x) => ({ ...x, daily: recordDailyWin(x.daily, dayNumber()) })) : undefined}
-        onRematch={() => (battle.topic === "drill" ? startDrill() : battle.topic === "daily" ? startDaily() : startBattle(battle.topic))}
+        onRematch={() => (battle.topic === "drill" ? startDrill() : battle.topic === "weak" ? startWeakDrill() : battle.topic === "daily" ? startDaily() : startBattle(battle.topic))}
       />
     );
   }
@@ -225,6 +234,27 @@ export default function InterviewPage() {
             ▶ Start loop
           </Button>
         </div>
+        {save.loopResults[0]?.review && (
+          <details className="mt-3" data-testid="loop-replay">
+            <summary className="cursor-pointer text-xs uppercase tracking-wide text-white/70">Review last scorecard</summary>
+            <ul className="mt-2 space-y-1 text-sm" aria-live="polite">
+              {save.loopResults[0].review.map((r, i) => (
+                <li key={i} className="flex gap-2">
+                  <span className="font-display" style={{ color: r.fraction === 1 ? "#34d399" : r.fraction ? "#facc15" : "#f87171" }}>
+                    {r.fraction === 1 ? "✓" : r.fraction === null ? "–" : "✗"}
+                  </span>
+                  <span className="min-w-0 flex-1 text-white/80">{r.title}</span>
+                  <span className="font-mono text-xs text-white/55">{Math.round(r.max * (r.fraction ?? 0) * 10) / 10}/{r.max}</span>
+                </li>
+              ))}
+            </ul>
+            {reviewWeakSpots(save.loopResults[0]).length > 0 && (
+              <Button variant="ghost" size="md" className="mt-3" data-testid="retry-weak" onClick={startWeakDrill}>
+                ↻ Retry weak spots
+              </Button>
+            )}
+          </details>
+        )}
       </section>
 
       <div role="tablist" aria-label="Difficulty" className="px-tray mt-4 flex gap-1.5 overflow-x-auto p-2 scroll-thin">
