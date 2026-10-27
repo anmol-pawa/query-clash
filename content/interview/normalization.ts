@@ -255,7 +255,7 @@ export const NORMALIZATION: Question[] = [
     kind: "short",
     prompt: "5NF (project-join normal form) deals with ___ dependencies that are not implied by candidate keys.",
     accept: ["join"],
-    explanation: "5NF says every non-trivial join dependency is implied by the candidate keys: the table cannot be split into three or more projections that rejoin losslessly unless the keys force it.",
+    explanation: "5NF says every non-trivial join dependency is implied by the candidate keys: the table cannot be split into projections that rejoin losslessly (the interesting case needs three or more, since a binary lossless split is already a 4NF or BCNF matter) unless the keys force it.",
     difficulty: 3,
     tags: ["5nf", "join dependency"],
   },

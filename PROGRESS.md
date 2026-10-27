@@ -933,3 +933,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Re-read every explanation in `concurrency.ts` (lock compatibility count, 2PL variants, conversions, deadlock prevention, timestamp ordering, tree protocol) and `mvcc.ts` (xmin/xmax, vacuum, snapshot timing, Oracle undo/ORA-01555/ORA-08177, SSI, xid wraparound). All correct; one fix: the Thomas' write rule view-serializability explanation now says the schedule is view-equivalent to T1, T2 once the obsolete write is dropped, with the conflict cycle R1 -> W2 -> W1. Split H1 into H1a-c.
 - Verified: lint, typecheck, tests, `build`, `build:pages` pass. Text-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: H1b (`recovery.ts`, `normalization.ts`).
+
+## 2026-10-27 - H1b: audit of recovery and normalization banks
+
+- Re-read every explanation in `recovery.ts` (WAL, steal/force, deferred vs immediate logging, checkpoints, ARIES analysis/redo/undo, CLRs, pageLSN rule) and `normalization.ts` (FDs, closure, keys, minimal cover, 1NF-5NF, lossless join, BCNF/3NF decomposition). All correct; two fixes: the shadow-paging note wrongly called SQLite's rollback journal a copy-on-write cousin (it is an undo log of original pages; LMDB-style COW trees are the real analogue), and the 5NF explanation now says the interesting join dependencies need three or more projections.
+- Verified: lint, typecheck, 829 tests, `build`, `build:pages` pass. Text-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: H1c (`query.ts`, `er.ts`, `distributed.ts`).

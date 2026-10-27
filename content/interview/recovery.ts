@@ -215,7 +215,7 @@ export const RECOVERY: Question[] = [
       "Locking the whole database during each transaction",
     ],
     answer: 0,
-    explanation: "Changed pages go to fresh locations; the current page table points at them while the shadow table still points at the old ones. Commit atomically swaps the root pointer. It fragments data and makes concurrency hard, so logs won (SQLite's old rollback journal and LMDB-style copy-on-write trees are cousins).",
+    explanation: "Changed pages go to fresh locations; the current page table points at them while the shadow table still points at the old ones. Commit atomically swaps the root pointer. It fragments data and makes concurrency hard, so logs won (LMDB and other copy-on-write B+ trees work this way; SQLite's rollback journal does not, it is an undo log of original pages).",
     difficulty: 2,
     tags: ["shadow paging"],
   },
