@@ -822,3 +822,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `tests/interviewExplainPlans.test.ts` parses the plan text to recompute the numeric answers (1,000 rows from loops, 1,000,000 rows scanned), checks the estimate-miss and 92% selectivity plans against their explanations, and keys every answer.
 - Verified: lint, typecheck, 781 tests, `build`, `build:pages` pass. Playwright on the static export (desktop + iPhone 14): plan renders under the prompt, no console errors, no horizontal page overflow. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
 - Next: F5 (pagination and query patterns at scale).
+
+## 2026-10-27 - F5: pagination and query patterns at scale
+
+- Added 15 questions in `content/interview/scaleFine.ts` (topic "query"): OFFSET cost and drift, keyset queries with row-value comparison and its limits, N+1 and batching fixes, bulk insert round-trip cost, upsert (ON CONFLICT / MERGE), why count(*) is slow under MVCC, hot-row counters and sharded counter slots, top-K and top-K per group, batched deletes and partition drops.
+- `tests/interviewScaleFine.test.ts` recomputes the numeric answers (99,980 skipped, 51 queries, 50 s, 25 slots) and keys every answer.
+- Verified: lint, typecheck, 786 tests, `build`, `build:pages` pass. Content-only change, so no screenshots. CI/deploy confirmation skipped (GitHub Actions quota exhausted until 2026-11-01).
+- Next: F6 (transactions in application code).
