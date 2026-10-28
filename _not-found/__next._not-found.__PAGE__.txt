@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[22016,["/query-clash/_next/static/chunks/0u02qm4i6dgq_.js","/query-clash/_next/static/chunks/14mrh2-p_w84d.js","/query-clash/_next/static/chunks/1rxncug86bump.js"],""]
+3:I[97367,["/query-clash/_next/static/chunks/0u02qm4i6dgq_.js","/query-clash/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"rsc":["$","$1","c",{"children":[["$","main",null,{"className":"flex min-h-dvh flex-col items-center justify-center gap-4 text-center","children":[["$","div",null,{"className":"font-display text-6xl font-black text-[var(--accent)] neon-text","children":"ORA-00942"}],["$","p",null,{"className":"text-white/60","children":"table or view does not exist — this page isn't in the schema."}],["$","$L2",null,{"href":"/","className":"text-sm text-white/80 underline","children":"Back to the main menu"}]]}],[["$","script","script-0",{"src":"/query-clash/_next/static/chunks/1rxncug86bump.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"w0R1OzM2ofSBir0uNNIib"}
+5:null
