@@ -194,7 +194,7 @@ Coverage today: theory is deep (about 600 questions across basics, ER, normaliza
 
 ## I. Correctness and coverage gate (added 2026-10-28; runs are daily now, so each box is one meaningful slice)
 
-- [ ] I1. Whole-bank audit test (`tests/bankAudit.test.ts`), as Kernel Clash did: unique ids across every `content/interview/*.ts` bank, every keyed answer valid, every explanation present, tags/topics valid, and **answer-position balance** (no bank where the correct MCQ slot is predictable). Fix every bank the test flags.
+- [x] I1. Whole-bank audit test (`tests/bankAudit.test.ts`), as Kernel Clash did: unique ids across every `content/interview/*.ts` bank, every keyed answer valid, every explanation present, tags/topics valid, and **answer-position balance** (no bank where the correct MCQ slot is predictable). Fix every bank the test flags.
 - [ ] I2. `docs/COVERAGE.md`: a matrix of typical SDE / data-engineer / DBA interview topics (SQL coding, schema design, indexing, query plans, transactions, isolation, locking, replication, sharding, caching, NoSQL, migrations) against the missions, lessons and questions that cover them. Fill any hole the matrix shows (add new boxes below if a hole needs more than one run).
 - [ ] I3. Freshness pass (web-check, stamp "as of October 2026"): current PostgreSQL and Oracle releases and the features interviews now mention (PostgreSQL `MERGE` and `RETURNING` on `MERGE`, `JSON_TABLE`, virtual generated columns, UUIDv7, async I/O; Oracle JSON relational duality, boolean type, `IF [NOT] EXISTS`, `SELECT` without `FROM`). Update the dialect notes and codex, never state a version fact without the stamp.
 

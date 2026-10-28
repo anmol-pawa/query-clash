@@ -119,7 +119,7 @@ describe("MVCC interview content", () => {
     expect([...new Set(MVCC.map((q) => q.kind))].sort()).toEqual(["mcq", "multi", "numeric", "order", "short", "truefalse"]);
     expect([...new Set(MVCC.map((q) => q.difficulty))].sort()).toEqual([1, 2, 3]);
     for (const g of [mvccVisibleGen, mvccReadGen, siAbortGen]) expect(GENERATORS).toContain(g);
-    expect(QUESTIONS).toEqual(expect.arrayContaining(MVCC));
+    expect(QUESTIONS.map((q) => q.id)).toEqual(expect.arrayContaining(MVCC.map((q) => q.id))); // QUESTIONS re-slots MCQ keys, so compare ids
   });
 
   it("keys each fixed answer correctly", () => {
