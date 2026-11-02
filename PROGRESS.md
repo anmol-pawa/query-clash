@@ -951,3 +951,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - The audit found a real problem: 66% of all authored MCQs keyed slot 0/1 (16 banks, several 100% in slot 0, e.g. `QUERY` 16/16, `DISTRIBUTED` 19/19), and the game never shuffles choices. Fix: new pure `lib/balanceChoices.ts` re-slots each single-answer MCQ's correct choice by a hash of its id (other choices keep their order), applied once in `content/interview/index.ts`. Questions whose order matters ("all of the above", numeric ladders, explanations saying "choice 3") are left untouched. Tests in `tests/balanceChoices.test.ts`; `tests/mvcc.test.ts` now compares ids since `QUESTIONS` holds re-slotted copies.
 - Verified: lint, typecheck, 838 tests, build, build:pages pass. UI unchanged (only choice order), so no screenshots. CI/deploy confirmation skipped: GitHub Actions quota is used up until 2026-11-01.
 - Known gap: generator-made MCQs aren't re-slotted (they're seed-built). Next: I2 (`docs/COVERAGE.md`).
+
+## 2026-11-02 - I2: interview coverage matrix
+
+- Added `lib/coverage.ts` (36 topic rows across SQL coding, schema design, indexing, query plans, transactions, scale/systems, storage; each matches question tags and, for SQL rows, mission text, with a minimum count) and `tests/coverage.test.ts`, which fails if any row falls below its minimum or if the generated `docs/COVERAGE.md` is stale (`UPDATE_COVERAGE=1 npx vitest run tests/coverage.test.ts` refreshes it).
+- The matrix showed recursive CTEs as the thinnest SQL row (4 questions), so added `content/interview/recursiveFine.ts` (working-table semantics, row count, cycles/CYCLE clause, Oracle has no RECURSIVE keyword). Other thin rows are queued as I2b.
+- Verified: lint, typecheck, 842 tests, `build`, `build:pages` pass. Content/docs only, so no screenshots. CI/deploy confirmation skipped by choice of the run: it was not checked. Committed on the session branch `claude/focused-cerf-cq1947` (the harness requires that branch rather than `main`).
+- Next: I2b, then I3 (freshness pass).
