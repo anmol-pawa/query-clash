@@ -9,13 +9,13 @@ expected table. Numbers are matches, not a quality score; a hit can be a passing
 |---|---|---:|---:|---:|
 | SQL coding | Joins (inner, outer, self, anti, semi) | 65 | 2 | 6 |
 | SQL coding | Aggregation, GROUP BY, HAVING, conditional aggregates | 32 | 2 | 4 |
-| SQL coding | Subqueries, EXISTS, correlated, NOT IN with NULL | 24 | 5 | 5 |
+| SQL coding | Subqueries, EXISTS, correlated, NOT IN with NULL | 25 | 5 | 5 |
 | SQL coding | Window functions, ranking, running totals, top-N per group | 28 | 4 | 6 |
 | SQL coding | CTEs and recursive queries, hierarchies | 7 | 2 | 3 |
-| SQL coding | NULL semantics and three-valued logic | 37 | 9 | 3 |
-| SQL coding | Set operations (UNION, INTERSECT, EXCEPT) | 13 | 1 | 2 |
+| SQL coding | NULL semantics and three-valued logic | 39 | 9 | 3 |
+| SQL coding | Set operations (UNION, INTERSECT, EXCEPT) | 15 | 1 | 2 |
 | SQL coding | DML: INSERT/UPDATE/DELETE, upsert, MERGE, RETURNING | 33 | 7 | 4 |
-| SQL coding | Dedupe, gaps and islands, pagination, pivoting | 29 | 3 | 4 |
+| SQL coding | Dedupe, gaps and islands, pagination, pivoting | 31 | 3 | 4 |
 | SQL coding | Dates, strings, JSON functions | 26 | 5 | 6 |
 | Schema design | ER modelling and mapping to tables | 28 | 1 | 2 |
 | Schema design | Functional dependencies, normal forms, decomposition | 35 | 0 | 1 |
@@ -56,6 +56,6 @@ expected table. Numbers are matches, not a quality score; a hit can be a passing
 | Recursive CTE / hierarchy has 2 missions | Org-chart and graph-traversal questions are a staple of SQL rounds | ROADMAP J2 (chapter 14) |
 | Reading and fixing `EXPLAIN` plans has no mission | Query-tuning rounds ask candidates to fix a slow query from its plan | ROADMAP J3 (chapter 15, plan-based grading) |
 | Window functions: only 4 missions | Frames, `LAST_VALUE` trap, `NTILE`, `LEAD`/`LAG` defaults come up constantly | ROADMAP J1 (chapter 13) |
-| Set operations have 1 mission | `INTERSECT`/`EXCEPT` and `UNION` vs `UNION ALL` are common warm-ups | ROADMAP I2b |
+| Set operations had 1 chapter mission | `INTERSECT`/`EXCEPT` and `UNION` vs `UNION ALL` are common warm-ups | Filled by I2b: interview missions `iq-set-intersect-signups` and `iq-set-except-never-sold` (hidden NULL/duplicate data, naive queries tested). The matrix counts chapter missions only, so these show up in the Questions column |
 | Functional dependencies / normalization has no mission | Pure theory; trained by the FD closure, key and decomposition solvers (`lib/dbms/fd.ts`, `keys.ts`) in interview mode | none needed |
 | Replication, sharding, consensus, caching, capacity | Distributed design rounds; cannot be run on one PGlite instance | covered by question banks; revisit in the K practice modes |

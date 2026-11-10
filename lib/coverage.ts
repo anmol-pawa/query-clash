@@ -25,7 +25,7 @@ export const COVERAGE_ROWS: CoverageRow[] = [
   { id: "sql-windows", area: "SQL coding", topic: "Window functions, ranking, running totals, top-N per group", re: /window|row_number|dense_rank|\blag\b|running total|top-n|ranking/, minQuestions: 10, minHandsOn: 5 },
   { id: "sql-cte", area: "SQL coding", topic: "CTEs and recursive queries, hierarchies", re: /\bcte\b|recursive|hierarch|connect by|connect-by/, minQuestions: 5, minHandsOn: 4 },
   { id: "sql-null", area: "SQL coding", topic: "NULL semantics and three-valued logic", re: /\bnull\b/, minQuestions: 10, minHandsOn: 3 },
-  { id: "sql-sets", area: "SQL coding", topic: "Set operations (UNION, INTERSECT, EXCEPT)", re: /union|intersect|except|set operat|set-operat/, minQuestions: 5, minHandsOn: 1 },
+  { id: "sql-sets", area: "SQL coding", topic: "Set operations (UNION, INTERSECT, EXCEPT)", re: /union|intersect|except|set operat|set-operat/, minQuestions: 5, minHandsOn: 3 },
   { id: "sql-dml", area: "SQL coding", topic: "DML: INSERT/UPDATE/DELETE, upsert, MERGE, RETURNING", re: /upsert|\bmerge\b|insert|returning|on conflict/, minQuestions: 4, minHandsOn: 4 },
   { id: "sql-dedupe-gaps", area: "SQL coding", topic: "Dedupe, gaps and islands, pagination, pivoting", re: /duplicat|distinct|gaps and islands|pagination|keyset|pivot|offset/, minQuestions: 6, minHandsOn: 3 },
   { id: "sql-dates-strings", area: "SQL coding", topic: "Dates, strings, JSON functions", re: /\bdates?\b|date_trunc|interval|extract|substr|string|json|\blike\b/, minQuestions: 3, minHandsOn: 3 },

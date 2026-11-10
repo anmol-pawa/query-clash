@@ -751,6 +751,43 @@ const ENTRIES: Entry[] = [
     hints: ["Within a streak the date and the position grow by one each day.", "What happens to ROW_NUMBER when one day appears twice? Look for a ranking function that gives equal dates the same number.", "login_date - CAST(DENSE_RANK() OVER (PARTITION BY user_id ORDER BY login_date) AS INTEGER) is constant inside a streak; GROUP BY user_id and that, with COUNT(DISTINCT login_date)."],
     tables: [],
   },
+  {
+    id: "set-intersect-signups",
+    title: "Signed up on both channels",
+    difficulty: 2,
+    tags: ["set operations", "INTERSECT", "NULL", "duplicates"],
+    askedAt: "A data-engineer warm-up: 'which users are on both lists?'. The follow-up is what happens with duplicates and NULLs, which separates INTERSECT from a join.",
+    task: "Two tables hold marketing signups: `signups_web(email)` and `signups_app(email)`. A person can appear more than once in either table. Return the distinct emails that appear in **both** tables, one row each, ordered by email (NULLs last).",
+    setup:
+      "CREATE TABLE signups_web (email VARCHAR(40)); CREATE TABLE signups_app (email VARCHAR(40)); INSERT INTO signups_web VALUES ('ana@x.io'),('bo@x.io'),('cy@x.io'),('di@x.io'); INSERT INTO signups_app VALUES ('bo@x.io'),('di@x.io'),('ed@x.io');",
+    postgres: "SELECT email FROM signups_web INTERSECT SELECT email FROM signups_app ORDER BY email",
+    ordered: true,
+    hidden: "INSERT INTO signups_web VALUES ('bo@x.io'),(NULL),(NULL); INSERT INTO signups_app VALUES ('bo@x.io'),(NULL);",
+    naive: "SELECT DISTINCT w.email FROM signups_web w JOIN signups_app a ON a.email = w.email ORDER BY w.email",
+    explanation:
+      "INTERSECT returns the distinct rows present in both inputs, and it compares rows with 'not distinct from' semantics: two NULLs count as the same value. A join on equality never matches NULL = NULL, so the join-plus-DISTINCT version silently drops the NULL row that INTERSECT keeps. Without DISTINCT the join would also multiply rows (two copies on one side and two on the other give four). Whether a NULL email should count as a match is a business decision, so state it in the interview; if it should not, add WHERE email IS NOT NULL to one side. Both PostgreSQL and Oracle spell it INTERSECT, and ORDER BY applies once, to the combined result, and NULLs sort last in both ascending by default. PostgreSQL also has INTERSECT ALL, which keeps min(count in A, count in B) copies of each row. Oracle's INTERSECT ALL only arrived with 21c (check the release before relying on it).",
+    hints: ["You want rows that exist in both result sets, with duplicates collapsed.", "There is a set operator for exactly this. Think about what a plain equality join does with NULL = NULL.", "SELECT email FROM signups_web INTERSECT SELECT email FROM signups_app ORDER BY email; the ORDER BY goes at the very end."],
+    tables: [],
+  },
+  {
+    id: "set-except-never-sold",
+    title: "In the warehouse, never sold",
+    difficulty: 2,
+    tags: ["set operations", "EXCEPT", "MINUS", "NOT IN", "NULL"],
+    askedAt: "The classic NULL trap: 'find SKUs that never sold' written with NOT IN works until one NULL appears in the subquery. EXCEPT (Oracle: MINUS) is the safe set form.",
+    task: "`stock(sku)` lists every SKU the warehouse carries and `sales(sku)` has one row per sale (a SKU can sell many times; some legacy rows have a NULL sku). Return the distinct SKUs in `stock` that never appear in `sales`, ordered by sku. Use a set operator.",
+    setup:
+      "CREATE TABLE stock (sku VARCHAR(10)); CREATE TABLE sales (sku VARCHAR(10)); INSERT INTO stock VALUES ('A1'),('B2'),('C3'),('D4'); INSERT INTO sales VALUES ('A1'),('A1'),('C3');",
+    postgres: "SELECT sku FROM stock EXCEPT SELECT sku FROM sales ORDER BY sku",
+    oracle: "SELECT sku FROM stock MINUS SELECT sku FROM sales ORDER BY sku",
+    ordered: true,
+    hidden: "INSERT INTO sales VALUES (NULL),('A1'); INSERT INTO stock VALUES ('E5'),('B2');",
+    naive: "SELECT DISTINCT sku FROM stock WHERE sku NOT IN (SELECT sku FROM sales) ORDER BY sku",
+    explanation:
+      "EXCEPT (Oracle: MINUS) returns the distinct rows of the first query that do not appear in the second. NULLs in the second query are harmless: they just never equal a stock SKU. NOT IN is different: x NOT IN (list containing NULL) can never be TRUE (it is FALSE if x is in the list and UNKNOWN otherwise), so one stray NULL in sales makes the whole query return nothing. That is why the naive query passes the clean visible data and returns zero rows once a NULL sale exists. NOT EXISTS with a correlated subquery is the other safe form. EXCEPT also removes duplicates in the result, so SKUs repeated in stock come back once. PostgreSQL's EXCEPT ALL subtracts counts instead (3 copies minus 1 leaves 2); Oracle's MINUS is always distinct, and EXCEPT as a keyword needs Oracle 21c or later. The result is a set, so the operator order matters: B EXCEPT A is a different question from A EXCEPT B.",
+    hints: ["Rows in the first table minus rows in the second. Which operator subtracts one result set from another?", "Why might NOT IN misbehave when the subquery can contain NULL? Compare with how a set operator compares rows.", "PostgreSQL: SELECT sku FROM stock EXCEPT SELECT sku FROM sales ORDER BY sku. In Oracle write MINUS instead of EXCEPT."],
+    tables: [],
+  },
 ];
 
 export const SQL_MISSIONS: Mission[] = ENTRIES.map((e) => ({

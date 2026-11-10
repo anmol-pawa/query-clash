@@ -958,3 +958,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Counts are regex matches, so a hit can be a passing mention; the doc says to read the Missions column as the real signal.
 - Verified: lint, typecheck, 841 tests, build, build:pages pass. No UI change, so no screenshots. Actions quota note ended 2026-11-01; latest CI runs on main were green (Nov 4). CI/deploy for this commit checked after push.
 - Next: I2b (set-operation missions), then I3 (freshness pass).
+
+## 2026-11-10 - I2b: set-operation missions
+
+- Added two interview missions to `content/interview/sql.ts`: `iq-set-intersect-signups` (INTERSECT; hidden rows add duplicates and NULLs on both sides, naive `DISTINCT` join drops the NULL row INTERSECT keeps) and `iq-set-except-never-sold` (EXCEPT, Oracle form MINUS; hidden rows add a NULL sale, naive `NOT IN` returns nothing). Both have setup tables, 3 hints, explanations on NULL semantics and ALL variants, and entries in `SQL_NAIVE` so the existing test proves each naive query passes visible data and fails hidden data. Version-specific remarks (Oracle `EXCEPT` and `INTERSECT ALL` need 21c) are hedged to "check the release".
+- `lib/coverage.ts`: `sql-sets` now `minHandsOn: 3`; `docs/COVERAGE.md` table regenerated and the set-operations hole marked filled. Known gap: the matrix counts chapter missions only, not `iq-` interview missions, so the new missions raise the Questions column but not the Missions one.
+- Verified: lint, typecheck, test, build, build:pages (see commit). Content-only, runs through the existing runner, so no screenshots.
+- Next: I3 (freshness pass).
