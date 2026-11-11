@@ -18,7 +18,7 @@ export const CODEX: CodexEntry[] = [
     enterprise:
       "Most production SQL is reads: reports, APIs and dashboards. Teams avoid SELECT * in application code, because a new column can break consumers or waste network and memory. Explicit column lists are also what let the planner use covering indexes.",
     pitfalls: ["SELECT * in production code couples you to the table layout.", "Rows come back in no particular order unless you add ORDER BY."],
-    dialectNotes: "Oracle before 23ai needs a FROM clause even for constants (SELECT 1 FROM dual). PostgreSQL lets you write SELECT 1.",
+    dialectNotes: "Oracle before 23ai needs a FROM clause even for constants (SELECT 1 FROM dual). PostgreSQL lets you write SELECT 1. (As of November 2026: 23ai features reached on-premises as Oracle AI Database 26ai, release update 23.26.1, January 2026.)",
     quiz: {
       q: "Without ORDER BY, in which order are rows returned?",
       options: ["Insertion order", "Primary key order", "No guaranteed order", "Alphabetical"],
@@ -380,7 +380,7 @@ export const CODEX: CodexEntry[] = [
     title: "MERGE / UPSERT",
     category: "DML",
     definition:
-      "An upsert inserts rows that don't exist and updates rows that do, atomically. Oracle uses MERGE (SQL:2003). PostgreSQL has INSERT … ON CONFLICT … DO UPDATE and, since v15, MERGE as well.",
+      "An upsert inserts rows that don't exist and updates rows that do, atomically. Oracle uses MERGE (SQL:2003). PostgreSQL has INSERT … ON CONFLICT … DO UPDATE and, since v15, MERGE as well (as of November 2026: PostgreSQL 17 added RETURNING and WHEN NOT MATCHED BY SOURCE to MERGE; PostgreSQL 18, released September 2025, lets RETURNING see OLD and NEW values).",
     syntax: {
       postgres: "INSERT INTO products (product_id, name, price)\nVALUES (16, 'USB-C Hub', 39)\nON CONFLICT (product_id)\nDO UPDATE SET price = EXCLUDED.price;",
       oracle: "MERGE INTO products p\nUSING (SELECT 16 AS product_id, 39 AS price FROM dual) s\nON (p.product_id = s.product_id)\nWHEN MATCHED THEN UPDATE SET p.price = s.price\nWHEN NOT MATCHED THEN INSERT (product_id, price)\n  VALUES (s.product_id, s.price);",

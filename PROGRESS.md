@@ -965,3 +965,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - `lib/coverage.ts`: `sql-sets` now `minHandsOn: 3`; `docs/COVERAGE.md` table regenerated and the set-operations hole marked filled. Known gap: the matrix counts chapter missions only, not `iq-` interview missions, so the new missions raise the Questions column but not the Missions one.
 - Verified: lint, typecheck, test, build, build:pages (see commit). Content-only, runs through the existing runner, so no screenshots.
 - Next: I3 (freshness pass).
+
+## 2026-11-11 - I3: freshness pass
+
+- Web-checked release facts and recorded them in new `docs/VERSIONS.md`, stamped "as of November 2026": PostgreSQL 18 (released 2025-09-25, latest 18.x found 18.4), PG 19 still in beta, Oracle 23ai features now on-prem as Oracle AI Database 26ai (23.26.1, January 2026). Codex `merge` and `select` entries now carry the stamp (MERGE RETURNING / JSON_TABLE in 17, RETURNING OLD/NEW in 18). `tests/versions.test.ts` guards the stamps.
+- Known gap: the web results did not directly confirm uuidv7 / virtual generated columns / Oracle BOOLEAN details; those rest on prior knowledge, listed in VERSIONS.md for the next pass to re-check against the official notes. No new codex entries for uuidv7 or virtual columns yet.
+- Verified: lint, typecheck, 849 tests, build, build:pages pass. Text-only, no screenshots. CI/deploy confirmation to be checked after push.
+- Next: J1 (chapter 13 window functions).
