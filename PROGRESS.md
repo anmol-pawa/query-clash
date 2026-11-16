@@ -972,3 +972,11 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Known gap: the web results did not directly confirm uuidv7 / virtual generated columns / Oracle BOOLEAN details; those rest on prior knowledge, listed in VERSIONS.md for the next pass to re-check against the official notes. No new codex entries for uuidv7 or virtual columns yet.
 - Verified: lint, typecheck, 849 tests, build, build:pages pass. Text-only, no screenshots. CI/deploy confirmation to be checked after push.
 - Next: J1 (chapter 13 window functions).
+
+## 2026-11-16 - J1a: chapter 13 window-function missions and codex
+
+- Added `content/chapters/part4.ts` with 8 `WINDOW_MISSIONS` (not yet in `CHAPTERS`, that is J1c): running balance with ROWS vs the default RANGE tie trap (hidden same-day deposits), the `LAST_VALUE` default-frame trap, a 3-row moving average, a 30-day RANGE window over a day number, `NTILE(4)` over 26 employees (7/7/6/6), `PERCENT_RANK` / `CUME_DIST` with a salary tie, `LAG` with a default argument, and top-2-with-ties via `DENSE_RANK` (hidden tie; NULL-department employee excluded). All solutions are plain ANSI window SQL, identical in the PostgreSQL and Oracle forms. `WINDOW_NAIVE` holds a plausible wrong query per mission.
+- Three new codex entries (`window-frames`, `last-value-trap`, `ntile-cume-dist`), stamped "as of November 2026": GROUPS frames are in PostgreSQL 11+ and documented for Oracle 21c+ (web-checked against the Oracle 26ai SQL reference). `docs/COVERAGE.md` matrix regenerated for the new codex counts.
+- Verified: `tests/windowMissions.test.ts` (17 tests): both dialects agree and pass, every naive query fails, hidden-data naive queries pass the visible data and fail only the hidden case, results match hand-rolled JS folds (running sum, 30-day window, bucket sizes, last-value = department max). lint, typecheck, 866 tests, build, build:pages all pass. Content-only, nothing renders yet, so no screenshots. CI and deploy confirmation skipped by the routine's instruction for this run; the work is pushed to the session branch `claude/focused-cerf-i2y767`, not `main`.
+- Known gap: the Oracle forms were run through the repo's transpiler on PGlite, not on a real Oracle. GROUPS has no mission (only codex) because the transpiler path is untested for it.
+- Next: J1b (chapter 13 boss art).
