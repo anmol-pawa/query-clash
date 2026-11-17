@@ -10,13 +10,13 @@ expected table. Numbers are matches, not a quality score; a hit can be a passing
 | SQL coding | Joins (inner, outer, self, anti, semi) | 65 | 2 | 6 |
 | SQL coding | Aggregation, GROUP BY, HAVING, conditional aggregates | 32 | 2 | 4 |
 | SQL coding | Subqueries, EXISTS, correlated, NOT IN with NULL | 25 | 5 | 5 |
-| SQL coding | Window functions, ranking, running totals, top-N per group | 28 | 4 | 7 |
+| SQL coding | Window functions, ranking, running totals, top-N per group | 28 | 4 | 8 |
 | SQL coding | CTEs and recursive queries, hierarchies | 7 | 2 | 3 |
-| SQL coding | NULL semantics and three-valued logic | 39 | 9 | 3 |
+| SQL coding | NULL semantics and three-valued logic | 39 | 9 | 4 |
 | SQL coding | Set operations (UNION, INTERSECT, EXCEPT) | 15 | 1 | 2 |
-| SQL coding | DML: INSERT/UPDATE/DELETE, upsert, MERGE, RETURNING | 33 | 7 | 4 |
+| SQL coding | DML: INSERT/UPDATE/DELETE, upsert, MERGE, RETURNING | 33 | 7 | 5 |
 | SQL coding | Dedupe, gaps and islands, pagination, pivoting | 31 | 3 | 4 |
-| SQL coding | Dates, strings, JSON functions | 26 | 5 | 6 |
+| SQL coding | Dates, strings, JSON functions | 26 | 5 | 7 |
 | Schema design | ER modelling and mapping to tables | 28 | 1 | 2 |
 | Schema design | Functional dependencies, normal forms, decomposition | 35 | 0 | 1 |
 | Schema design | Keys, foreign keys, constraints, identity/UUID | 60 | 3 | 4 |
