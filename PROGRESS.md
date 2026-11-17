@@ -980,3 +980,12 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Verified: `tests/windowMissions.test.ts` (17 tests): both dialects agree and pass, every naive query fails, hidden-data naive queries pass the visible data and fail only the hidden case, results match hand-rolled JS folds (running sum, 30-day window, bucket sizes, last-value = department max). lint, typecheck, 866 tests, build, build:pages all pass. Content-only, nothing renders yet, so no screenshots. CI and deploy confirmation skipped by the routine's instruction for this run; the work is pushed to the session branch `claude/focused-cerf-i2y767`, not `main`.
 - Known gap: the Oracle forms were run through the repo's transpiler on PGlite, not on a real Oracle. GROUPS has no mission (only codex) because the transpiler path is untested for it.
 - Next: J1b (chapter 13 boss art).
+
+## 2026-11-17 - J1b: chapter 13 boss art (PANEWARDEN)
+
+- New 96×96 boss PANEWARDEN (17 colours): a stone sentinel with a pointed-arch glass window in its chest and a gold frame that slides over a row of five ledger tiles at its feet; tiles inside the frame light up, the rest stay dark (a window frame moving over rows). idle 4f (frame slides, pane glints), attack 3f (arms raised, frame sweeps, angry eyes), hurt 2f (X eyes, pane dims), faint 4f (sink + dither dissolve). Script `scripts/art/panewarden.mjs`; sprite registered in `game/sprites/index.ts`.
+- Not yet in `BOSS_SPRITE` / `BOSS_STYLE` / `BossId` (needs a chapter), so nothing in the game renders it yet; that is J1c.
+- Tests: `tests/sprites.test.ts` roster test now includes `panewarden` (96×96); the generic sprite tests (palette keys, rectangular frames, idle animates, attack/hurt/faint, faint ends sparser) cover it.
+- Verified: lint, typecheck, 895 tests, build:pages pass. Playwright on the static export at 1280×900 and iPhone 14 `/dev/sprites`: PANEWARDEN renders at all scales with the live Pixi preview, no console errors, no horizontal overflow. Contact sheet of all frames reviewed. CI and deploy confirmation was not checked this run; the work is pushed to the session branch, not `main`.
+- Known gap: the faint frames keep the gold frame at full opacity longer than the body only through dither, which reads fine but is not a bespoke "frame shatters" frame.
+- Next: J1c (wire chapter 13: `BossId` + `CHAPTERS` entry, `BOSS_SPRITE` / `BOSS_STYLE`, fix hard-coded chapter and boss counts).
