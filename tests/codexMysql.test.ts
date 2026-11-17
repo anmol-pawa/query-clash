@@ -15,6 +15,10 @@ const KEY: Record<string, number> = {
   "mysql-set-ops": 1, // UNION of LEFT and RIGHT
   "mysql-collation": 0, // case-insensitive default
   "mysql-division-dates": 1, // / is decimal, DIV truncates
+  "mysql-null-safe-equal": 1, // 1 <=> NULL is 0
+  "mysql-group-concat": 1, // truncated with a warning
+  "mysql-insert-ignore": 1, // other row-level errors become warnings
+  "mysql-window-versions": 2, // 8.0
 };
 
 describe("MySQL codex entries", () => {
