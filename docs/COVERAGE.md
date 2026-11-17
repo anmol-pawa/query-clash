@@ -7,24 +7,24 @@ expected table. Numbers are matches, not a quality score; a hit can be a passing
 
 | Area | Topic | Questions | Missions | Codex |
 |---|---|---:|---:|---:|
-| SQL coding | Joins (inner, outer, self, anti, semi) | 65 | 2 | 6 |
+| SQL coding | Joins (inner, outer, self, anti, semi) | 68 | 2 | 6 |
 | SQL coding | Aggregation, GROUP BY, HAVING, conditional aggregates | 32 | 2 | 4 |
-| SQL coding | Subqueries, EXISTS, correlated, NOT IN with NULL | 25 | 5 | 5 |
-| SQL coding | Window functions, ranking, running totals, top-N per group | 28 | 4 | 8 |
-| SQL coding | CTEs and recursive queries, hierarchies | 7 | 2 | 3 |
+| SQL coding | Subqueries, EXISTS, correlated, NOT IN with NULL | 26 | 5 | 5 |
+| SQL coding | Window functions, ranking, running totals, top-N per group | 29 | 4 | 8 |
+| SQL coding | CTEs and recursive queries, hierarchies | 16 | 2 | 3 |
 | SQL coding | NULL semantics and three-valued logic | 39 | 9 | 4 |
-| SQL coding | Set operations (UNION, INTERSECT, EXCEPT) | 15 | 1 | 2 |
+| SQL coding | Set operations (UNION, INTERSECT, EXCEPT) | 20 | 1 | 2 |
 | SQL coding | DML: INSERT/UPDATE/DELETE, upsert, MERGE, RETURNING | 33 | 7 | 5 |
 | SQL coding | Dedupe, gaps and islands, pagination, pivoting | 31 | 3 | 4 |
-| SQL coding | Dates, strings, JSON functions | 26 | 5 | 7 |
+| SQL coding | Dates, strings, JSON functions | 36 | 5 | 7 |
 | Schema design | ER modelling and mapping to tables | 28 | 1 | 2 |
-| Schema design | Functional dependencies, normal forms, decomposition | 35 | 0 | 1 |
+| Schema design | Functional dependencies, normal forms, decomposition | 36 | 0 | 1 |
 | Schema design | Keys, foreign keys, constraints, identity/UUID | 60 | 3 | 4 |
-| Schema design | Design scenarios (multi-tenancy, soft delete, hot rows, leaderboards) | 25 | 0 | 0 |
+| Schema design | Design scenarios (multi-tenancy, soft delete, hot rows, leaderboards) | 27 | 0 | 0 |
 | Schema design | Online migrations, backfills, zero-downtime DDL | 14 | 0 | 2 |
-| Indexing | B+ tree structure, fan-out, height, splits | 32 | 0 | 0 |
-| Indexing | Composite, covering, partial, expression indexes; leftmost prefix | 15 | 3 | 2 |
-| Indexing | Hash, LSM, Bloom filters, clustered vs secondary | 29 | 0 | 1 |
+| Indexing | B+ tree structure, fan-out, height, splits | 34 | 0 | 0 |
+| Indexing | Composite, covering, partial, expression indexes; leftmost prefix | 16 | 3 | 2 |
+| Indexing | Hash, LSM, Bloom filters, clustered vs secondary | 35 | 0 | 1 |
 | Query plans | Reading EXPLAIN / EXPLAIN ANALYZE, scans, estimates vs actuals | 22 | 0 | 1 |
 | Query plans | Join algorithms and cost (nested loop, hash, merge) | 25 | 0 | 0 |
 | Query plans | Statistics, selectivity, sargability, anti-patterns | 27 | 4 | 5 |
@@ -38,7 +38,7 @@ expected table. Numbers are matches, not a quality score; a hit can be a passing
 | Scale and distribution | CAP/PACELC, quorums, consensus, clocks | 22 | 0 | 0 |
 | Scale and distribution | 2PC, sagas, idempotency, outbox/CDC, dual writes | 20 | 0 | 0 |
 | Scale and distribution | Caching: cache-aside, write-through/behind, stampede, TTL | 13 | 0 | 0 |
-| Scale and distribution | NoSQL and store choice (document, key-value, wide-column) | 16 | 0 | 0 |
+| Scale and distribution | NoSQL and store choice (document, key-value, wide-column) | 19 | 0 | 0 |
 | Scale and distribution | Capacity estimation and back-of-envelope sizing | 9 | 0 | 0 |
 | Operations | Vacuum/autovacuum, connection limits, pooling, long transactions | 24 | 0 | 0 |
 
