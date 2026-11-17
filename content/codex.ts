@@ -876,6 +876,64 @@ export const CODEX: CodexEntry[] = [
     dialectNotes: "Oracle's implicit conversions are far more permissive than PostgreSQL's, so type mismatches hide longer there.",
   },
   ...MYSQL_CODEX,
+
+  /* ------------------------------------------------- Window functions, depth */
+  {
+    id: "window-frames",
+    title: "Window frames: ROWS, RANGE, GROUPS",
+    category: "Analytics",
+    definition:
+      "A frame says which rows of the partition an aggregate sees for the current row. ROWS counts physical rows. RANGE compares values of the ORDER BY key, so rows with the same key (peers) are always included together and an offset such as 29 PRECEDING means a distance in key units. GROUPS counts whole groups of peers. With ORDER BY and no frame clause, the default is RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW.",
+    syntax: {
+      postgres: "SUM(amount) OVER (ORDER BY txn_date, txn_id\n                 ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)\n\n-- RANGE with an offset needs one numeric (or date/interval) key:\nSUM(amount) OVER (ORDER BY day_no RANGE BETWEEN 29 PRECEDING AND CURRENT ROW)\n\n-- GROUPS: the current peer group and the one before it\nSUM(amount) OVER (ORDER BY txn_date GROUPS BETWEEN 1 PRECEDING AND CURRENT ROW)",
+      oracle: "SUM(amount) OVER (ORDER BY txn_date, txn_id\n                 ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)\n\n-- RANGE on a DATE key accepts a day count or an interval:\nSUM(amount) OVER (ORDER BY txn_date RANGE BETWEEN INTERVAL '29' DAY PRECEDING AND CURRENT ROW)",
+    },
+    enterprise:
+      "Running balances want ROWS over a unique ordering. Rolling windows measured in time (last 7 days, last 30 days) want RANGE, because a quiet week has fewer rows but the same calendar span. Reviewers often ask why a running total jumps by two rows at once: the answer is the RANGE default meeting a tie.",
+    pitfalls: [
+      "A running total ordered by a non-unique column with the default RANGE frame adds all tied rows at once. Add a unique tie-breaker and use ROWS.",
+      "ROWS BETWEEN 29 PRECEDING is 30 rows, not 30 days. Months with few rows silently widen the time span.",
+      "RANGE with a numeric offset needs exactly one ORDER BY key. GROUPS accepts several keys.",
+    ],
+    dialectNotes:
+      "As of November 2026: PostgreSQL supports ROWS, RANGE and GROUPS (GROUPS and EXCLUDE since PostgreSQL 11), and RANGE with offsets on numeric, date and interval keys. Oracle documents ROWS, RANGE and GROUPS (GROUPS since 21c), and RANGE on a DATE key takes a number of days or an INTERVAL. Check your release before relying on GROUPS in Oracle.",
+    quiz: { q: "A running SUM(x) OVER (ORDER BY d) has two rows with the same d. What do both rows show?", options: ["Their own running totals one after the other", "The same total, including both rows", "NULL for the second row", "An error"], answer: 1, why: "The default frame is RANGE, so peers (same d) are all inside the frame of each other. Add a unique tie-breaker and use ROWS to get one step per row." },
+  },
+  {
+    id: "last-value-trap",
+    title: "The LAST_VALUE trap",
+    category: "Analytics",
+    definition:
+      "FIRST_VALUE looks at the start of the frame and LAST_VALUE at its end. Because the default frame ends at the current row, LAST_VALUE(x) OVER (ORDER BY y) simply returns the current row's value (or its last peer's). To read the last row of the whole partition, extend the frame to UNBOUNDED FOLLOWING.",
+    syntax: {
+      postgres: "SELECT emp_id, salary,\n  LAST_VALUE(salary) OVER (\n    PARTITION BY dept_id ORDER BY salary\n    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS dept_top\nFROM employees;\n\n-- often simpler: reverse the order and use FIRST_VALUE\nFIRST_VALUE(salary) OVER (PARTITION BY dept_id ORDER BY salary DESC)",
+      oracle: "SELECT emp_id, salary,\n  LAST_VALUE(salary) OVER (\n    PARTITION BY dept_id ORDER BY salary\n    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS dept_top\nFROM employees;\n\n-- Oracle also offers KEEP (DENSE_RANK LAST ORDER BY ...) in aggregates.",
+    },
+    enterprise: "Used to fill 'latest known value' columns, compare each row with the period end, and compute 'distance from best'. It is a favourite interview trap because the wrong query runs without an error.",
+    pitfalls: [
+      "No error is raised for the default frame: the output is just quietly wrong.",
+      "NULLs: FIRST_VALUE and LAST_VALUE return NULL if the edge row is NULL, unless you ask to skip NULLs (Oracle has IGNORE NULLS; check your PostgreSQL release before relying on it, as support for it is recent).",
+    ],
+    quiz: { q: "What does LAST_VALUE(salary) OVER (ORDER BY salary) return with the default frame?", options: ["The maximum salary", "The current row's salary (or its last tied peer)", "The previous row's salary", "NULL"], answer: 1, why: "The default frame ends at the current row (plus peers), so the last value inside the frame is the current salary." },
+  },
+  {
+    id: "ntile-cume-dist",
+    title: "NTILE, PERCENT_RANK, CUME_DIST",
+    category: "Analytics",
+    definition:
+      "NTILE(n) deals the ordered rows into n buckets whose sizes differ by at most one; the first buckets take the extra rows (26 rows into 4 gives 7, 7, 6, 6). PERCENT_RANK is (rank - 1) / (rows - 1), from 0 to 1. CUME_DIST is the share of rows at or below the current value, so the largest value gives 1. Tied rows get the same PERCENT_RANK and CUME_DIST.",
+    syntax: {
+      postgres: "SELECT emp_id, salary,\n  NTILE(4)       OVER (ORDER BY salary DESC) AS quartile,\n  PERCENT_RANK() OVER (ORDER BY salary)      AS pct_rank,\n  CUME_DIST()    OVER (ORDER BY salary)      AS cume\nFROM employees;",
+      oracle: "SELECT emp_id, salary,\n  NTILE(4)       OVER (ORDER BY salary DESC) AS quartile,\n  PERCENT_RANK() OVER (ORDER BY salary)      AS pct_rank,\n  CUME_DIST()    OVER (ORDER BY salary)      AS cume\nFROM employees;",
+    },
+    enterprise: "Quartile and decile reports, 'top 10% of customers', latency percentile buckets and score banding. For exact percentile values use PERCENTILE_CONT / PERCENTILE_DISC instead.",
+    pitfalls: [
+      "NTILE splits by row position, not by value: equal salaries can land in different buckets.",
+      "PERCENT_RANK of a single-row partition is 0 (the formula would divide by zero, so it is defined as 0).",
+      "ROUND on these results needs NUMERIC in PostgreSQL: they are double precision there.",
+    ],
+    quiz: { q: "NTILE(4) over 10 rows gives bucket sizes:", options: ["3, 3, 2, 2", "2, 2, 3, 3", "3, 3, 3, 1", "2, 3, 3, 2"], answer: 0, why: "10 = 4 × 2 + 2, so the first two buckets receive one extra row each: 3, 3, 2, 2." },
+  },
 ];
 
 export function codexById(id: string): CodexEntry | undefined {
