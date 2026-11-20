@@ -980,3 +980,9 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Verified: `tests/windowMissions.test.ts` (17 tests): both dialects agree and pass, every naive query fails, hidden-data naive queries pass the visible data and fail only the hidden case, results match hand-rolled JS folds (running sum, 30-day window, bucket sizes, last-value = department max). lint, typecheck, 866 tests, build, build:pages all pass. Content-only, nothing renders yet, so no screenshots. CI and deploy confirmation skipped by the routine's instruction for this run; the work is pushed to the session branch `claude/focused-cerf-i2y767`, not `main`.
 - Known gap: the Oracle forms were run through the repo's transpiler on PGlite, not on a real Oracle. GROUPS has no mission (only codex) because the transpiler path is untested for it.
 - Next: J1b (chapter 13 boss art).
+
+## 2026-11-20 - J1b: OVERWING, the chapter 13 boss art
+
+- New 96×96 boss OVERWING (`scripts/art/overwing.mjs` → `game/sprites/creatures/overwing.ts`, 17 colours): a stone-feathered owl whose belly is a five-row ledger; a gold window frame with cyan glass (the `OVER()` clause) slides down the rows in idle (4f) and flares open with spread wings in attack (3f); hurt 2f, faint 4f (dissolve). Registered in `SPRITES` and added to the 96×96 roster test; wiring into `BossId` / `BOSS_SPRITE` / map / `CHAPTERS` is J1c.
+- Verified: lint, typecheck, 895 tests, build, build:pages pass. Playwright on the static export at 1280×900 and iPhone 14: `/dev/sprites` shows OVERWING at 1×/2×/4× with the live Pixi preview, no console errors, no horizontal overflow; also judged from the contact sheet of all 12 frames. CI/deploy not checked: this run is on the session branch `claude/focused-cerf-zm7322` as instructed, not `main`.
+- Next: J1c (wire chapter 13: `BossId`, `BOSS_SPRITE`, type, glyph, 13th attack style, map node/biome, `CHAPTERS`, fix hard-coded counts).
