@@ -980,3 +980,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Verified: `tests/windowMissions.test.ts` (17 tests): both dialects agree and pass, every naive query fails, hidden-data naive queries pass the visible data and fail only the hidden case, results match hand-rolled JS folds (running sum, 30-day window, bucket sizes, last-value = department max). lint, typecheck, 866 tests, build, build:pages all pass. Content-only, nothing renders yet, so no screenshots. CI and deploy confirmation skipped by the routine's instruction for this run; the work is pushed to the session branch `claude/focused-cerf-i2y767`, not `main`.
 - Known gap: the Oracle forms were run through the repo's transpiler on PGlite, not on a real Oracle. GROUPS has no mission (only codex) because the transpiler path is untested for it.
 - Next: J1b (chapter 13 boss art).
+
+## 2026-11-18 - J1b: chapter 13 boss art (PANEWARDEN)
+
+- Added the chapter 13 boss sprite `panewarden` (96×96, 18 colours): a great owl-sage with ear tufts, amber facial discs and a glass pane held over its belly. The pane shows rows of data cells and a bright `ROWS BETWEEN` bracket that slides down across the rows, lighting the ones inside the window. idle 4f (the window slides, body bobs), attack 3f (wings flung wide, pane thrust forward), hurt 2f (> < eyes, recoil), faint 4f (sinks and dissolves). Script `scripts/art/panewarden.mjs`; registered in `game/sprites/index.ts`; roster test in `tests/sprites.test.ts` now includes it.
+- Verified: lint, typecheck, 895 tests, build, build:pages pass. Playwright on the static export `/dev/sprites` at 1280×900 and iPhone 14: PANEWARDEN renders and animates, no console errors, no horizontal overflow; contact sheet reviewed. CI/deploy confirmation not checked this run (no `gh` access here; GitHub MCP only).
+- Known gap: no back-of-chapter wiring yet (BossId, scenery, glyph, `CHAPTERS`), that is J1c.
+- Next: J1c (wiring chapter 13 using the C1d2 checklist).
