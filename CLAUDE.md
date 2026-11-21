@@ -35,3 +35,7 @@ The games need **real character art and animation**, not glowing shapes, stick f
 - Educational content must be correct. Every quiz answer is checked by a test, and computed problems (closures, schedules, keys) are solved by code that tests check against textbook examples.
 - Next.js here is v16, which differs from older versions: read `node_modules/next/dist/docs/` before changing routing or config.
 - Never commit secrets, `node_modules`, `out/`, `.next/` or `public/pglite/`.
+
+## Routine operating rules (v2)
+
+Scheduled builder runs must also read `docs/ROUTINE_V2.md` at the start of every run and follow it alongside the Run protocol above (token budget, start-of-run branch hygiene, coverage-driven box choice, graphics bar, generated-file LF check, landing on the default branch). If the two disagree, the Run protocol wins on repo mechanics and `docs/ROUTINE_V2.md` wins on landing and hygiene.
