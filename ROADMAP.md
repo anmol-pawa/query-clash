@@ -205,7 +205,7 @@ Each chapter is three or four boxes: (a) 5-6 missions with hidden edge-case data
 
 - [ ] J1. Chapter 13 "Window functions mastery".
   - [x] J1a. (done: `content/chapters/part4.ts` `WINDOW_MISSIONS`, 3 codex entries, `tests/windowMissions.test.ts`.) Missions and codex: ROWS vs RANGE vs GROUPS frames, the `LAST_VALUE` default-frame trap, moving averages, `NTILE`, `PERCENT_RANK` / `CUME_DIST`, `LEAD`/`LAG` with defaults, top-N-per-group with ties.
-  - [ ] J1b. Boss art.
+  - [x] J1b. (done: FRAMEKEEPER, `scripts/art/framekeeper.mjs`, `game/sprites/creatures/framekeeper.ts`, registered in `SPRITES`; not yet a `BossId`, that is J1c.) Boss art.
   - [ ] J1c. Wiring.
 - [ ] J2. Chapter 14 "Recursive CTEs and graphs".
   - [ ] J2a. Missions and codex: org-chart paths, bill-of-materials roll-up, cycle guards, shortest path in a small graph, date-series generation, transitive closure; Oracle `CONNECT BY` forms in the hints.

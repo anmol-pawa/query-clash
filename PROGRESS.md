@@ -980,3 +980,12 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Verified: `tests/windowMissions.test.ts` (17 tests): both dialects agree and pass, every naive query fails, hidden-data naive queries pass the visible data and fail only the hidden case, results match hand-rolled JS folds (running sum, 30-day window, bucket sizes, last-value = department max). lint, typecheck, 866 tests, build, build:pages all pass. Content-only, nothing renders yet, so no screenshots. CI and deploy confirmation skipped by the routine's instruction for this run; the work is pushed to the session branch `claude/focused-cerf-i2y767`, not `main`.
 - Known gap: the Oracle forms were run through the repo's transpiler on PGlite, not on a real Oracle. GROUPS has no mission (only codex) because the transpiler path is untested for it.
 - Next: J1b (chapter 13 boss art).
+
+## 2026-11-21 - J1b: chapter 13 boss art (FRAMEKEEPER)
+
+- New boss sprite FRAMEKEEPER (96×96, 14 colours, 3–4 shade ramps for stone and glass): a stone window-golem with an arched keystone, a glass pane showing five rows of data and a glowing frame bracket that slides row by row in idle (the window frame). idle 4f, attack 3f (fists rise, the bracket flares white and outward), hurt 2f (x eyes, recoil), faint 4f (sinks and dithers away). Authored by `scripts/art/framekeeper.mjs`, emitted to `game/sprites/creatures/framekeeper.ts`, registered in `SPRITES`.
+- `tests/sprites.test.ts` roster test now requires `framekeeper` to exist at 96×96 (the generic sprite tests cover shape, palette, idle, attack/hurt/faint).
+- Verified: lint, typecheck, 895 tests, build, build:pages pass. Playwright on the static export of `/dev/sprites` at 1280×900 and iPhone 14: FRAMEKEEPER card renders and animates, no console errors, no horizontal overflow. I looked at the contact sheet and both screenshots.
+- Work is on the session branch `claude/focused-cerf-qs46sg` (not `main`). CI/deploy not checked: nothing is pushed to `main`.
+- Known gap: the sprite is not yet bound to a `BossId` or attack style; that is J1c. The attack frame's bracket flare could get a matching in-battle effect colour (sky/amber) in J1c.
+- Next: J1c (wire chapter 13 into `CHAPTERS`, `BossId`, `BOSS_SPRITE`/`BOSS_STYLE`, and fix hard-coded chapter and boss counts).
