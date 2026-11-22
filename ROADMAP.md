@@ -203,10 +203,10 @@ Coverage today: theory is deep (about 600 questions across basics, ER, normaliza
 
 Each chapter is three or four boxes: (a) 5-6 missions with hidden edge-case data and a naive wrong query that must fail, both dialects where applicable, plus 3 codex entries, tested, not yet in `CHAPTERS`; (b) the boss (original 96×96 pixel monster, idle/attack/hurt/faint, `/dev/sprites`); (c) wiring, using the checklist of C1d2 and fixing every hard-coded chapter or boss count.
 
-- [ ] J1. Chapter 13 "Window functions mastery".
+- [x] J1. Chapter 13 "Window functions mastery".
   - [x] J1a. (done: `content/chapters/part4.ts` `WINDOW_MISSIONS`, 3 codex entries, `tests/windowMissions.test.ts`.) Missions and codex: ROWS vs RANGE vs GROUPS frames, the `LAST_VALUE` default-frame trap, moving averages, `NTILE`, `PERCENT_RANK` / `CUME_DIST`, `LEAD`/`LAG` with defaults, top-N-per-group with ties.
   - [x] J1b. (done: `scripts/art/panewarden.mjs` -> `game/sprites/creatures/panewarden.ts`, registered in `SPRITES`; not yet a `BossId`, that is J1c.) Boss art.
-  - [ ] J1c. Wiring.
+  - [x] J1c. (done: `BossId` panewarden, WINDOW type, `panes` attack, 13th map node/biome/scene, `CHAPTERS_13`, save and sandbox caps.) Wiring.
 - [ ] J2. Chapter 14 "Recursive CTEs and graphs".
   - [ ] J2a. Missions and codex: org-chart paths, bill-of-materials roll-up, cycle guards, shortest path in a small graph, date-series generation, transitive closure; Oracle `CONNECT BY` forms in the hints.
   - [ ] J2b. Boss art.

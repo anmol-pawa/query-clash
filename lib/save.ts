@@ -109,7 +109,7 @@ export function unlockedChapters(s: SaveData): number {
   // chapter n+1 unlocks when chapter n has at least one star
   let n = 1;
   while (s.stars[n]) n++;
-  return Math.min(n, 12);
+  return Math.min(n, 13);
 }
 
 export const level = (xp: number) => Math.floor(Math.sqrt(xp / 120)) + 1;

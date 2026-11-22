@@ -32,6 +32,7 @@ export const BOSS_SPRITE: Readonly<Record<BossId, string>> = {
   optimizer: "opticore",
   arborix: "arborix",
   hydrax: "hydrax",
+  panewarden: "panewarden",
 };
 
 export function bossSprite(id: BossId): SpriteDef {
@@ -64,4 +65,5 @@ export const BOSS_STYLE: Readonly<Record<BossId, { style: BossAttackStyle; color
   optimizer: { style: "laser", color: 0xe879f9 },
   arborix: { style: "roots", color: 0x84cc16 },
   hydrax: { style: "heads", color: 0x14b8a6 },
+  panewarden: { style: "panes", color: 0xf59e0b },
 };

@@ -987,3 +987,10 @@ Each hourly routine run appends an entry: date (IST), task, what changed, how it
 - Verified: lint, typecheck, 895 tests, build, build:pages pass. Playwright on the static export `/dev/sprites` at 1280×900 and iPhone 14: PANEWARDEN renders and animates, no console errors, no horizontal overflow; contact sheet reviewed. CI/deploy confirmation not checked this run (no `gh` access here; GitHub MCP only).
 - Known gap: no back-of-chapter wiring yet (BossId, scenery, glyph, `CHAPTERS`), that is J1c.
 - Next: J1c (wiring chapter 13 using the C1d2 checklist).
+
+## 2026-11-22 - J1c: chapter 13 wired in
+
+- Chapter 13 "The Glasshouse of Windows" is now playable: `BossId` `panewarden` (type WINDOW, shared with Windwraith), glyph, a 13th boss attack style `panes` (glass panes slide across the target, each with a slash and a burst), a 13th overworld map node and `glasshouse` biome, a dusk amber battle scene, `CHAPTERS_13` (8 window missions) in `CHAPTERS`, and the hard-coded caps in `lib/save.ts` and `app/sandbox/page.tsx` raised to 13. Test counts updated (querydex, sprites, types); `docs/COVERAGE.md` matrix regenerated (window row now 8 missions).
+- Verified: lint, typecheck, 903 tests, build, build:pages pass. Playwright on the static export at 1280x800 and iPhone 14: campaign map shows node 13, `/battle/13` shows the intro, PANEWARDEN on its platform with the amber scene and HP boxes, no console errors, no horizontal overflow. CI/deploy confirmed not by me this run (no Actions check made).
+- Known gap: the `panes` attack animation was not captured mid-cast (only the idle battle screen), and unlocking chapter 13 on the map needs a star on chapter 12.
+- Next: J2a (chapter 14 recursive CTE missions and codex).

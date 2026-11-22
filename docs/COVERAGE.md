@@ -10,13 +10,13 @@ expected table. Numbers are matches, not a quality score; a hit can be a passing
 | SQL coding | Joins (inner, outer, self, anti, semi) | 68 | 2 | 6 |
 | SQL coding | Aggregation, GROUP BY, HAVING, conditional aggregates | 32 | 2 | 4 |
 | SQL coding | Subqueries, EXISTS, correlated, NOT IN with NULL | 26 | 5 | 5 |
-| SQL coding | Window functions, ranking, running totals, top-N per group | 29 | 4 | 8 |
+| SQL coding | Window functions, ranking, running totals, top-N per group | 29 | 6 | 8 |
 | SQL coding | CTEs and recursive queries, hierarchies | 16 | 2 | 3 |
 | SQL coding | NULL semantics and three-valued logic | 39 | 9 | 4 |
 | SQL coding | Set operations (UNION, INTERSECT, EXCEPT) | 20 | 1 | 2 |
 | SQL coding | DML: INSERT/UPDATE/DELETE, upsert, MERGE, RETURNING | 33 | 7 | 5 |
-| SQL coding | Dedupe, gaps and islands, pagination, pivoting | 31 | 3 | 4 |
-| SQL coding | Dates, strings, JSON functions | 36 | 5 | 7 |
+| SQL coding | Dedupe, gaps and islands, pagination, pivoting | 31 | 4 | 4 |
+| SQL coding | Dates, strings, JSON functions | 36 | 6 | 7 |
 | Schema design | ER modelling and mapping to tables | 28 | 1 | 2 |
 | Schema design | Functional dependencies, normal forms, decomposition | 36 | 0 | 1 |
 | Schema design | Keys, foreign keys, constraints, identity/UUID | 60 | 3 | 4 |
@@ -32,8 +32,8 @@ expected table. Numbers are matches, not a quality score; a hit can be a passing
 | Transactions | Isolation levels and anomalies (dirty, non-repeatable, phantom, write skew) | 52 | 1 | 2 |
 | Transactions | Locking: 2PL, deadlocks, FOR UPDATE, NOWAIT, optimistic vs pessimistic | 53 | 2 | 1 |
 | Transactions | MVCC, snapshots, vacuum/bloat, undo (PostgreSQL vs Oracle) | 60 | 5 | 0 |
-| Transactions | WAL, ARIES, checkpoints, crash and point-in-time recovery | 48 | 1 | 0 |
-| Scale and distribution | Replication, lag, failover, read-your-writes | 26 | 1 | 1 |
+| Transactions | WAL, ARIES, checkpoints, crash and point-in-time recovery | 48 | 3 | 0 |
+| Scale and distribution | Replication, lag, failover, read-your-writes | 26 | 2 | 1 |
 | Scale and distribution | Sharding, partitioning, consistent hashing, resharding | 28 | 0 | 1 |
 | Scale and distribution | CAP/PACELC, quorums, consensus, clocks | 22 | 0 | 0 |
 | Scale and distribution | 2PC, sagas, idempotency, outbox/CDC, dual writes | 20 | 0 | 0 |
@@ -55,7 +55,7 @@ expected table. Numbers are matches, not a quality score; a hit can be a passing
 |---|---|---|
 | Recursive CTE / hierarchy has 2 missions | Org-chart and graph-traversal questions are a staple of SQL rounds | ROADMAP J2 (chapter 14) |
 | Reading and fixing `EXPLAIN` plans has no mission | Query-tuning rounds ask candidates to fix a slow query from its plan | ROADMAP J3 (chapter 15, plan-based grading) |
-| Window functions: only 4 missions | Frames, `LAST_VALUE` trap, `NTILE`, `LEAD`/`LAG` defaults come up constantly | ROADMAP J1 (chapter 13) |
+| Window functions had only 4 missions | Frames, `LAST_VALUE` trap, `NTILE`, `LEAD`/`LAG` defaults come up constantly | Filled by J1: chapter 13 has 8 window missions |
 | Set operations had 1 chapter mission | `INTERSECT`/`EXCEPT` and `UNION` vs `UNION ALL` are common warm-ups | Filled by I2b: interview missions `iq-set-intersect-signups` and `iq-set-except-never-sold` (hidden NULL/duplicate data, naive queries tested). The matrix counts chapter missions only, so these show up in the Questions column |
 | Functional dependencies / normalization has no mission | Pure theory; trained by the FD closure, key and decomposition solvers (`lib/dbms/fd.ts`, `keys.ts`) in interview mode | none needed |
 | Replication, sharding, consensus, caching, capacity | Distributed design rounds; cannot be run on one PGlite instance | covered by question banks; revisit in the K practice modes |

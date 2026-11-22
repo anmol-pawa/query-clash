@@ -641,6 +641,20 @@ export async function bossAttack(c: FxContext, boss: Character & { style: BossAt
       }
       break;
     }
+    case "panes": {
+      // glass panes slide down over the target one after another, each ending in a shattering flash
+      const glass = 0xfde68a;
+      c.camera.shake(6, 3);
+      for (let i = 0; i < 3; i++) {
+        const dy = (i - 1) * 34;
+        await projectile(c, { x: from.x, y: from.y + dy }, { x: to.x, y: to.y + dy }, { color: glass, size: 26, dur: 0.14, arc: 0 });
+        onImpact(i, 3);
+        await slash(c, { x: to.x, y: to.y + dy }, { color: 0xfff7d6, angle: 0.15, size: 120 });
+        fx.burst(to.x, to.y + dy, { color, count: 8, speed: 240 });
+      }
+      ring(c, { x: to.x, y: to.y }, { color, radius: 150, squash: 0.5, width: 10 });
+      break;
+    }
     case "roots": {
       const ground = { x: from.x, y: to.y + 120 };
       const bark = 0x92643a;

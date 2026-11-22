@@ -57,6 +57,7 @@ export const BOSS_TYPE: Record<BossId, SqlType> = {
   optimizer: "index",
   arborix: "index",
   hydrax: "subquery",
+  panewarden: "window",
 };
 
 export interface Matchup {

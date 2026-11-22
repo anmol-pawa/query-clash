@@ -2,7 +2,7 @@ import { Container, Graphics, Sprite } from "pixi.js";
 import type { BossId } from "@/content/types";
 import { Character, RigContext } from "./rig";
 
-export type BossAttackStyle = "orbs" | "chain" | "blocks" | "shards" | "scythe" | "gear" | "quake" | "wind" | "breath" | "laser" | "roots" | "heads";
+export type BossAttackStyle = "orbs" | "chain" | "blocks" | "shards" | "scythe" | "gear" | "quake" | "wind" | "breath" | "laser" | "roots" | "heads" | "panes";
 
 /**
  * Bosses are drawn facing right and flipped to face the player. Each one is a
@@ -509,6 +509,7 @@ const REGISTRY: Record<BossId, new (ctx: RigContext) => Boss> = {
   optimizer: Optimizer,
   arborix: Optimizer, // never drawn: the battle stage plays the pixel sprite
   hydrax: Optimizer, // likewise
+  panewarden: Optimizer, // likewise
 };
 
 export function createBoss(id: BossId, ctx: RigContext): Boss {

@@ -48,7 +48,8 @@ export type BossId =
   | "hydra"
   | "optimizer"
   | "arborix"
-  | "hydrax";
+  | "hydrax"
+  | "panewarden";
 
 export interface Chapter {
   n: number;

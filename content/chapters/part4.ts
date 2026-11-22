@@ -1,9 +1,9 @@
-import type { Mission } from "../types";
+import type { Chapter, Mission } from "../types";
 
 const same = (sql: string) => ({ postgres: sql, oracle: sql });
 
 /**
- * Chapter 13, "Window functions mastery". Not wired into `CHAPTERS` yet (box J1c).
+ * Chapter 13, "Window functions mastery". Wired into `CHAPTERS` as chapter 13 (PANEWARDEN).
  * Every solution is plain ANSI window SQL that runs unchanged on PostgreSQL and Oracle.
  * Several missions carry hidden rows (ties, odd bucket sizes) that expose the classic wrong answer.
  */
@@ -143,3 +143,19 @@ export const WINDOW_NAIVE: Record<string, string> = {
   "c13-lag-default": "SELECT txn_id, account_id, COALESCE(txn_date - LAG(txn_date) OVER (ORDER BY txn_date, txn_id), 0) AS gap_days FROM transactions ORDER BY account_id, txn_date, txn_id",
   "c13-top-two-ties": "SELECT dept_id, last_name, salary FROM (SELECT dept_id, last_name, salary, ROW_NUMBER() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS r FROM employees WHERE dept_id IS NOT NULL) t WHERE r <= 2 ORDER BY dept_id, salary DESC, last_name",
 };
+
+export const CHAPTERS_13: Chapter[] = [
+  {
+    n: 13,
+    boss: "panewarden",
+    bossName: "PANEWARDEN",
+    bossTitle: "Owl-Sage of the Sliding Window",
+    title: "The Glasshouse of Windows",
+    topics: ["Window frames", "ROWS vs RANGE", "LAST_VALUE trap", "NTILE and PERCENT_RANK", "LAG and LEAD", "Top-N per group"],
+    intro:
+      "Under a roof of amber glass lives an owl who never loses sight of a row's neighbours. PANEWARDEN slides a pane across your data and sees only what falls inside it. Learn where the frame starts and ends, and every running total, moving average and ranking becomes yours to bend.",
+    defeat: "PANEWARDEN lowers its pane. You know your frames, your ties and your partitions, and no window can hide a row from you now.",
+    color: "#f59e0b",
+    missions: WINDOW_MISSIONS,
+  },
+];

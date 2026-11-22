@@ -43,10 +43,11 @@ export const SCENES: readonly Scene[] = [
   { sky: ["#1c1440", "#3c2c78", "#7a58b8"], orb: "#c8f4ff", orbAt: [90, 34], sprinkle: "star", far: "#4c3a8a", near: "#32266a", ridge: "spikes" },
   { sky: ["#6a9c60", "#a4cc7c", "#e0eca0"], orb: "#fffbc0", orbAt: [250, 36], sprinkle: "cloud", far: "#4c8050", near: "#2c5a34", ridge: "hills" },
   { sky: ["#1c3c4c", "#2c6068", "#5c9c94"], orb: "#a8f4e4", orbAt: [70, 34], sprinkle: "star", far: "#244c54", near: "#183a40", ridge: "dunes" },
+  { sky: ["#3a2c4c", "#b0704a", "#f4c878"], orb: "#fff0b0", orbAt: [230, 40], sprinkle: "cloud", far: "#7a5a58", near: "#4c3a40", ridge: "peaks" },
 ];
 
 /** Each boss fights in its chapter's biome (BossId order is chapter order). */
-export const BOSS_ORDER: readonly BossId[] = ["nulloth", "joinmaster", "aggregon", "subzero", "reaper", "transactor", "schemaforge", "windwraith", "hydra", "optimizer", "arborix", "hydrax"];
+export const BOSS_ORDER: readonly BossId[] = ["nulloth", "joinmaster", "aggregon", "subzero", "reaper", "transactor", "schemaforge", "windwraith", "hydra", "optimizer", "arborix", "hydrax", "panewarden"];
 export const bossScene = (boss: BossId | undefined): number => (boss ? Math.max(0, BOSS_ORDER.indexOf(boss)) : 0);
 
 const mix = (a: RGB, b: RGB, t: number): RGB => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
