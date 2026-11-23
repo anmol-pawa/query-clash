@@ -11,7 +11,7 @@ expected table. Numbers are matches, not a quality score; a hit can be a passing
 | SQL coding | Aggregation, GROUP BY, HAVING, conditional aggregates | 32 | 2 | 4 |
 | SQL coding | Subqueries, EXISTS, correlated, NOT IN with NULL | 26 | 5 | 5 |
 | SQL coding | Window functions, ranking, running totals, top-N per group | 29 | 6 | 8 |
-| SQL coding | CTEs and recursive queries, hierarchies | 16 | 2 | 3 |
+| SQL coding | CTEs and recursive queries, hierarchies | 16 | 2 | 5 |
 | SQL coding | NULL semantics and three-valued logic | 39 | 9 | 4 |
 | SQL coding | Set operations (UNION, INTERSECT, EXCEPT) | 20 | 1 | 2 |
 | SQL coding | DML: INSERT/UPDATE/DELETE, upsert, MERGE, RETURNING | 33 | 7 | 5 |

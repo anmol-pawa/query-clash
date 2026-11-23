@@ -934,6 +934,81 @@ export const CODEX: CodexEntry[] = [
     ],
     quiz: { q: "NTILE(4) over 10 rows gives bucket sizes:", options: ["3, 3, 2, 2", "2, 2, 3, 3", "3, 3, 3, 1", "2, 3, 3, 2"], answer: 0, why: "10 = 4 × 2 + 2, so the first two buckets receive one extra row each: 3, 3, 2, 2." },
   },
+  /* ------------------------------------------------- Recursive CTEs, depth */
+  {
+    id: "bom-rollup",
+    title: "Bill-of-materials roll-up",
+    category: "Hierarchies",
+    definition:
+      "A bill of materials is a tree (really a graph) of parts: each link says how many of a child go into one parent. To total the raw parts for one finished product, walk down from the product and multiply the link quantities along each path, then add up the quantities that reach the same raw part by different paths.",
+    syntax: {
+      postgres: "WITH RECURSIVE parts (part, qty) AS (\n  SELECT child, qty FROM bom WHERE parent = 'BIKE'\n  UNION ALL\n  SELECT b.child, p.qty * b.qty\n  FROM bom b JOIN parts p ON b.parent = p.part\n)\nSELECT part, SUM(qty) FROM parts\nWHERE part NOT IN (SELECT parent FROM bom)\nGROUP BY part;",
+      oracle: "WITH parts (part, qty) AS (\n  SELECT child, qty FROM bom WHERE parent = 'BIKE'\n  UNION ALL\n  SELECT b.child, p.qty * b.qty\n  FROM bom b JOIN parts p ON b.parent = p.part\n)\nSELECT part, SUM(qty) FROM parts\nWHERE part NOT IN (SELECT parent FROM bom)\nGROUP BY part;",
+    },
+    enterprise: "Manufacturing cost roll-ups, 'what must I order to build 500 units', software dependency counts and recipe scaling. Interviewers use it to see whether you multiply down a path and add across paths.",
+    pitfalls: [
+      "UNION instead of UNION ALL silently merges two different paths that produce an identical row, so the totals come out too small.",
+      "Adding the link quantity without multiplying by the parent's quantity gives the count per direct parent, not per finished product.",
+      "NOT IN with a column that can be NULL returns nothing. Here `parent` is never NULL, but guard it in real schemas.",
+    ],
+    quiz: { q: "One BIKE has 2 WHEELs, each WHEEL has 1 HUB, each HUB has 6 BOLTs. How many BOLTs come from the wheels?", options: ["6", "8", "12", "9"], answer: 2, why: "Multiply along the path: 2 wheels × 1 hub × 6 bolts = 12. Add that to the bolts reaching the bike by other paths." },
+  },
+  {
+    id: "recursive-cycle-guard",
+    title: "Cycle guards in recursive queries",
+    category: "Hierarchies",
+    definition:
+      "If the data can contain a loop (a follows b follows a), a recursive CTE keeps producing rows and never ends. A guard remembers the path walked so far and refuses to step onto a node already on it. Both databases also have a CYCLE clause that does this bookkeeping for you.",
+    syntax: {
+      postgres: "WITH RECURSIVE reach (node, trail) AS (\n  SELECT dst, ',1,' || dst || ',' FROM links WHERE src = 1\n  UNION ALL\n  SELECT l.dst, r.trail || l.dst || ','\n  FROM links l JOIN reach r ON l.src = r.node\n  WHERE r.trail NOT LIKE '%,' || l.dst || ',%'\n)\nSELECT DISTINCT node FROM reach;\n\n-- or the SQL-standard clause (PostgreSQL 14+):\n-- ... CYCLE node SET is_cycle USING path",
+      oracle: "WITH reach (node, trail) AS (\n  SELECT dst, ',1,' || dst || ',' FROM links WHERE src = 1\n  UNION ALL\n  SELECT l.dst, r.trail || l.dst || ','\n  FROM links l JOIN reach r ON l.src = r.node\n  WHERE r.trail NOT LIKE '%,' || l.dst || ',%'\n)\nSELECT DISTINCT node FROM reach;\n\n-- or: ... CYCLE node SET is_cycle TO 'Y' DEFAULT 'N'",
+    },
+    enterprise: "Follower graphs, dependency graphs, permission inheritance and bad org-chart data all contain loops sooner or later. A recursive query without a guard can run until the statement times out and take a database with it.",
+    pitfalls: [
+      "A depth limit (`WHERE depth < 5`) stops the loop but also cuts off legitimately deep nodes. A path guard is exact.",
+      "UNION (not ALL) removes duplicate rows and so can end a loop on a plain node list, but Oracle does not allow UNION in the recursive member, and it breaks as soon as you carry a path or a cost.",
+      "A trail made of ids needs delimiters: '12' LIKE '%2%' is true, ',12,' LIKE '%,2,%' is not.",
+    ],
+    dialectNotes:
+      "As of November 2026: PostgreSQL has the SQL-standard SEARCH and CYCLE clauses since version 14. Oracle has had them since 11g Release 2, with the syntax CYCLE col SET flag TO 'Y' DEFAULT 'N'. The LIKE trail guard in the missions works on both without either clause.",
+    quiz: { q: "Why delimit ids in a trail string, like ',1,2,4,'?", options: ["It makes the string shorter", "So node 2 is not found inside node 12", "Oracle requires commas", "LIKE is case sensitive"], answer: 1, why: "Without delimiters, '%2%' matches inside '12' and the guard would wrongly block node 2." },
+  },
+  {
+    id: "recursive-series",
+    title: "Generating series with recursion",
+    category: "Hierarchies",
+    definition:
+      "A recursive CTE with no table in it can manufacture rows: an anchor with the first value and a step that adds one, stopping at a bound. It is the portable way to build a calendar of days so a report can show days with zero rows, using a LEFT JOIN to the facts.",
+    syntax: {
+      postgres: "WITH RECURSIVE cal (cal_day) AS (\n  SELECT DATE '2024-03-01'\n  UNION ALL\n  SELECT cal_day + 1 FROM cal WHERE cal_day < DATE '2024-03-10'\n)\nSELECT * FROM cal;\n\n-- PostgreSQL shortcut:\nSELECT d::date FROM generate_series(DATE '2024-03-01', DATE '2024-03-10', INTERVAL '1 day') AS d;",
+      oracle: "WITH cal (cal_day) AS (\n  SELECT DATE '2024-03-01' FROM dual\n  UNION ALL\n  SELECT cal_day + 1 FROM cal WHERE cal_day < DATE '2024-03-10'\n)\nSELECT * FROM cal;\n\n-- Oracle shortcut:\nSELECT DATE '2024-03-01' + LEVEL - 1 FROM dual CONNECT BY LEVEL <= 10;",
+    },
+    enterprise: "Daily and hourly time series with gaps filled with zero, retention grids, 'days since signup' tables and slot booking all start from a generated calendar, because a GROUP BY over facts can only show days that have facts.",
+    pitfalls: [
+      "COUNT(*) after a LEFT JOIN counts the calendar row itself, so empty days show 1. Count a column from the fact table.",
+      "Taking the bounds from MIN and MAX of the data hides leading and trailing quiet days. Use the reporting window.",
+      "Forgetting the stop condition generates rows until the server gives up.",
+    ],
+    quiz: { q: "After a LEFT JOIN from a calendar to visits, which count shows 0 on an empty day?", options: ["COUNT(*)", "COUNT(1)", "COUNT(cal_day)", "COUNT(v.visit_id)"], answer: 3, why: "COUNT(column) ignores NULLs, and the unmatched side of the LEFT JOIN is NULL. COUNT(*) counts the calendar row itself." },
+  },
+  {
+    id: "transitive-closure",
+    title: "Transitive closure",
+    category: "Hierarchies",
+    definition:
+      "The transitive closure of a relation lists every pair connected by a chain of one or more links: if A needs B and B needs C, then A needs C. A recursive CTE computes it by starting from the direct pairs and joining each result back to the links. Different chains to the same node (a diamond) produce duplicate pairs, so deduplicate at the end.",
+    syntax: {
+      postgres: "WITH RECURSIVE closure (course, req) AS (\n  SELECT course, needs FROM prereqs\n  UNION ALL\n  SELECT c.course, p.needs\n  FROM closure c JOIN prereqs p ON p.course = c.req\n)\nSELECT DISTINCT course, req FROM closure;",
+      oracle: "WITH closure (course, req) AS (\n  SELECT course, needs FROM prereqs\n  UNION ALL\n  SELECT c.course, p.needs\n  FROM closure c JOIN prereqs p ON p.course = c.req\n)\nSELECT DISTINCT course, req FROM closure;",
+    },
+    enterprise: "Course and package prerequisites, 'everything this service depends on', permission inheritance, and impact analysis ('what breaks if this table changes'). It is the standard example for why graph questions need recursion.",
+    pitfalls: [
+      "The query only terminates on acyclic data. If cycles are possible, add a trail guard or the CYCLE clause.",
+      "On a dense graph the number of paths grows far faster than the number of distinct pairs, so the DISTINCT at the end hides a lot of wasted work. Production systems often materialize the closure instead.",
+      "Forgetting DISTINCT passes tests on a simple tree and fails in production when a diamond appears.",
+    ],
+    quiz: { q: "A needs B and C, B needs D, C needs D. How many times does the pair (A, D) appear before DISTINCT?", options: ["0", "1", "3", "2"], answer: 3, why: "One path goes through B and one through C, and the recursion emits a row per path. DISTINCT collapses them to one pair." },
+  },
 ];
 
 export function codexById(id: string): CodexEntry | undefined {

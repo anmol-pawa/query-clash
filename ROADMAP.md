@@ -208,7 +208,7 @@ Each chapter is three or four boxes: (a) 5-6 missions with hidden edge-case data
   - [x] J1b. (done: `scripts/art/panewarden.mjs` -> `game/sprites/creatures/panewarden.ts`, registered in `SPRITES`; not yet a `BossId`, that is J1c.) Boss art.
   - [x] J1c. (done: `BossId` panewarden, WINDOW type, `panes` attack, 13th map node/biome/scene, `CHAPTERS_13`, save and sandbox caps.) Wiring.
 - [ ] J2. Chapter 14 "Recursive CTEs and graphs".
-  - [ ] J2a. Missions and codex: org-chart paths, bill-of-materials roll-up, cycle guards, shortest path in a small graph, date-series generation, transitive closure; Oracle `CONNECT BY` forms in the hints.
+  - [x] J2a. (done: `RECURSIVE_MISSIONS` in `content/chapters/part4.ts`, 4 codex entries, `tests/recursiveMissions.test.ts`; not yet in `CHAPTERS`, that is J2c.) Missions and codex: org-chart paths, bill-of-materials roll-up, cycle guards, shortest path in a small graph, date-series generation, transitive closure; Oracle `CONNECT BY` forms in the hints.
   - [ ] J2b. Boss art.
   - [ ] J2c. Wiring.
 - [ ] J3. Chapter 15 "Query tuning with EXPLAIN".
